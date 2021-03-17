@@ -1,0 +1,139 @@
+---
+title: "Single-cell RNA-squencing ~ Session 2 <html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>"
+author: "Rockefeller University, Bioinformatics Resource Centre"
+date: "http://rockefelleruniversity.github.io/RU_course_template/"
+output: 
+  xaringan::moon_reader:
+    css: ["default", "metropolisCustom.css", "metropolis-fontsCustom.css"]
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+  html_document:
+    toc: true # table of content true
+    toc_float: yes
+    depth: 3  # upto three depths of headings (specified by #, ## and ###)
+    number_sections: false  ## if you want number sections at each table header
+    theme: united  # many options for theme, this one is my favorite.
+    highlight: tango  # specifies the syntax highlighting style
+params:
+  isSlides: "no"
+---
+```{r setup, include=FALSE}
+suppressPackageStartupMessages(require(knitr))
+suppressPackageStartupMessages(require(Seurat))
+suppressPackageStartupMessages(require(phaetmap))
+suppressPackageStartupMessages(require(dplyr))
+knitr::opts_chunk$set(echo = TRUE, tidy = T)
+```
+
+```{r, results='asis',include=TRUE,echo=FALSE}
+if(params$isSlides != "yes"){
+  cat("# ?? name of course?? (part 2)
+
+---
+"    
+  )
+  
+}
+
+```
+
+
+##  Data analysis with [Seurat](https://satijalab.org/seurat/)
+
+[Seurat](https://satijalab.org/seurat/) is a powerful package for single-cell data analysis. It supports many common analysis of single-cell RNA-Seq and cross connecction with many useful packages through [SeuratWrapper](https://github.com/satijalab/seurat-wrappers). In this session, we will demonstrate our regular workflow for single-cell RNA-seq data analysis with Seurat. 
+
+---
+## Outline
+- Read Cell Ranger results into Seurat object
+- 
+
+---
+```{r, results='asis',include=TRUE,echo=FALSE}
+if(params$isSlides == "yes"){
+  cat("class: inverse, center, middle
+
+# Analysis with Seurat
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=720px></html> 
+
+---
+"    
+  )
+}else{
+  cat("# Set Up
+
+---
+"    
+  )
+  
+}
+
+```
+
+---
+## Cell Ranger counting matrix
+```{r loadCR2Seurat}
+tar_dir <- "~/Documents/packDev_ALL/scRNA-seq/scRNASeq/inst/extdata/data/CTRL"
+# tar_dir <- "data/CTRL"
+dir(tar_dir)
+```
+
+- Cell barcodes: *barcodes.tsv.gz*
+- Gene symbols: *features.tsv.gz*
+- Counting matrix: *matrix.mtx.gz*
+
+---
+## Load Cell Ranger results into Seurat object
+- Loading data
+- Estimate mitochondrial contents
+- Subset 1000 cells
+```{r loadCR2Seurat2,eval=FALSE}
+library(Seurat)
+samID <- "CTRL"
+X10_file <- Seurat::Read10X(tar_dir)
+obj <- CreateSeuratObject(counts = X10_file, project = samID, min.cells = 5,min.features = 200)
+obj$dset <- samID
+obj <- Seurat::RenameCells(obj,add.cell.id=samID)
+#
+obj[["percent.mt"]] <- PercentageFeatureSet(obj, pattern = "^mt-")
+#
+cellID <- rownames(obj@meta.data)
+cellID_sel <- sample(cellID,1000,replace = FALSE)
+obj_sel <- obj[,cellID_sel]
+saveRDS(obj_sel,file.path("data",paste0("scSeq_",samID,"_1kCell_ori.rds"))
+```
+
+---
+## Evaluate read counts, genes counts, and mitochondrial contents
+```{r eval_readCount_geneCount_mitoCont,dpi=300}
+obj <- readRDS("../data/scSeq_CTRL_1kCell_ori.rds")
+# obj <- readRDS("../data/scSeq_CTRL_1kCell_ori.rds")
+VlnPlot(obj,features = c("nCount_RNA","nFeature_RNA","percent.mt"),pt.size = 0.2)
+FeatureScatter(obj, feature1 = "nCount_RNA", feature2 = "percent.mt") 
+FeatureScatter(obj, feature1 = "nCount_RNA", feature2 = "nFeature_RNA") 
+#
+summary(obj@meta.data$percent.mt)
+mt_cutH <- 10
+obj <- subset(obj,subset = percent.mt < mt_cutH)
+```
+---
+## Same stuff
+??More content for second session??
+
+---
+## Time for an exercise!
+
+
+Exercise on functions can be found [here](../..//exercises/exercises/MyExercise3_exercise.html)
+
+---
+## Answers to exercise.
+
+
+Answers can be found here  [here](../..//exercises/answers/MyExercise3_answers.html)
+
+Rcode for answers can be found here  [here](../..//exercises/answers//answers/MyExercise3_Answers.R)
+
