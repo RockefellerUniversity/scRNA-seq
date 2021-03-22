@@ -103,7 +103,7 @@ legend("bottomleft", legend=c("Inflection", "Knee"),
 
 ---
 ## Knee Plot
-```{r rankUMI_knee,eval=TRUE,echo=FALSE,include=TRUE}
+```{r rankUMI_knee2,eval=TRUE,echo=FALSE,include=TRUE}
 uniq <- !duplicated(bcrank$rank)
 #
 plot(bcrank$rank[uniq], bcrank$total[uniq], log="xy",
