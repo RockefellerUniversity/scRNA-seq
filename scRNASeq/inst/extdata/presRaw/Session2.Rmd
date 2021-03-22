@@ -90,6 +90,7 @@ dir(tar_dir)
 - Loading data
 - Estimate mitochondrial contents
 - Subset 1000 cells
+
 ```{r loadCR2Seurat2,eval=FALSE}
 library(Seurat)
 samID <- "CTRL"
@@ -103,13 +104,13 @@ obj[["percent.mt"]] <- PercentageFeatureSet(obj, pattern = "^mt-")
 cellID <- rownames(obj@meta.data)
 cellID_sel <- sample(cellID,1000,replace = FALSE)
 obj_sel <- obj[,cellID_sel]
-saveRDS(obj_sel,file.path("data",paste0("scSeq_",samID,"_1kCell_ori.rds"))
+saveRDS(obj_sel,file.path("data",paste0("scSeq_",samID,"_1kCell_ori.rds")))
 ```
 
 ---
 ## Evaluate read counts, genes counts, and mitochondrial contents
 ```{r eval_readCount_geneCount_mitoCont,dpi=300}
-obj <- readRDS("../data/scSeq_CTRL_1kCell_ori.rds")
+obj <- readRDS("data/scSeq_CTRL_1kCell_ori.rds")
 # obj <- readRDS("../data/scSeq_CTRL_1kCell_ori.rds")
 VlnPlot(obj,features = c("nCount_RNA","nFeature_RNA","percent.mt"),pt.size = 0.2)
 FeatureScatter(obj, feature1 = "nCount_RNA", feature2 = "percent.mt") 

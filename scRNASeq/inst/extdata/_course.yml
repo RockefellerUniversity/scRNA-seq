@@ -1,5 +1,5 @@
 Description:
-  CourseName: Course Template
+  CourseName: scRNAseq
   OverviewRmd: CourseOverview.Rmd
 Presentations:
     titles: Session1 Session2

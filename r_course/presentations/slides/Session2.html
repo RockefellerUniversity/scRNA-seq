@@ -12,7 +12,7 @@
     <textarea id="source">
 class: center, middle, inverse, title-slide
 
-# Introduction to R, Session 2
+# Single-cell RNA-squencing ~ Session 2
 <html>
 <div style="float:left">
 
@@ -29,16 +29,101 @@ class: center, middle, inverse, title-slide
 
 
 
-##  Recap
+##  Data analysis with [Seurat](https://satijalab.org/seurat/)
 
-?? can add a recap to link to keypoints in first session??
-Session 1 covered introduction to R data types and import/export of data.
+[Seurat](https://satijalab.org/seurat/) is a powerful package for single-cell data analysis. It supports many common analysis of single-cell RNA-Seq and cross connecction with many useful packages through [SeuratWrapper](https://github.com/satijalab/seurat-wrappers). In this session, we will demonstrate our regular workflow for single-cell RNA-seq data analysis with Seurat. 
 
-- [Background to R](https://rockefelleruniversity.github.io/Intro_To_R_1Day/r_course/presentations/singlepage/introToR_Session1.html#background-to-r)
-- [Data types in R](https://rockefelleruniversity.github.io/Intro_To_R_1Day/r_course/presentations/singlepage/introToR_Session1.html#data_types_in_r)
-- [Reading and writing in R](https://rockefelleruniversity.github.io/Intro_To_R_1Day/r_course/presentations/singlepage/introToR_Session1.html#reading-and-writing-data-in-r)
+---
+## Outline
+- Read Cell Ranger results into Seurat object
+- 
+
+---
+class: inverse, center, middle
+
+# Analysis with Seurat
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=720px&gt;&lt;/html&gt; 
+
+---
+
+---
+## Cell Ranger counting matrix
+
+```r
+tar_dir &lt;- "~/Documents/packDev_ALL/scRNA-seq/scRNASeq/inst/extdata/data/CTRL"
+# tar_dir &lt;- 'data/CTRL'
+dir(tar_dir)
+```
+
+```
+## character(0)
+```
+
+- Cell barcodes: *barcodes.tsv.gz*
+- Gene symbols: *features.tsv.gz*
+- Counting matrix: *matrix.mtx.gz*
+
+---
+## Load Cell Ranger results into Seurat object
+- Loading data
+- Estimate mitochondrial contents
+- Subset 1000 cells
 
 
+```r
+library(Seurat)
+samID &lt;- "CTRL"
+X10_file &lt;- Seurat::Read10X(tar_dir)
+obj &lt;- CreateSeuratObject(counts = X10_file, project = samID, min.cells = 5, min.features = 200)
+obj$dset &lt;- samID
+obj &lt;- Seurat::RenameCells(obj, add.cell.id = samID)
+# 
+obj[["percent.mt"]] &lt;- PercentageFeatureSet(obj, pattern = "^mt-")
+# 
+cellID &lt;- rownames(obj@meta.data)
+cellID_sel &lt;- sample(cellID, 1000, replace = FALSE)
+obj_sel &lt;- obj[, cellID_sel]
+saveRDS(obj_sel, file.path("data", paste0("scSeq_", samID, "_1kCell_ori.rds")))
+```
+
+---
+## Evaluate read counts, genes counts, and mitochondrial contents
+
+```r
+obj &lt;- readRDS("data/scSeq_CTRL_1kCell_ori.rds")
+# obj &lt;- readRDS('../data/scSeq_CTRL_1kCell_ori.rds')
+VlnPlot(obj, features = c("nCount_RNA", "nFeature_RNA", "percent.mt"), pt.size = 0.2)
+```
+
+![](Session2_files/figure-html/eval_readCount_geneCount_mitoCont-1.png)&lt;!-- --&gt;
+
+```r
+FeatureScatter(obj, feature1 = "nCount_RNA", feature2 = "percent.mt")
+```
+
+![](Session2_files/figure-html/eval_readCount_geneCount_mitoCont-2.png)&lt;!-- --&gt;
+
+```r
+FeatureScatter(obj, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+```
+
+![](Session2_files/figure-html/eval_readCount_geneCount_mitoCont-3.png)&lt;!-- --&gt;
+
+```r
+# 
+summary(obj@meta.data$percent.mt)
+```
+
+```
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##   0.000   4.249   5.986  10.804  12.428  59.680
+```
+
+```r
+mt_cutH &lt;- 10
+obj &lt;- subset(obj, subset = percent.mt &lt; mt_cutH)
+```
 ---
 ## Same stuff
 ??More content for second session??
