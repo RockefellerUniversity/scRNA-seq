@@ -1,4 +1,4 @@
-Package: scRNAseq
+Package: scRNASeq
 Type: Package
 Title: scRNAseq training
 Version: 0.1.0
