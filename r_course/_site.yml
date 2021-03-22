@@ -1,6 +1,6 @@
 output_dir: '.'
 navbar:
-  title: Template Package for Courses
+  title: scRNAseq training
   left:
   - text: Home
     href: index.html
