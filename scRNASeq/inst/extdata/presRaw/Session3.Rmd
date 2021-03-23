@@ -208,7 +208,7 @@ colData(sce2)
 
 ---
 ## UMAP plot
-```{r plotUMAP,eval=TRUE,echo=TRUE,include=TRUE}
+```{r plotUMAP_2,eval=TRUE,echo=TRUE,include=TRUE}
 plotUMAP(sce2,colour_by="label")
 ```
 
