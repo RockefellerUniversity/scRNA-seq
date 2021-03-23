@@ -1,7 +1,7 @@
 ---
-title: "Single-cell RNA-seq ~ Session 3<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>"
+title: "Single-cell RNA sequencing ~ Session 3<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>"
 author: "Rockefeller University, Bioinformatics Resource Centre"
-date: "http://rockefelleruniversity.github.io/RU_course_template/"
+date: "https://rockefelleruniversity.github.io/scRNA-seq/"
 output: 
   xaringan::moon_reader:
     css: ["default", "metropolisCustom.css", "metropolis-fontsCustom.css"]
@@ -31,19 +31,29 @@ suppressPackageStartupMessages(require(scDblFinder))
 knitr::opts_chunk$set(echo = TRUE, tidy = T)
 ```
 
----
-## Outline
-There are more and more bioconductor packages supporting single-cell data analysis. R Amezquita, A Lun, S Hicks, and R Gottardo wrote an integrated workflow, [Orchestrating Single-Cell Analysis with Bioconductor](https://bioconductor.org/books/release/OSCA/), for single-cell data analysis and quality accessment. In this session, we will go through several important QC metrics which can't be made with Seurat. 
 
-- how to differentiate empty droplets?
-- how to estimate ambient RNA and remove them?
-- how to identify doublets?
-- any confounded effect?
+## Outline
+There are more and more Bioconductor packages supporting single-cell data analysis. R Amezquita, A Lun, S Hicks, and R Gottardo wrote an integrated workflow, [Orchestrating Single-Cell Analysis with Bioconductor](https://bioconductor.org/books/release/OSCA/), for single-cell data analysis and quality assessment. In this session, we will go through several important QC metrics which can't be made with Seurat. 
+
+- How to differentiate empty droplets?
+- How to estimate ambient RNA and remove them?
+- How to identify doublets?
+- Checking for confounded effect?
 
 ---
 ```{r, results='asis',include=TRUE,echo=FALSE}
-if(params$isSlides != "yes"){
-  cat("# load data and access empty drops
+if(params$isSlides == "yes"){
+  cat("class: inverse, center, middle
+
+# Loading data and empty droplets
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=720px></html> 
+
+---
+"    
+  )
+}else{
+  cat("#  Loading data and empty drops
 
 ---
 "    
@@ -54,29 +64,38 @@ if(params$isSlides != "yes"){
 ```
 
 ## Load data from Cell Ranger Result
+We can load the data in from 10X with the *DropletUtils* function, *read10xCounts()*.
 ```{r loadSCE,eval=FALSE,include=TRUE,echo=TRUE}
 library(DropletUtils)
 library(DropletTestFiles)
-fname <- "file path to Cell Ranger results"
+fname <- "~/filepath/toCellRanger/results"
 sce <- read10xCounts(fname, col.names=TRUE)
 cellID <- colData(sce)$Barcode
 cellID_sel <- sample(cellID,100000,replace = FALSE) # make subsets
-sce_sub <- sce[,cellID_sel]
+sce <- sce[,cellID_sel]
 ```
 
 ```{r loadSCE_io,include=TRUE,echo=FALSE,eval=TRUE}
-sce_sub <- readRDS("data/scSeq_CTRL_sceSub.rds")
+sce <- readRDS("data/scSeq_CTRL_sceSub.rds")
 ```
 
 ---
 ## SingleCellExperiment Object
+
+*read10xCounts()* reads the data in as a specialist object called a SingleCellExperiment. 
 ```{r loadSCE_pres,include=TRUE,echo=TRUE,eval=TRUE}
-sce_sub
+sce
+```
+
+---
+## SingleCellExperiment Object
+The *colData()* and *rowData()* functions can be used to access experiment metadata. 
+
+```{r loadSCE_pres2,include=TRUE,echo=TRUE,eval=TRUE}
 # cell information
 colData(sce_sub)[1:2,]
 # gene information
 rowData(sce_sub)[1:2,]
-sce <- sce_sub
 ```
 
 ---
@@ -117,9 +136,10 @@ legend("bottomleft", legend=c("Inflection", "Knee"),
 ```
 
 ---
-## Identify non-empyt droplets
+## Identify non-empty droplets
+  The *emptydrops* function can be used to identify goog/bad droplets. 2 keys arguments are:
 - limit: lowest counts per cell
-- test.ambient: Could be used to estimate embient RNA contamination
+- test.ambient: Could be used to estimate ambient RNA contamination
 
 ```{r estDroplet,eval=TRUE,echo=TRUE,include=TRUE}
 set.seed(100)
@@ -139,7 +159,9 @@ table(Sig=e.out$FDR <= 0.001, Limited=e.out$Limited)
 ```
 
 ---
-## distribution of significance of non-empty reads
+## Distribution of non-empty reads
+We can plot the distribution of significance of non-empty reads
+
 ```{r estDroplet3,eval=TRUE,echo=TRUE,include=TRUE}
 hist(e.out$PValue[e.out$Total <= limit & e.out$Total > 0],
     xlab="P-value", main="", col="grey80") 
@@ -147,13 +169,25 @@ hist(e.out$PValue[e.out$Total <= limit & e.out$Total > 0],
 
 ---
 ## Subset non-empty droplets
+We can filter to just our non-empty droplets using a simple which query on the FDR from *emptyDrops()*. Here we are using a 0.001 cut-off. 
 ```{r estDroplet4,eval=TRUE,echo=TRUE,include=TRUE}
 sce2 <- sce[,which(e.out$FDR <= 0.001)]
 ```
 
+
 ---
 ```{r, results='asis',include=TRUE,echo=FALSE}
-if(params$isSlides != "yes"){
+if(params$isSlides == "yes"){
+  cat("class: inverse, center, middle
+
+# Normalization and clustering
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=720px></html> 
+
+---
+"    
+  )
+}else{
   cat("# Normalization and clustering
 
 ---
@@ -161,6 +195,7 @@ if(params$isSlides != "yes"){
   )
   
 }
+
 ```
 
 ## Counts normalization
@@ -220,19 +255,30 @@ plotTSNE(sce2,colour_by ="label")
 
 ---
 ```{r, results='asis',include=TRUE,echo=FALSE}
-if(params$isSlides != "yes"){
-  cat("# Remove ambient RNA
+if(params$isSlides == "yes"){
+  cat("class: inverse, center, middle
+
+# Removing Ambient RNA
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=720px></html> 
+
+---
+"    
+  )
+}else{
+  cat("# Removing Ambient RNA
 
 ---
 "    
   )
   
 }
+
 ```
 
-## Abmient RNA
-- cell-free RNAs contaminated in droplet
-- could be estimated by empty droplets
+## Ambient RNA
+- Cell-free RNAs can contaminate droplets.
+- They can be estimated by empty droplets.
 ```{r estAmb1,eval=TRUE,echo=TRUE,include=TRUE}
 # extrat potential ambient RNA and thee estimated score
 amb <- metadata(e.out)$ambient[,1]
@@ -247,7 +293,7 @@ stripped <- sce2[names(amb),]
 out <- removeAmbience(counts(stripped), ambient=amb,groups = colLabels(stripped))
 ```
 
---
+---
 ## Integrate corrected counts
 ```{r recalAmb,eval=TRUE,echo=TRUE,include=TRUE}
 counts(stripped, withDimnames=FALSE) <- out
@@ -255,70 +301,99 @@ stripped <- logNormCounts(stripped)
 ```
 
 ---
-## Before/After removement
+## Before/After removal
 - Hemoglobin A1 (Hba-a1) as example
-- in most cases the Hbs are contaminated from residual RBCs
+- In most cases the Hbs are contaminated from residual RBCs
 ```{r compRMAmb,eval=FALSE,echo=TRUE,include=TRUE}
 ensmbl_id <- rowData(sce2)$ID[rowData(sce2)$Symbol=="Hba-a1"]
-plotExpression(sce2, x="label", colour_by="label", features=ensmbl_id) + 
+plotExpression(sce2, x="label", colour_by="label", features=ensmbl_id) +
         ggtitle("Before")
+
 plotExpression(stripped, x="label", colour_by="label", features=ensmbl_id) + 
         ggtitle("After")
 ```
 
 ---
-## Before/After removement
+## Before/After removal
+- Hemoglobin A1 (Hba-a1) as example
+.pull-left[
 ```{r compRMAmb_pres,eval=TRUE,echo=FALSE,include=TRUE}
 ensmbl_id <- rowData(sce2)$ID[rowData(sce2)$Symbol=="Hba-a1"]
 plotExpression(sce2, x="label", colour_by="label", features=ensmbl_id) + 
         ggtitle("Before")
+```
+  ]
+
+.pull-right[
+```{r compRMAmb_pres2,eval=TRUE,echo=FALSE,include=TRUE}
 plotExpression(stripped, x="label", colour_by="label", features=ensmbl_id) + 
         ggtitle("After")
 ```
-
+  ]
+  
 ---
-## Before/After removement
+## Before/After removal
 - Krt17 as example
 ```{r compRMAmb2,eval=FALSE,echo=TRUE,include=TRUE}
 ensmbl_id <- rowData(sce2)$ID[rowData(sce2)$Symbol=="Krt17"]
-plotExpression(sce2, x="label", colour_by="label", features=ensmbl_id) + 
+plotExpression(sce2, x="label", colour_by="label", features=ensmbl_id) +  
         ggtitle("Before")
 plotExpression(stripped, x="label", colour_by="label", features=ensmbl_id) + 
         ggtitle("After")
 ```
 
 ---
-## Before/After removement
+## Before/After removal
+- Krt17 as example
+.pull-left[
 ```{r compRMAmb2_pres,eval=TRUE,echo=FALSE,include=TRUE}
 ensmbl_id <- rowData(sce2)$ID[rowData(sce2)$Symbol=="Krt17"]
 plotExpression(sce2, x="label", colour_by="label", features=ensmbl_id) + 
         ggtitle("Before")
+```
+  ]
+
+.pull-right[
+```{r compRMAmb2_pres2,eval=TRUE,echo=FALSE,include=TRUE}
 plotExpression(stripped, x="label", colour_by="label", features=ensmbl_id) + 
         ggtitle("After")
 ```
 
 ---
 ## Save result
+Again we can save our results for later using a Rds object.
 ```{r rmAmb_store,eval=TRUE,echo=TRUE,include=TRUE}
 saveRDS(stripped,"scSeq_CTRL_sceSub_rmAmbRNA.rds")
 ```
 
+
 ---
 ```{r, results='asis',include=TRUE,echo=FALSE}
-if(params$isSlides != "yes"){
-  cat("# Remove doublets
+if(params$isSlides == "yes"){
+  cat("class: inverse, center, middle
+
+# Removing Doublets
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=720px></html> 
+
+---
+"    
+  )
+}else{
+  cat("# Removing Doublets
 
 ---
 "    
   )
   
 }
+
 ```
 
----
+
 ## Doublets
 - Doublets means two or more cells clumped in a single droplet. Thus, the read counts and genes detected in this droplet would be much higher than other droplets.
-- here, we demonstrate how to identify doublets by silmulation with [scran](https://bioconductor.org/packages/release/bioc/manuals/scran/man/scran.pdf)
+- Here, we demonstrate how to identify doublets using simulation with [scran](https://bioconductor.org/packages/release/bioc/manuals/scran/man/scran.pdf)
 
 ---
 ## Normalization and clustering
@@ -348,6 +423,7 @@ plotUMAP(stripped,colour_by="label")
 
 ---
 ## Estimate doublets
+The *computeDoubletDensity()* fucntion can be used on your SingleCellExperiment object to estimate doublets. 
 ```{r estDoublet,eval=TRUE,echo=TRUE,include=TRUE}
 dbl.dens <- computeDoubletDensity(stripped, #subset.row=top.mam, 
     d=ncol(reducedDim(stripped)),subset.row=hvgs)
@@ -357,21 +433,24 @@ stripped$DoubletScore <- dbl.dens
 
 ---
 ## Plot doublets scores ~ UMAP
+We can project the doublet scores onto our UMPA to see if doublet correlates with the data distribution.
 ```{r doublerScore,eval=TRUE,echo=TRUE,include=TRUE}
 plotUMAP(stripped,colour_by="DoubletScore")
 ```
 
 ---
 ## Plot doublets scores by cluster
-```{r doublerScorebyClust,eval=TRUE,echo=TRUE,include=TRUE}
+Likewise we can look for over representation of doublets in clusters.
+```{r doublerScorebyClust,eval=TRUE,echo=TRUE,include=TRUE,fig.height=3.5,fig.width=5}
 plotColData(stripped, x="label", y="DoubletScore", colour_by="label")+
   geom_hline(yintercept = quantile(colData(stripped)$DoubletScore,0.95),lty="dashed",color="red")
 ```
-- No clusters have significantly higher doublet scores than other clusters.No clusters would be removed.
-- Red dash line representd 95% quantile of doublet score. The cells with higher doublrt score than this cut-off would be removed.
+- No clusters have significantly higher doublet scores than other clusters. No clusters would be removed.
+- Red dash line represented 95% quantile of doublet score. The cells with higher doublet score than this cut-off would be removed.
 
 ---
 ## Remove doublets
+We can clean our data up based on this 95% quantile cut-off. 
 ```{r rmDoublet,eval=TRUE,echo=TRUE,include=TRUE}
 cut_off <- quantile(stripped$DoubletScore,0.95)
 stripped$isDoublet <- c("no","yes")[factor(as.integer(stripped$DoubletScore>=cut_off),levels=c(0,1))]
@@ -380,54 +459,127 @@ sce_clean <- stripped[stripped$isDoublet=="no",]
 saveRDS(sce_clean,"scSeq_CTRL_sceSub_rmAmbRNA_rmDoublet.rds")
 ```
 
+
+
 ---
 ```{r, results='asis',include=TRUE,echo=FALSE}
-if(params$isSlides != "yes"){
-  cat("# QC plots after cleanrance
+if(params$isSlides == "yes"){
+  cat("class: inverse, center, middle
+
+# QC plots after clearance
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=720px></html> 
+
+---
+"    
+  )
+}else{
+  cat("# QC plots after clearance
 
 ---
 "    
   )
   
 }
+
 ```
 
+
 ## QC plots
-- mitochondrial content
+- Mitochondrial content
 - Genes detected
 - Reads per cell
 ```{r evaQC_cal,eval=TRUE,echo=TRUE,include=TRUE}
 library(scater)
 mtGene <- rowData(sce_clean)$ID[grepl(rowData(sce_clean)$Symbol,pattern = "mt-")]
-is.mito<- names(sce_clean) %in% mtGene
+is.mito <- names(sce_clean) %in% mtGene
 sce_clean <- addPerCellQC(sce_clean, subsets=list(Mito=is.mito))
 ```
 
 ---
-## QC plots 
-- violin plot of read counts, gene counts, and mitochondrial contents per cell
-```{r qc_mrg,eval=TRUE,echo=TRUE,include=TRUE}
+## QC plots - Read counts
+
+.pull-left[
+Pre-clean
+```{r qc_mrgl,eval=TRUE,echo=TRUE,include=TRUE}
+plotColData(sce,x="label", y="sum", colour_by="label")+ggtitle("read counts")
+```
+  ]
+  
+.pull-right[
+Post-clean
+```{r qc_mrgr,eval=TRUE,echo=TRUE,include=TRUE}
 plotColData(sce_clean,x="label", y="sum", colour_by="label")+ggtitle("read counts")
+```
+  ]
+
+
+---
+## QC plots - Gene counts
+
+.pull-left[
+Pre-clean
+```{r qc_mrg2l,eval=TRUE,echo=TRUE,include=TRUE}
+plotColData(sce,x="label", y="detected", colour_by="label")+ggtitle("gene counts")
+```
+  ]
+  
+.pull-right[
+Post-clean
+```{r qc_mrg2r,eval=TRUE,echo=TRUE,include=TRUE}
 plotColData(sce_clean,x="label", y="detected", colour_by="label")+ggtitle("gene counts")
+```
+  ]
+
+---
+## QC plots - Mitochondrial %
+
+.pull-left[
+Pre-clean
+```{r qc_mrg3l,eval=TRUE,echo=TRUE,include=TRUE}
+plotColData(sce,x="label", y="subsets_Mito_percent", colour_by="label")+ggtitle("mitocondrial content")
+```
+  ]
+  
+.pull-right[
+Post-clean
+```{r qc_mrg3r,eval=TRUE,echo=TRUE,include=TRUE}
 plotColData(sce_clean,x="label", y="subsets_Mito_percent", colour_by="label")+ggtitle("mitocondrial content")
+```
+  ]
+
+
+---
+## QC plots ~ comparison
+- Mitochondrial contents vs read counts
+```{r qc_complex,eval=TRUE,echo=TRUE,include=TRUE}
+plotColData(sce_clean,x="sum",y="subsets_Mito_percent",colour_by="label")+ggtitle("is.mito vs read counts")
 ```
 
 ---
 ## QC plots ~ comparison
-- mitochondrial contents vs read counts
-- gene counts vs read counts
-```{r qc_complex,eval=TRUE,echo=TRUE,include=TRUE}
-plotColData(sce_clean,x="sum",y="subsets_Mito_percent",colour_by="label")+ggtitle("is.mito vs read counts")
+- Gene counts vs read counts
+```{r qc_complex2,eval=TRUE,echo=TRUE,include=TRUE}
 plotColData(sce_clean,x="sum",y="detected",colour_by="label")+ggtitle("gene counts vs read counts")
 ```
 
 ---
 ## Estimate variance explaination
-- clustering (leable), mitochindrial content (subsets_Mito_percent), doublets (DoubletScore), read counts (sum), and gene counts (detected) were tested.
+- Clustering (label), mitochondrial content (subsets_Mito_percent), doublets (DoubletScore), read counts (sum), and gene counts (detected) were tested.
 - We would suppose "label" (clustering) would explain more variances than other controls.
-```{r varExp,eval=TRUE,echo=TRUE,include=TRUE}
+```{r varExp,eval=T,echo=TRUE,include=TRUE}
 vars <- getVarianceExplained(sce_clean, 
     variables=c("DoubletScore","label","sum","detected","subsets_Mito_percent"))
+```
+```{r varExp2,eval=F,echo=TRUE,include=TRUE}
+plotExplanatoryVariables(vars)
+```
+
+
+---
+## Estimate variance explaination
+
+```{r varExp3,eval=TRUE,echo=TRUE,include=TRUE}
 plotExplanatoryVariables(vars)
 ```
 
