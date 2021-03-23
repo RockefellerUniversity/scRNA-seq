@@ -233,7 +233,7 @@ if(params$isSlides != "yes"){
 ## Abmient RNA
 - cell-free RNAs contaminated in droplet
 - could be estimated by empty droplets
-```{r estAmb,eval=TRUE,echo=TRUE,include=TRUE}
+```{r estAmb1,eval=TRUE,echo=TRUE,include=TRUE}
 # extrat potential ambient RNA and thee estimated score
 amb <- metadata(e.out)$ambient[,1]
 head(amb)
@@ -241,7 +241,7 @@ head(amb)
 
 ---
 ## Remove ambient RNA
-```{r estAmb,eval=TRUE,echo=TRUE,include=TRUE}
+```{r estAmb2,eval=TRUE,echo=TRUE,include=TRUE}
 library(scater)
 stripped <- sce2[names(amb),]
 out <- removeAmbience(counts(stripped), ambient=amb,groups = colLabels(stripped))
