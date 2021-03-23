@@ -440,8 +440,8 @@ div.tocify {
 </div>
 <div id="overview" class="section level3">
 <h3>Overview</h3>
-<p>This course introduces scRNAseq analysis in Bioconductor and beyond.</p>
-<p>The course consists of a single session. Exercises and answer sheets are included after all subsections to practice techniques and provide examples.</p>
+<p>In this course we are going to introduce basic analysis for single-cell RNAseq, with a specific focus on the 10X system. The course is divided into three sessions. In the first session, we will introduce how to interpret the Cell Ranger QC report and how to do analysis with the LOUPE Browser. We will also demonstrate the customized analysis we can support right know. In the Second session, we will demonstrate how to process scRNAseq data and make QC reports with Seurat. In the third session, we will discuss how to to do more advanced analysis and QC with Bioconductor packages.</p>
+<p>Exercises and answer sheets are included to help you practice techniques and provide examples.</p>
 <p>Course material and exercises are available to view as rendered HTML at <a href="https://rockefelleruniversity.github.io/scRNA-seq/" class="uri">https://rockefelleruniversity.github.io/scRNA-seq/</a>. All material is available to download under GPL v2 license.</p>
 <p><br><br></p>
 </div>
@@ -494,7 +494,6 @@ BiocManager::install(&#39;Seurat&#39;)
 BiocManager::install(&#39;dplyr&#39;)
 BiocManager::install(&#39;scuttle&#39;)
 BiocManager::install(&#39;biomaRt&#39;)
-BiocManager::install(&#39;scRNAseq&#39;)
 BiocManager::install(&#39;knitr&#39;)
 BiocManager::install(&#39;rmarkdown&#39;)
 BiocManager::install(&#39;testthat&#39;)
@@ -510,14 +509,9 @@ BiocManager::install(&#39;yaml&#39;)</code></pre>
 <div id="the-presentations" class="section level2">
 <h2>The Presentations</h2>
 <p><br></p>
-<div id="my-course-name-session-1" class="section level4">
-<h4><strong>?? My course name?? , Session 1</strong></h4>
-<p>??What am I focusing on in this section. Bullet point lists are good??</p>
-<ul>
-<li>Course content</li>
-<li>Building courses</li>
-<li>Making it look nice</li>
-</ul>
+<div id="single-cell-rna-sequencing-session-1" class="section level4">
+<h4><strong>Single-cell RNA sequencing , Session 1</strong></h4>
+<p>In this session we will cover the use of Cell Ranger and the LOUPE browser.</p>
 <iframe src="presentations/slides/Session1.html" width="100%" height="400" title="Session1">
 </iframe>
 <div id="links-to-presentations" class="section level5">
@@ -528,13 +522,13 @@ BiocManager::install(&#39;yaml&#39;)</code></pre>
 <p><br></p>
 </div>
 </div>
-<div id="my-course-name-session-2" class="section level4">
-<h4><strong>?? My course name?? , Session 2</strong></h4>
-<p>??If you have more sections then do this again. what is session 2 about? keep adding more files if needed??</p>
+<div id="single-cell-rna-sequencing-session-2" class="section level4">
+<h4><strong>Single-cell RNA sequencing , Session 2</strong></h4>
+<p>In this session we will cover data processing with Seurat, including:</p>
 <ul>
-<li>Course content</li>
-<li>Building courses</li>
-<li>Making it look nice</li>
+<li>Basic QC, including mitochondrial content and cell cycle</li>
+<li>Normalization and clustering</li>
+<li>Visualization</li>
 </ul>
 <iframe src="presentations/slides/Session2.html" width="100%" height="400" title="Session2">
 </iframe>
@@ -546,13 +540,13 @@ BiocManager::install(&#39;yaml&#39;)</code></pre>
 <p><br></p>
 </div>
 </div>
-<div id="my-course-name-session-2-1" class="section level4">
-<h4><strong>?? My course name?? , Session 2</strong></h4>
-<p>??If you have more sections then do this again. what is session 2 about? keep adding more files if needed??</p>
+<div id="single-cell-rna-sequencing-session-3" class="section level4">
+<h4><strong>Single-cell RNA sequencing , Session 3</strong></h4>
+<p>In this session we will cover data processing with Bioconductor pacakges, including:</p>
 <ul>
-<li>Course content</li>
-<li>Building courses</li>
-<li>Making it look nice</li>
+<li>Empty droplet removal</li>
+<li>Ambient RNA removal</li>
+<li>Doublet removal</li>
 </ul>
 <iframe src="presentations/slides/Session3.html" width="100%" height="400" title="NA">
 </iframe>
