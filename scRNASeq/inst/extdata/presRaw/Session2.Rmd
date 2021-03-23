@@ -173,7 +173,7 @@ if(params$isSlides != "yes"){
 - In Seurat, the default marker genes for S phase and G2M pahse are stored in *cc.gene* list
 - This list is based on human data.
 - We can convert it into mouse gene symbol by using *bioMart*
-```{r cellCycle_conv,echo=TRUE,eval=FALSE,include=TRUE}
+```{r cellCycle_conv,echo=TRUE,eval=TRUE,include=TRUE}
 convertHumanGeneList <- function(x){
   require("biomaRt")
   human = useMart("ensembl", dataset = "hsapiens_gene_ensembl")
