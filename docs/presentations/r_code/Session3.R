@@ -45,7 +45,6 @@ if(params$isSlides == "yes"){
 
 ## ----loadSCE_io,include=TRUE,echo=FALSE,eval=TRUE-----------------------------
 sce <- readRDS("data/scSeq_CTRL_sceSub.rds")
-sce
 
 
 ## ----loadSCE_pres,include=TRUE,echo=TRUE,eval=TRUE----------------------------
@@ -295,7 +294,7 @@ if(params$isSlides == "yes"){
 ## plotUMAP(stripped,colour_by="label")
 
 
-## ----normClust2,eval=TRUE,echo=FALSE,include=TRUE-----------------------------
+## ----normClust2,eval=TRUE,echo=FALSE,include=TRUE,fig.height=4,fig.width=4----
 dec <- modelGeneVar(stripped)
 hvgs <- getTopHVGs(dec,n=1000)
 stripped <- runPCA(stripped, ncomponents=10, subset_row=hvgs)
@@ -359,23 +358,23 @@ is.mito <- names(sce_clean) %in% mtGene
 sce_clean <- addPerCellQC(sce_clean, subsets=list(Mito=is.mito))
 
 
-## ----qc_mrgr,eval=TRUE,echo=TRUE,include=TRUE---------------------------------
+## ----qc_mrgr,eval=TRUE,echo=TRUE,include=TRUE,fig.height=4,fig.width=4--------
 plotColData(sce_clean,x="label", y="sum", colour_by="label")+ggtitle("read counts")
 
 
-## ----qc_mrg2r,eval=TRUE,echo=TRUE,include=TRUE--------------------------------
+## ----qc_mrg2r,eval=TRUE,echo=TRUE,include=TRUE,fig.height=4,fig.width=4-------
 plotColData(sce_clean,x="label", y="detected", colour_by="label")+ggtitle("gene counts")
 
 
-## ----qc_mrg3r,eval=TRUE,echo=TRUE,include=TRUE--------------------------------
+## ----qc_mrg3r,eval=TRUE,echo=TRUE,include=TRUE,fig.height=4,fig.width=4-------
 plotColData(sce_clean,x="label", y="subsets_Mito_percent", colour_by="label")+ggtitle("mitocondrial content")
 
 
-## ----qc_complex,eval=TRUE,echo=TRUE,include=TRUE------------------------------
+## ----qc_complex,eval=TRUE,echo=TRUE,include=TRUE,fig.height=4,fig.width=4-----
 plotColData(sce_clean,x="sum",y="subsets_Mito_percent",colour_by="label")+ggtitle("is.mito vs read counts")
 
 
-## ----qc_complex2,eval=TRUE,echo=TRUE,include=TRUE-----------------------------
+## ----qc_complex2,eval=TRUE,echo=TRUE,include=TRUE,fig.height=4,fig.width=4----
 plotColData(sce_clean,x="sum",y="detected",colour_by="label")+ggtitle("gene counts vs read counts")
 
 
@@ -387,6 +386,6 @@ vars <- getVarianceExplained(sce_clean,
 ## plotExplanatoryVariables(vars)
 
 
-## ----varExp3,eval=TRUE,echo=TRUE,include=TRUE---------------------------------
+## ----varExp3,eval=TRUE,echo=TRUE,include=TRUE,fig.height=4,fig.width=4--------
 plotExplanatoryVariables(vars)
 

@@ -60,20 +60,6 @@ cellID &lt;- colData(sce)$Barcode
 We have a small subset version of this dataset that you can load in from the *data/* directory to try this out. 
 
 
-```
-## class: SingleCellExperiment 
-## dim: 27998 100000 
-## metadata(1): Samples
-## assays(1): counts
-## rownames(27998): ENSMUSG00000051951 ENSMUSG00000089699 ...
-##   ENSMUSG00000096730 ENSMUSG00000095742
-## rowData names(2): ID Symbol
-## colnames(100000): CGTGTCTTCGCATGAT-1 TTTATGCGTCGAACAG-1 ...
-##   TTATGCTGTGTTTGTG-1 GCTGCGACACGTTGGC-1
-## colData names(2): Sample Barcode
-## reducedDimNames(0):
-## altExpNames(0):
-```
 
 ---
 ## SingleCellExperiment Object
@@ -427,7 +413,8 @@ plotExpression(stripped, x = "label", colour_by = "label", features = ensmbl_id)
 
 ---
 ## Before/After removal
-- Hemoglobin A1 (Hba-a1) as example
+Hemoglobin A1 (Hba-a1) as example
+
 .pull-left[
 ![](Session3_files/figure-html/compRMAmb_pres1-1.png)&lt;!-- --&gt;
   ]
@@ -449,13 +436,15 @@ plotExpression(stripped, x = "label", colour_by = "label", features = ensmbl_id)
 
 ---
 ## Before/After removal
-- Krt17 as example
+Krt17 as example
+
 .pull-left[
 ![](Session3_files/figure-html/compRMAmb2_pres-1.png)&lt;!-- --&gt;
   ]
 
 .pull-right[
 ![](Session3_files/figure-html/compRMAmb2_pres2-1.png)&lt;!-- --&gt;
+  ]
 
 ---
 ## Save result

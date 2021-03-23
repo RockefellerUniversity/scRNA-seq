@@ -66,7 +66,7 @@ head(obj@assays$RNA@counts)
 head(obj@assays$RNA@data)
 
 
-## ----eval_readCount_geneCount_mitoCont,echo=TRUE,eval=TRUE,include=TRUE-------
+## ----eval_readCount_geneCount_mitoCont,echo=TRUE,eval=TRUE,include=TRUE,fig.height=3,fig.width=3----
 VlnPlot(obj,features = c("nCount_RNA","nFeature_RNA","percent.mt"),pt.size = 0.2)
 
 
@@ -152,7 +152,7 @@ yd_dat <- as.data.frame(table(obj@meta.data$dset,obj@meta.data$Phase))
 head(yd_dat)
 
 
-## ----cellCycle_plot2,echo=TRUE,eval=TRUE,include=TRUE-------------------------
+## ----cellCycle_plot2,echo=TRUE,eval=TRUE,include=TRUE,fig.height=4,fig.width=2----
 library(ggplot2)
 ggplot(yd_dat,aes(x=Var1,y=Freq,fill=Var2))+geom_bar(stat="identity",position="stack")+labs(x="",y="Counts",fill="Phase")+theme_classic()
 
@@ -189,7 +189,7 @@ set.seed(1000)
 obj <- RunPCA(obj, npcs = 30, verbose = FALSE)
 
 
-## ----pcSel,echo=TRUE,eval=TRUE,include=TRUE-----------------------------------
+## ----pcSel,echo=TRUE,eval=TRUE,include=TRUE,fig.height=4,fig.width=4----------
 ElbowPlot(obj,ndims=30)
 #
 numPC <- 15
@@ -301,7 +301,7 @@ FeaturePlot(obj,features = gene_marker,pt.size = 0.2)
 
 
 ## ----makGene_RidgePlott2,echo=F,eval=TRUE,include=TRUE------------------------
-suppressMessages(RidgePlot(obj,features = gene_marker))
+suppressMessages(print(RidgePlot(obj,features = gene_marker)))
 
 
 ## ----cellcycle_cluster,echo=TRUE,eval=TRUE,include=TRUE-----------------------
