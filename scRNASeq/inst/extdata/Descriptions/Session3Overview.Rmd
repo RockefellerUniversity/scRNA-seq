@@ -1,9 +1,9 @@
 <br>
 
-#### **?? My course name?? , Session 2**
+#### **Single-cell RNA sequencing , Session 3**
 
-??If you have more sections then do this again. what is session 2 about? keep adding more files if needed??
+In this session we will cover data processing with Bioconductor pacakges, including:
 
-* Course content
-* Building courses
-* Making it look nice
+* Empty droplet removal
+* Ambient RNA removal
+* Doublet removal
