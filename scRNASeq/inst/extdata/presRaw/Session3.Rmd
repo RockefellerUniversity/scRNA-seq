@@ -93,9 +93,9 @@ The *colData()* and *rowData()* functions can be used to access experiment metad
 
 ```{r loadSCE_pres2,include=TRUE,echo=TRUE,eval=TRUE}
 # cell information
-colData(sce_sub)[1:2,]
+colData(sce)[1:2,]
 # gene information
-rowData(sce_sub)[1:2,]
+rowData(sce)[1:2,]
 ```
 
 ---
