@@ -317,7 +317,7 @@ plotExpression(stripped, x="label", colour_by="label", features=ensmbl_id) +
 ## Before/After removal
 - Hemoglobin A1 (Hba-a1) as example
 .pull-left[
-```{r compRMAmb_pres,eval=TRUE,echo=FALSE,include=TRUE}
+```{r compRMAmb_pres1,eval=TRUE,echo=FALSE,include=TRUE}
 ensmbl_id <- rowData(sce2)$ID[rowData(sce2)$Symbol=="Hba-a1"]
 plotExpression(sce2, x="label", colour_by="label", features=ensmbl_id) + 
         ggtitle("Before")

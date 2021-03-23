@@ -166,14 +166,14 @@ obj <- subset(obj,subset = percent.mt < mt_cutH)
 
 .pull-left[
 Unfiltered
-```{r rmMito_vln,echo=TRUE,eval=TRUE,include=TRUE}
+```{r rmMito_vln1,echo=TRUE,eval=TRUE,include=TRUE}
 VlnPlot(obj_unfiltered,features = c("nCount_RNA","nFeature_RNA","percent.mt"),pt.size = 0.2)
 ```
   ]
 
 .pull-right[
 Filtered
-```{r rmMito_vln,echo=TRUE,eval=TRUE,include=TRUE}
+```{r rmMito_vln2,echo=TRUE,eval=TRUE,include=TRUE}
 VlnPlot(obj,features = c("nCount_RNA","nFeature_RNA","percent.mt"),pt.size = 0.2)
 ```
   ]
@@ -182,13 +182,13 @@ VlnPlot(obj,features = c("nCount_RNA","nFeature_RNA","percent.mt"),pt.size = 0.2
 ## Remove potential cell debris
 
 .pull-left[
-```{r rmMito_scatter,echo=TRUE,eval=TRUE,include=TRUE}
+```{r rmMito_scatter1,echo=TRUE,eval=TRUE,include=TRUE}
 FeatureScatter(obj_unfiltered, feature1 = "nCount_RNA", feature2 = "percent.mt") 
 ```
   ]
 
 .pull-right[  
-```{r rmMito_scatter,echo=TRUE,eval=TRUE,include=TRUE}
+```{r rmMito_scatter2,echo=TRUE,eval=TRUE,include=TRUE}
 FeatureScatter(obj, feature1 = "nCount_RNA", feature2 = "percent.mt") 
 ```
   ]
