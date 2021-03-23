@@ -8,7 +8,7 @@ Description: This pacakge shows an example framework to build a teaching course.
 License: What license is it under?
 LazyData: TRUE
 biocViews: Training
-Depends: DropletUtils, DropletTestFiles, SingleCellExperiment, scran, scater, Seurat, dplyr, scuttle, bioMart, SeuratWrappers, 
+Depends: DropletUtils, DropletTestFiles, SingleCellExperiment, scran, scater, Seurat, dplyr, scuttle, bioMart, SeuratWrappers, scRNAseq
 Suggests: knitr,
     rmarkdown,
     testthat,
