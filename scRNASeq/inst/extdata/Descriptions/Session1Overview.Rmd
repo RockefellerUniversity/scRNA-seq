@@ -1,9 +1,5 @@
 <br>
 
-#### **?? My course name?? , Session 1**
+#### **Single-cell RNA sequencing , Session 1**
 
-??What am I focusing on in this section. Bullet point lists are good??
-
-* Course content
-* Building courses
-* Making it look nice
+In this session we will cover the use of Cell Ranger and the LOUPE browser.
