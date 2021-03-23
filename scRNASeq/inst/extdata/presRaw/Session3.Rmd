@@ -64,6 +64,13 @@ cellID_sel <- sample(cellID,100000,replace = FALSE) # make subsets
 sce_sub <- sce[,cellID_sel]
 ```
 ```{r loadSCE_io,include=TRUE,echo=FALSE,eval=TRUE}
+library(DropletUtils)
+library(DropletTestFiles)
+fname <- "file path to Cell Ranger results"
+sce <- read10xCounts(fname, col.names=TRUE)
+cellID <- colData(sce)$Barcode
+cellID_sel <- sample(cellID,100000,replace = FALSE) # make subsets
+sce_sub <- sce[,cellID_sel]
 saveRDS(sce_sub,"data/scSeq_CTRL_sceSub.rds")
 sce_sub <- readRDS("data/scSeq_CTRL_sceSub.rds")
 ```
