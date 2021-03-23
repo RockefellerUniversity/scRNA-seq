@@ -63,6 +63,7 @@ cellID <- colData(sce)$Barcode
 cellID_sel <- sample(cellID,100000,replace = FALSE) # make subsets
 sce_sub <- sce[,cellID_sel]
 ```
+
 ```{r loadSCE_io,include=TRUE,echo=FALSE,eval=TRUE}
 sce_sub <- readRDS("data/scSeq_CTRL_sceSub.rds")
 ```
@@ -267,9 +268,8 @@ plotExpression(stripped, x="label", colour_by="label", features=ensmbl_id) +
 
 ---
 ## Before/After removement
-- Hemoglobin A1 (Hba-a1) as example
-- in most cases the Hbs are contaminated from residual RBCs
 ```{r compRMAmb_pres,eval=TRUE,echo=FALSE,include=TRUE}
+ensmbl_id <- rowData(sce2)$ID[rowData(sce2)$Symbol=="Hba-a1"]
 plotExpression(sce2, x="label", colour_by="label", features=ensmbl_id) + 
         ggtitle("Before")
 plotExpression(stripped, x="label", colour_by="label", features=ensmbl_id) + 
@@ -289,8 +289,8 @@ plotExpression(stripped, x="label", colour_by="label", features=ensmbl_id) +
 
 ---
 ## Before/After removement
-- Krt17 as example
 ```{r compRMAmb2_pres,eval=TRUE,echo=FALSE,include=TRUE}
+ensmbl_id <- rowData(sce2)$ID[rowData(sce2)$Symbol=="Krt17"]
 plotExpression(sce2, x="label", colour_by="label", features=ensmbl_id) + 
         ggtitle("Before")
 plotExpression(stripped, x="label", colour_by="label", features=ensmbl_id) + 
