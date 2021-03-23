@@ -1,9 +1,9 @@
 <br>
 
-#### **?? My course name?? , Session 2**
+#### **Single-cell RNA sequencing , Session 2**
 
-??If you have more sections then do this again. what is session 2 about? keep adding more files if needed??
+In this session we will cover data processing with Seurat, including:
 
-* Course content
-* Building courses
-* Making it look nice
+* Basic QC, including mitochondrial content and cell cycle
+* Normalization and clustering
+* Visualization
