@@ -398,7 +398,6 @@ if(params$isSlides != "yes"){
 - Reads per cell
 ```{r evaQC_cal,eval=TRUE,echo=TRUE,include=TRUE}
 library(scater)
-sce_clean <- sce_clean2 
 mtGene <- rowData(sce_clean)$ID[grepl(rowData(sce_clean)$Symbol,pattern = "mt-")]
 is.mito<- names(sce_clean) %in% mtGene
 sce_clean <- addPerCellQC(sce_clean, subsets=list(Mito=is.mito))
