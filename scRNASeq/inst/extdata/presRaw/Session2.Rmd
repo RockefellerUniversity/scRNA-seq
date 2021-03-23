@@ -396,12 +396,9 @@ saveRDS(obj_sub,"scSeq_Seurat_clean.rds")
 ```
 
 ---
-## Convert into SingleCellExperiment
-```{r convetSCE,echo=TRUE,eval=TRUE,include=TRUE}
-library(SeuratWrappers)
-sce <- toSingleCellExperiment(obj_sub)
-scce
-```
+## SeuratWrappers
+- Seurat objects can be converted into different objects for further analysis
+- detailed information please refer to [SeuratWrappers](https://github.com/satijalab/seurat-wrappers)
 
 ---
 ## Exercise time
