@@ -390,7 +390,7 @@ ggplot(tbl_dat,aes(x=Var1,y=prop,fill=Var2))+
 ---
 ## Save file
 ```{r saveRDS_surat,echo=TRUE,eval=TRUE,include=TRUE}
-cellID <- rownames(obj@meta.data[!obj@meta.data$seurat_clusters==2])
+cellID <- rownames(obj@meta.data)[!obj@meta.data$seurat_clusters==2]
 obj_sub <- obj[,cellID]
 saveRDS(obj_sub,"scSeq_Seurat_clean.rds")
 ```
