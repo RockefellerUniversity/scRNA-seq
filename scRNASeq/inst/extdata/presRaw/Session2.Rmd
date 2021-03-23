@@ -1,7 +1,7 @@
 ---
-title: "Single-cell RNA-squencing ~ Session 2 <html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>"
+title: "Single-cell RNA sequencing ~ Session 2 <html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>"
 author: "Rockefeller University, Bioinformatics Resource Centre"
-date: "http://rockefelleruniversity.github.io/RU_course_template/"
+date: "https://rockefelleruniversity.github.io/scRNA-seq/"
 output: 
   xaringan::moon_reader:
     css: ["default", "metropolisCustom.css", "metropolis-fontsCustom.css"]
@@ -29,24 +29,36 @@ suppressPackageStartupMessages(require(SeuratWrappers))
 knitr::opts_chunk$set(echo = TRUE, tidy = T)
 ```
 
----
 ##  Data analysis with [Seurat](https://satijalab.org/seurat/)
 
-[Seurat](https://satijalab.org/seurat/) is a powerful package for single-cell data analysis. It supports many common analysis of single-cell RNA-Seq and cross connecction with many useful packages through [SeuratWrapper](https://github.com/satijalab/seurat-wrappers). In this session, we will demonstrate our regular workflow for single-cell RNA-seq data analysis with Seurat.
+[Seurat](https://satijalab.org/seurat/) is a powerful package for single-cell data analysis. It supports many common analysis of single-cell RNAseq and cross connection with many useful packages through [SeuratWrapper](https://github.com/satijalab/seurat-wrappers). 
+
+In this session, we will demonstrate our regular workflow for single-cell RNAseq data analysis with Seurat.
 
 ---
 ## Outline
 - Read Cell Ranger results into Seurat object
 - Generate QC
 - Evaluate cell cycle
-- Normalize data and make clustering
+- Normalize data and do clustering
 - Marker genes for each cluster
 - Advanced visualization
 
+
 ---
 ```{r, results='asis',include=TRUE,echo=FALSE}
-if(params$isSlides != "yes"){
-  cat("Create Seurat object and Generare QC plots
+if(params$isSlides == "yes"){
+  cat("class: inverse, center, middle
+
+# Create Seurat object and Generare QC plots
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=720px></html> 
+
+---
+"    
+  )
+}else{
+  cat("# Create Seurat object and Generare QC plots
 
 ---
 "    
@@ -58,12 +70,13 @@ if(params$isSlides != "yes"){
 
 ## Cell Ranger counting matrix
 - The data is avialable on [BOX]()
+
 ```{r loadCR2Seurat,echo=TRUE,eval=FALSE,include=TRUE}
 tar_dir <- "path to raw data"
 ```
 
 ---
-## Load Cell Ranger results into Seurat object
+## Load Cell Ranger results into Seurat
 - Loading data
 - Estimate mitochondrial contents
 - Subset 1000 cells
@@ -96,69 +109,106 @@ obj
 
 ---
 ## Cell information
-Containing cell barcode, mitochodiral contents, datasets, and clustering etc
+The object metadata contains cell barcode, mitochondrial contents, datasets, and clustering etc
 ```{r objInfo_cell,echo=TRUE,eval=TRUE,include=TRUE}
 head(obj@meta.data)
 ```
 
 ---
-## Counting Matrix
-- raw count matrix
-- scaled or normalized data 
+## Raw count matrix
+
 ```{r objInfo_count,echo=TRUE,eval=TRUE,include=TRUE}
-message("raw counts")
 head(obj@assays$RNA@counts)
-message("scaled data")
+```
+
+---
+## Scaled or normalized data 
+```{r objInfo_count2,echo=TRUE,eval=TRUE,include=TRUE}
 head(obj@assays$RNA@data)
 ```
 
 ---
-## Evaluate read counts, genes counts, and mitochondrial contents
+## Evaluate data
+Seurat has in-built functions to easily compare features. 
 - read counts: nCount_RNA
 - gene counts: nFeature_RNA
 - mitochondrial content: percent.mt
 ```{r eval_readCount_geneCount_mitoCont,echo=TRUE,eval=TRUE,include=TRUE}
-# obj <- readRDS("../data/scSeq_CTRL_1kCell_ori.rds")
 VlnPlot(obj,features = c("nCount_RNA","nFeature_RNA","percent.mt"),pt.size = 0.2)
 ```
 
 ---
-## read counts vs genes counts
+## Read counts vs genes counts
+*FeatureScatter* allows pairwise comparisons of features, like counts...
 ```{r eval_readCount_geneCount,echo=TRUE,eval=TRUE,include=TRUE}
 FeatureScatter(obj, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
 ```
 
 ---
-## read counts vs mitochondrial contents
+## Read counts vs mitochondrial content
+...or mitochondiral content. 
 ```{r eval_readCount_mitoCont,echo=TRUE,eval=TRUE,include=TRUE}
 FeatureScatter(obj, feature1 = "nCount_RNA", feature2 = "percent.mt")
 ```
 
 ---
 ## Remove potential cell debris
-- high mitochondrial content and low read counts
+- High mitochondrial content and low read counts can be filtered out.
 ```{r rmMito,echo=TRUE,eval=TRUE,include=TRUE}
 summary(obj@meta.data$percent.mt)
 mt_cutH <- 10
+obj_unfiltered <- obj
 obj <- subset(obj,subset = percent.mt < mt_cutH)
 ```
 
 ---
 ## Remove potential cell debris
+
+.pull-left[
+Unfiltered
+```{r rmMito_vln,echo=TRUE,eval=TRUE,include=TRUE}
+VlnPlot(obj_unfiltered,features = c("nCount_RNA","nFeature_RNA","percent.mt"),pt.size = 0.2)
+```
+  ]
+
+.pull-right[
+Filtered
 ```{r rmMito_vln,echo=TRUE,eval=TRUE,include=TRUE}
 VlnPlot(obj,features = c("nCount_RNA","nFeature_RNA","percent.mt"),pt.size = 0.2)
 ```
+  ]
 
 ---
 ## Remove potential cell debris
+
+.pull-left[
+```{r rmMito_scatter,echo=TRUE,eval=TRUE,include=TRUE}
+FeatureScatter(obj_unfiltered, feature1 = "nCount_RNA", feature2 = "percent.mt") 
+```
+  ]
+
+.pull-right[  
 ```{r rmMito_scatter,echo=TRUE,eval=TRUE,include=TRUE}
 FeatureScatter(obj, feature1 = "nCount_RNA", feature2 = "percent.mt") 
 ```
-
+  ]
+  
+  
+  
 ---
 ```{r, results='asis',include=TRUE,echo=FALSE}
-if(params$isSlides != "yes"){
-  cat("Cell cycle phase determination
+if(params$isSlides == "yes"){
+  cat("class: inverse, center, middle
+
+# Cell cycle phase determination
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=720px></html> 
+
+---
+"    
+  )
+}else{
+  cat("# Cell cycle phase determination
 
 ---
 "    
@@ -168,8 +218,9 @@ if(params$isSlides != "yes"){
 
 ```
 
+
 ## Cell cycle ~ covert gene list
-- In Seurat, the default marker genes for S phase and G2M pahse are stored in *cc.gene* list
+- In Seurat, the default marker genes for S phase and G2/M phase are stored in *cc.gene* list
 - This list is based on human data.
 - We can convert it into mouse gene symbol by using *bioMart*
 ```{r cellCycle_est1,echo=TRUE,eval=TRUE,include=TRUE}
@@ -190,44 +241,42 @@ s_gene <- convertHumanGeneList(cc.genes$s.genes)
 g2m_gene <- convertHumanGeneList(cc.genes$g2m.genes)
 ```
 
+---
 ## Cell cycle ~ estimation
 ```{r cellCycle_est2,echo=TRUE,eval=TRUE,include=TRUE}
-convertHumanGeneList <- function(x){
-  require("biomaRt")
-  human = useMart("ensembl", dataset = "hsapiens_gene_ensembl")
-  mouse = useMart("ensembl", dataset = "mmusculus_gene_ensembl")
-  genesV2 = getLDS(attributes = c("hgnc_symbol"), 
-                   filters = "hgnc_symbol", 
-                   values = x , 
-                   mart = human,
-                   attributesL = c("mgi_symbol"), 
-                   martL = mouse, uniqueRows=T)
-  humanx <- unique(genesV2[, 2])
-  return(humanx)}
-#
-s_gene <- convertHumanGeneList(cc.genes$s.genes)
-g2m_gene <- convertHumanGeneList(cc.genes$g2m.genes)
 obj <- CellCycleScoring(obj, s.features = s_gene,
                               g2m.features = g2m_gene, set.ident = TRUE)
 obj@meta.data[1:2,]
 ```
 
+---
 ## Cell cycle ~ phase
 ```{r cellCycle_plot1,echo=TRUE,eval=TRUE,include=TRUE}
 yd_dat <- as.data.frame(table(obj@meta.data$dset,obj@meta.data$Phase))
 head(yd_dat)
 ```
-
+---
 ## Cell cycle ~ phase
 ```{r cellCycle_plot2,echo=TRUE,eval=TRUE,include=TRUE}
 library(ggplot2)
 ggplot(yd_dat,aes(x=Var1,y=Freq,fill=Var2))+geom_bar(stat="identity",position="stack")+labs(x="",y="Counts",fill="Phase")+theme_classic()
 ```
 
+
 ---
 ```{r, results='asis',include=TRUE,echo=FALSE}
-if(params$isSlides != "yes"){
-  cat("Regression and clustering
+if(params$isSlides == "yes"){
+  cat("class: inverse, center, middle
+
+# Regression and clustering
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=720px></html> 
+
+---
+"    
+  )
+}else{
+  cat("# Regression and clustering
 
 ---
 "    
@@ -245,15 +294,15 @@ obj <- ScaleData(obj,
 ```
 
 ---
-## Princciple Component Analysis
+## Principle Component Analysis
 ```{r prcomp,echo=TRUE,eval=TRUE,include=TRUE}
 set.seed(1000)
 obj <- RunPCA(obj, npcs = 30, verbose = FALSE)
 ```
 
 ---
-## How many PCs should we take ~ Elbow Plot
-- take the point start turning flat
+## How many PCs should we take? ~ Elbow Plot
+- Elbow plots are useful to estimate number of PCs to take. You need to look for the *elbow* i.e. the point start were the curve turns flat. This approximation minimizes deviation and PC number. 
 ```{r pcSel,echo=TRUE,eval=TRUE,include=TRUE}
 ElbowPlot(obj,ndims=30)
 #
@@ -267,6 +316,11 @@ set.seed(1000)
 maxPC <- numPC
 obj <- FindNeighbors(obj, reduction = "pca", dims = 1:maxPC)
 obj <- FindClusters(obj, resolution = 0.5)
+```
+
+---
+## Clustering
+```{r clust2,echo=TRUE,eval=TRUE,include=TRUE}
 obj <- RunUMAP(obj, reduction = "pca", dims = 1:maxPC)
 obj <- RunTSNE(obj, reduction = "pca", dims = 1:maxPC)
 ```
@@ -274,7 +328,7 @@ obj <- RunTSNE(obj, reduction = "pca", dims = 1:maxPC)
 ---
 ## UMAP plot
 ```{r seurat_UMAP,echo=TRUE,eval=TRUE,include=TRUE}
-DimPlot(obj,reduction="umap") # defaul it "umap"
+DimPlot(obj,reduction="umap") # default it "umap"
 ```
 
 ---
@@ -283,10 +337,21 @@ DimPlot(obj,reduction="umap") # defaul it "umap"
 DimPlot(obj,reduction = "tsne")
 ```
 
+
 ---
 ```{r, results='asis',include=TRUE,echo=FALSE}
-if(params$isSlides != "yes"){
-  cat("Identify marker genes for each cluster
+if(params$isSlides == "yes"){
+  cat("class: inverse, center, middle
+
+# Identify marker genes for each cluster
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=720px></html> 
+
+---
+"    
+  )
+}else{
+  cat("# Identify marker genes for each cluster
 
 ---
 "    
@@ -307,16 +372,30 @@ head(clust.markers)
 ```
 
 ---
-## Select top five marker genes for each cluster
+## Select marker genes for each cluster
+Here we will select the top 5 marker genes for each cluster. 
 ```{r markGene_sub,echo=TRUE,eval=TRUE,include=TRUE}
-topG <- clust.markers %>% group_by(cluster) %>% top_n(n = 5, wt = avg_log2FC)
+topG <- clust.markers %>% 
+  group_by(cluster) %>% 
+  top_n(n = 5, wt = avg_log2FC)
 head(topG)
 ```
 
+
 ---
 ```{r, results='asis',include=TRUE,echo=FALSE}
-if(params$isSlides != "yes"){
-  cat("Advanced plots
+if(params$isSlides == "yes"){
+  cat("class: inverse, center, middle
+
+# Advanced plots
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=720px></html> 
+
+---
+"    
+  )
+}else{
+  cat("# Advanced plots
 
 ---
 "    
@@ -339,8 +418,12 @@ DimPlot(obj,pt.size = 0.2,label=TRUE)+NoLegend()
 
 ---
 ## Marker Gene expression ~ heatmap
-```{r markGene_heatmap,echo=TRUE,eval=TRUE,include=TRUE}
+```{r markGene_heatmap,echo=TRUE,eval=F,include=TRUE}
 DoHeatmap(obj, features = topG$gene) + NoLegend()
+```
+
+```{r markGene_heatmap2,echo=F,eval=TRUE,include=TRUE}
+suppressWarnings(DoHeatmap(obj, features = topG$gene) + NoLegend())
 ```
 
 ---
@@ -352,8 +435,13 @@ FeaturePlot(obj,features = gene_marker,pt.size = 0.2)
 
 ---
 ## Marker Gene Expression ~ RidgePlot
-```{r makGene_RidgePlott,echo=TRUE,eval=TRUE,include=TRUE}
+```{r makGene_RidgePlott,echo=TRUE,eval=F,include=TRUE}
 RidgePlot(obj,features = gene_marker)
+```
+
+
+```{r makGene_RidgePlott,echo=F,eval=TRUE,include=TRUE}
+suppressMessages(RidgePlot(obj,features = gene_marker))
 ```
 
 ---
@@ -370,16 +458,7 @@ tbl_dat[1:2,]
 
 ---
 ## Cell cycle phases by cluster ~ plot
-```{r cellcycle_cluster_plot1,echo=TRUE,eval=FALSE,include=TRUE}
-ggplot(tbl_dat,aes(x=Var1,y=prop,fill=Var2))+
-  geom_bar(stat="identity",position="stack")+
-  labs(x="Seurat_clusters",y="Proportion",fill="Phase")+
-  theme_classic()
-```
-
----
-## Cell cycle phases by cluster ~ plot
-- may need to remove cluster 2
+- The second cluster may need to be removed, as there seems to be cell cycle bias. 
 ```{r cellcycle_cluster_plot2,echo=FALSE,eval=TRUE,include=TRUE}
 ggplot(tbl_dat,aes(x=Var1,y=prop,fill=Var2))+
   geom_bar(stat="identity",position="stack")+
@@ -389,6 +468,7 @@ ggplot(tbl_dat,aes(x=Var1,y=prop,fill=Var2))+
 
 ---
 ## Save file
+First we filter out the second cluster, and then save the data object.
 ```{r saveRDS_surat,echo=TRUE,eval=TRUE,include=TRUE}
 cellID <- rownames(obj@meta.data)[!obj@meta.data$seurat_clusters==2]
 obj_sub <- obj[,cellID]
@@ -397,8 +477,8 @@ saveRDS(obj_sub,"scSeq_Seurat_clean.rds")
 
 ---
 ## SeuratWrappers
-- Seurat objects can be converted into different objects for further analysis
-- detailed information please refer to [SeuratWrappers](https://github.com/satijalab/seurat-wrappers)
+- Seurat objects can be converted into different objects for further analysis with other tools i.e. Monocle or Velocity.
+- For detailed information please refer to the Github repository for [SeuratWrappers](https://github.com/satijalab/seurat-wrappers).
 
 ---
 ## Exercise time
