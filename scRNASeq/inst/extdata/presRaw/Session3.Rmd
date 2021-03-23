@@ -71,12 +71,16 @@ library(DropletTestFiles)
 fname <- "~/filepath/toCellRanger/results"
 sce <- read10xCounts(fname, col.names=TRUE)
 cellID <- colData(sce)$Barcode
-cellID_sel <- sample(cellID,100000,replace = FALSE) # make subsets
-sce <- sce[,cellID_sel]
+
 ```
+
+---
+## Subset dataset
+We have a small subset version of this dataset that you can load in from the *data/* directory to try this out. 
 
 ```{r loadSCE_io,include=TRUE,echo=FALSE,eval=TRUE}
 sce <- readRDS("data/scSeq_CTRL_sceSub.rds")
+sce
 ```
 
 ---
@@ -499,54 +503,29 @@ sce_clean <- addPerCellQC(sce_clean, subsets=list(Mito=is.mito))
 ---
 ## QC plots - Read counts
 
-.pull-left[
-Pre-clean
-```{r qc_mrgl,eval=TRUE,echo=TRUE,include=TRUE}
-plotColData(sce,x="label", y="sum", colour_by="label")+ggtitle("read counts")
-```
-  ]
-  
-.pull-right[
+
 Post-clean
 ```{r qc_mrgr,eval=TRUE,echo=TRUE,include=TRUE}
 plotColData(sce_clean,x="label", y="sum", colour_by="label")+ggtitle("read counts")
 ```
-  ]
 
 
 ---
 ## QC plots - Gene counts
 
-.pull-left[
-Pre-clean
-```{r qc_mrg2l,eval=TRUE,echo=TRUE,include=TRUE}
-plotColData(sce,x="label", y="detected", colour_by="label")+ggtitle("gene counts")
-```
-  ]
-  
-.pull-right[
 Post-clean
 ```{r qc_mrg2r,eval=TRUE,echo=TRUE,include=TRUE}
 plotColData(sce_clean,x="label", y="detected", colour_by="label")+ggtitle("gene counts")
 ```
-  ]
+
 
 ---
 ## QC plots - Mitochondrial %
 
-.pull-left[
-Pre-clean
-```{r qc_mrg3l,eval=TRUE,echo=TRUE,include=TRUE}
-plotColData(sce,x="label", y="subsets_Mito_percent", colour_by="label")+ggtitle("mitocondrial content")
-```
-  ]
-  
-.pull-right[
 Post-clean
 ```{r qc_mrg3r,eval=TRUE,echo=TRUE,include=TRUE}
 plotColData(sce_clean,x="label", y="subsets_Mito_percent", colour_by="label")+ggtitle("mitocondrial content")
 ```
-  ]
 
 
 ---

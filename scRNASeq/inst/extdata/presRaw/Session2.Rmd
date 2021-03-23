@@ -69,17 +69,16 @@ if(params$isSlides == "yes"){
 ```
 
 ## Cell Ranger counting matrix
-- The data is avialable on [BOX]()
+- The data is available on [BOX](https://rockefeller.box.com/s/hdy0vex38dlph5pglafrkw68b7uemndr)
 
 ```{r loadCR2Seurat,echo=TRUE,eval=FALSE,include=TRUE}
-tar_dir <- "path to raw data"
+tar_dir <- "~/path/to/raw/data"
 ```
 
 ---
 ## Load Cell Ranger results into Seurat
 - Loading data
 - Estimate mitochondrial contents
-- Subset 1000 cells
 
 ```{r loadCR2Seurat2,echo=TRUE,eval=FALSE,include=TRUE}
 library(Seurat)
@@ -90,20 +89,17 @@ obj$dset <- samID
 obj <- Seurat::RenameCells(obj,add.cell.id=samID)
 #
 obj[["percent.mt"]] <- PercentageFeatureSet(obj, pattern = "^mt-")
-#
-cellID <- rownames(obj@meta.data)
-cellID_sel <- sample(cellID,1000,replace = FALSE)
-obj_sel <- obj[,cellID_sel]
-saveRDS(obj_sel,file.path("data",paste0("scSeq_",samID,"_1kCell_ori.rds")))
-```
-```{r loadCR2Seurat3,echo=TRUE,eval=TRUE,include=FALSE}
-#obj <- readRDS("../data/scSeq_CTRL_1kCell_ori.rds")
-obj <- readRDS("data/scSeq_CTRL_1kCell_ori.rds")
+
 ```
 
+
 ---
-## Information in the objects
-```{r objInfo,echo=TRUE,eval=TRUE,include=TRUE}
+## Subset dataset
+We have a small subset version of this dataset that you can load in from the *data/* directory to try this out. 
+
+```{r loadCR2Seurat3,echo=TRUE,eval=TRUE,include=FALSE}
+
+obj <- readRDS("data/scSeq_CTRL_1kCell_ori.rds")
 obj
 ```
 
