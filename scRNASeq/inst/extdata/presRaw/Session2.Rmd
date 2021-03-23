@@ -440,7 +440,7 @@ RidgePlot(obj,features = gene_marker)
 ```
 
 
-```{r makGene_RidgePlott,echo=F,eval=TRUE,include=TRUE}
+```{r makGene_RidgePlott2,echo=F,eval=TRUE,include=TRUE}
 suppressMessages(RidgePlot(obj,features = gene_marker))
 ```
 
