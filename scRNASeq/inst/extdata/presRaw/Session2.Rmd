@@ -365,7 +365,7 @@ ggplot(tbl_dat,aes(x=Var1,y=prop,fill=Var2))+
 ---
 ## Cell cycle phases by cluster ~ plot
 - may need to remove cluster 2
-```{r cellcycle_cluster_plot1,echo=FALSE,eval=TRUE,include=TRUE}
+```{r cellcycle_cluster_plot2,echo=FALSE,eval=TRUE,include=TRUE}
 ggplot(tbl_dat,aes(x=Var1,y=prop,fill=Var2))+
   geom_bar(stat="identity",position="stack")+
   labs(x="Seurat_clusters",y="Proportion",fill="Phase")+
