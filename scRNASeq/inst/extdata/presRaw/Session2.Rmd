@@ -129,7 +129,7 @@ Seurat has in-built functions to easily compare features.
 - read counts: nCount_RNA
 - gene counts: nFeature_RNA
 - mitochondrial content: percent.mt
-```{r eval_readCount_geneCount_mitoCont,echo=TRUE,eval=TRUE,include=TRUE}
+```{r eval_readCount_geneCount_mitoCont,echo=TRUE,eval=TRUE,include=TRUE,fig.height=3,fig.width=3}
 VlnPlot(obj,features = c("nCount_RNA","nFeature_RNA","percent.mt"),pt.size = 0.2)
 ```
 
@@ -251,9 +251,10 @@ obj@meta.data[1:2,]
 yd_dat <- as.data.frame(table(obj@meta.data$dset,obj@meta.data$Phase))
 head(yd_dat)
 ```
+
 ---
 ## Cell cycle ~ phase
-```{r cellCycle_plot2,echo=TRUE,eval=TRUE,include=TRUE}
+```{r cellCycle_plot2,echo=TRUE,eval=TRUE,include=TRUE,fig.height=4,fig.width=2}
 library(ggplot2)
 ggplot(yd_dat,aes(x=Var1,y=Freq,fill=Var2))+geom_bar(stat="identity",position="stack")+labs(x="",y="Counts",fill="Phase")+theme_classic()
 ```
@@ -297,9 +298,9 @@ obj <- RunPCA(obj, npcs = 30, verbose = FALSE)
 ```
 
 ---
-## How many PCs should we take? ~ Elbow Plot
+## How many PCs? ~ Elbow Plot
 - Elbow plots are useful to estimate number of PCs to take. You need to look for the *elbow* i.e. the point start were the curve turns flat. This approximation minimizes deviation and PC number. 
-```{r pcSel,echo=TRUE,eval=TRUE,include=TRUE}
+```{r pcSel,echo=TRUE,eval=TRUE,include=TRUE,fig.height=4,fig.width=4}
 ElbowPlot(obj,ndims=30)
 #
 numPC <- 15
@@ -437,7 +438,7 @@ RidgePlot(obj,features = gene_marker)
 
 
 ```{r makGene_RidgePlott2,echo=F,eval=TRUE,include=TRUE}
-suppressMessages(RidgePlot(obj,features = gene_marker))
+suppressMessages(print(RidgePlot(obj,features = gene_marker)))
 ```
 
 ---
