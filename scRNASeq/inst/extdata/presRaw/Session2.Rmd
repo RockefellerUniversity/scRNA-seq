@@ -23,7 +23,6 @@ params:
 ```{r setup, include=FALSE}
 suppressPackageStartupMessages(require(knitr))
 suppressPackageStartupMessages(require(Seurat))
-suppressPackageStartupMessages(require(phaetmap))
 suppressPackageStartupMessages(require(dplyr))
 suppressPackageStartupMessages(require(bioMart))
 suppressPackageStartupMessages(require(SeuratWrappers))
@@ -169,11 +168,11 @@ if(params$isSlides != "yes"){
 
 ```
 
-## Cell cycle
+## Cell cycle ~ covert gene list
 - In Seurat, the default marker genes for S phase and G2M pahse are stored in *cc.gene* list
 - This list is based on human data.
 - We can convert it into mouse gene symbol by using *bioMart*
-```{r cellCycle_conv,echo=TRUE,eval=TRUE,include=TRUE}
+```{r cellCycle_est1,echo=TRUE,eval=TRUE,include=TRUE}
 convertHumanGeneList <- function(x){
   require("biomaRt")
   human = useMart("ensembl", dataset = "hsapiens_gene_ensembl")
@@ -186,10 +185,26 @@ convertHumanGeneList <- function(x){
                    martL = mouse, uniqueRows=T)
   humanx <- unique(genesV2[, 2])
   return(humanx)}
+#
+s_gene <- convertHumanGeneList(cc.genes$s.genes)
+g2m_gene <- convertHumanGeneList(cc.genes$g2m.genes)
 ```
 
-## Cell cycle ~ calculation
-```{r cellCycle_est,echo=TRUE,eval=TRUE,include=TRUE}
+## Cell cycle ~ estimation
+```{r cellCycle_est2,echo=TRUE,eval=TRUE,include=TRUE}
+convertHumanGeneList <- function(x){
+  require("biomaRt")
+  human = useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+  mouse = useMart("ensembl", dataset = "mmusculus_gene_ensembl")
+  genesV2 = getLDS(attributes = c("hgnc_symbol"), 
+                   filters = "hgnc_symbol", 
+                   values = x , 
+                   mart = human,
+                   attributesL = c("mgi_symbol"), 
+                   martL = mouse, uniqueRows=T)
+  humanx <- unique(genesV2[, 2])
+  return(humanx)}
+#
 s_gene <- convertHumanGeneList(cc.genes$s.genes)
 g2m_gene <- convertHumanGeneList(cc.genes$g2m.genes)
 obj <- CellCycleScoring(obj, s.features = s_gene,
