@@ -13,8 +13,18 @@ knitr::opts_chunk$set(echo = TRUE, tidy = T)
 
 
 ## ---- results='asis',include=TRUE,echo=FALSE----------------------------------
-if(params$isSlides != "yes"){
-  cat("# load data and access empty drops
+if(params$isSlides == "yes"){
+  cat("class: inverse, center, middle
+
+# Loading data and empty droplets
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=720px></html> 
+
+---
+"    
+  )
+}else{
+  cat("#  Loading data and empty drops
 
 ---
 "    
@@ -27,24 +37,26 @@ if(params$isSlides != "yes"){
 ## ----loadSCE,eval=FALSE,include=TRUE,echo=TRUE--------------------------------
 ## library(DropletUtils)
 ## library(DropletTestFiles)
-## fname <- "file path to Cell Ranger results"
+## fname <- "~/filepath/toCellRanger/results"
 ## sce <- read10xCounts(fname, col.names=TRUE)
 ## cellID <- colData(sce)$Barcode
-## cellID_sel <- sample(cellID,100000,replace = FALSE) # make subsets
-## sce_sub <- sce[,cellID_sel]
+## 
 
 
 ## ----loadSCE_io,include=TRUE,echo=FALSE,eval=TRUE-----------------------------
-sce_sub <- readRDS("data/scSeq_CTRL_sceSub.rds")
+sce <- readRDS("data/scSeq_CTRL_sceSub.rds")
+sce
 
 
 ## ----loadSCE_pres,include=TRUE,echo=TRUE,eval=TRUE----------------------------
-sce_sub
+sce
+
+
+## ----loadSCE_pres2,include=TRUE,echo=TRUE,eval=TRUE---------------------------
 # cell information
-colData(sce_sub)[1:2,]
+colData(sce)[1:2,]
 # gene information
-rowData(sce_sub)[1:2,]
-sce <- sce_sub
+rowData(sce)[1:2,]
 
 
 ## ----rankUMI,eval=TRUE--------------------------------------------------------
@@ -103,7 +115,17 @@ sce2 <- sce[,which(e.out$FDR <= 0.001)]
 
 
 ## ---- results='asis',include=TRUE,echo=FALSE----------------------------------
-if(params$isSlides != "yes"){
+if(params$isSlides == "yes"){
+  cat("class: inverse, center, middle
+
+# Normalization and clustering
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=720px></html> 
+
+---
+"    
+  )
+}else{
   cat("# Normalization and clustering
 
 ---
@@ -111,6 +133,7 @@ if(params$isSlides != "yes"){
   )
   
 }
+
 
 
 ## ----countNorm,eval=TRUE,echo=TRUE,include=TRUE-------------------------------
@@ -158,14 +181,25 @@ plotTSNE(sce2,colour_by ="label")
 
 
 ## ---- results='asis',include=TRUE,echo=FALSE----------------------------------
-if(params$isSlides != "yes"){
-  cat("# Remove ambient RNA
+if(params$isSlides == "yes"){
+  cat("class: inverse, center, middle
+
+# Removing Ambient RNA
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=720px></html> 
+
+---
+"    
+  )
+}else{
+  cat("# Removing Ambient RNA
 
 ---
 "    
   )
   
 }
+
 
 
 ## ----estAmb1,eval=TRUE,echo=TRUE,include=TRUE---------------------------------
@@ -189,14 +223,18 @@ stripped <- logNormCounts(stripped)
 ## ensmbl_id <- rowData(sce2)$ID[rowData(sce2)$Symbol=="Hba-a1"]
 ## plotExpression(sce2, x="label", colour_by="label", features=ensmbl_id) +
 ##         ggtitle("Before")
+## 
 ## plotExpression(stripped, x="label", colour_by="label", features=ensmbl_id) +
 ##         ggtitle("After")
 
 
-## ----compRMAmb_pres,eval=TRUE,echo=FALSE,include=TRUE-------------------------
+## ----compRMAmb_pres1,eval=TRUE,echo=FALSE,include=TRUE------------------------
 ensmbl_id <- rowData(sce2)$ID[rowData(sce2)$Symbol=="Hba-a1"]
 plotExpression(sce2, x="label", colour_by="label", features=ensmbl_id) + 
         ggtitle("Before")
+
+
+## ----compRMAmb_pres2,eval=TRUE,echo=FALSE,include=TRUE------------------------
 plotExpression(stripped, x="label", colour_by="label", features=ensmbl_id) + 
         ggtitle("After")
 
@@ -213,6 +251,9 @@ plotExpression(stripped, x="label", colour_by="label", features=ensmbl_id) +
 ensmbl_id <- rowData(sce2)$ID[rowData(sce2)$Symbol=="Krt17"]
 plotExpression(sce2, x="label", colour_by="label", features=ensmbl_id) + 
         ggtitle("Before")
+
+
+## ----compRMAmb2_pres2,eval=TRUE,echo=FALSE,include=TRUE-----------------------
 plotExpression(stripped, x="label", colour_by="label", features=ensmbl_id) + 
         ggtitle("After")
 
@@ -222,14 +263,25 @@ saveRDS(stripped,"scSeq_CTRL_sceSub_rmAmbRNA.rds")
 
 
 ## ---- results='asis',include=TRUE,echo=FALSE----------------------------------
-if(params$isSlides != "yes"){
-  cat("# Remove doublets
+if(params$isSlides == "yes"){
+  cat("class: inverse, center, middle
+
+# Removing Doublets
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=720px></html> 
+
+---
+"    
+  )
+}else{
+  cat("# Removing Doublets
 
 ---
 "    
   )
   
 }
+
 
 
 ## ----normClust,eval=FALSE,echo=TRUE,include=TRUE------------------------------
@@ -265,7 +317,7 @@ stripped$DoubletScore <- dbl.dens
 plotUMAP(stripped,colour_by="DoubletScore")
 
 
-## ----doublerScorebyClust,eval=TRUE,echo=TRUE,include=TRUE---------------------
+## ----doublerScorebyClust,eval=TRUE,echo=TRUE,include=TRUE,fig.height=3.5,fig.width=5----
 plotColData(stripped, x="label", y="DoubletScore", colour_by="label")+
   geom_hline(yintercept = quantile(colData(stripped)$DoubletScore,0.95),lty="dashed",color="red")
 
@@ -279,8 +331,18 @@ saveRDS(sce_clean,"scSeq_CTRL_sceSub_rmAmbRNA_rmDoublet.rds")
 
 
 ## ---- results='asis',include=TRUE,echo=FALSE----------------------------------
-if(params$isSlides != "yes"){
-  cat("# QC plots after cleanrance
+if(params$isSlides == "yes"){
+  cat("class: inverse, center, middle
+
+# QC plots after clearance
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=720px></html> 
+
+---
+"    
+  )
+}else{
+  cat("# QC plots after clearance
 
 ---
 "    
@@ -289,26 +351,42 @@ if(params$isSlides != "yes"){
 }
 
 
+
 ## ----evaQC_cal,eval=TRUE,echo=TRUE,include=TRUE-------------------------------
 library(scater)
 mtGene <- rowData(sce_clean)$ID[grepl(rowData(sce_clean)$Symbol,pattern = "mt-")]
-is.mito<- names(sce_clean) %in% mtGene
+is.mito <- names(sce_clean) %in% mtGene
 sce_clean <- addPerCellQC(sce_clean, subsets=list(Mito=is.mito))
 
 
-## ----qc_mrg,eval=TRUE,echo=TRUE,include=TRUE----------------------------------
+## ----qc_mrgr,eval=TRUE,echo=TRUE,include=TRUE---------------------------------
 plotColData(sce_clean,x="label", y="sum", colour_by="label")+ggtitle("read counts")
+
+
+## ----qc_mrg2r,eval=TRUE,echo=TRUE,include=TRUE--------------------------------
 plotColData(sce_clean,x="label", y="detected", colour_by="label")+ggtitle("gene counts")
+
+
+## ----qc_mrg3r,eval=TRUE,echo=TRUE,include=TRUE--------------------------------
 plotColData(sce_clean,x="label", y="subsets_Mito_percent", colour_by="label")+ggtitle("mitocondrial content")
 
 
 ## ----qc_complex,eval=TRUE,echo=TRUE,include=TRUE------------------------------
 plotColData(sce_clean,x="sum",y="subsets_Mito_percent",colour_by="label")+ggtitle("is.mito vs read counts")
+
+
+## ----qc_complex2,eval=TRUE,echo=TRUE,include=TRUE-----------------------------
 plotColData(sce_clean,x="sum",y="detected",colour_by="label")+ggtitle("gene counts vs read counts")
 
 
-## ----varExp,eval=TRUE,echo=TRUE,include=TRUE----------------------------------
+## ----varExp,eval=T,echo=TRUE,include=TRUE-------------------------------------
 vars <- getVarianceExplained(sce_clean, 
     variables=c("DoubletScore","label","sum","detected","subsets_Mito_percent"))
+
+## ----varExp2,eval=F,echo=TRUE,include=TRUE------------------------------------
+## plotExplanatoryVariables(vars)
+
+
+## ----varExp3,eval=TRUE,echo=TRUE,include=TRUE---------------------------------
 plotExplanatoryVariables(vars)
 

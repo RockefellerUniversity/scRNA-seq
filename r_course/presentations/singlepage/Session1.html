@@ -1305,100 +1305,6 @@ document.addEventListener('DOMContentLoaded', function() {
     </style>
 
 
-<style type="text/css">
-  code {
-    white-space: pre;
-  }
-  .sourceCode {
-    overflow: visible;
-  }
-</style>
-<style type="text/css" data-origin="pandoc">
-code.sourceCode > span { display: inline-block; line-height: 1.25; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-code.sourceCode { white-space: pre-wrap; }
-code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-    color: #aaaaaa;
-  }
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
-div.sourceCode
-  {  background-color: #f8f8f8; }
-@media screen {
-code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
-code span.al { color: #ef2929; } /* Alert */
-code span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
-code span.at { color: #c4a000; } /* Attribute */
-code span.bn { color: #0000cf; } /* BaseN */
-code span.cf { color: #204a87; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #4e9a06; } /* Char */
-code span.cn { color: #000000; } /* Constant */
-code span.co { color: #8f5902; font-style: italic; } /* Comment */
-code span.cv { color: #8f5902; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #8f5902; font-weight: bold; font-style: italic; } /* Documentation */
-code span.dt { color: #204a87; } /* DataType */
-code span.dv { color: #0000cf; } /* DecVal */
-code span.er { color: #a40000; font-weight: bold; } /* Error */
-code span.ex { } /* Extension */
-code span.fl { color: #0000cf; } /* Float */
-code span.fu { color: #000000; } /* Function */
-code span.im { } /* Import */
-code span.in { color: #8f5902; font-weight: bold; font-style: italic; } /* Information */
-code span.kw { color: #204a87; font-weight: bold; } /* Keyword */
-code span.op { color: #ce5c00; font-weight: bold; } /* Operator */
-code span.ot { color: #8f5902; } /* Other */
-code span.pp { color: #8f5902; font-style: italic; } /* Preprocessor */
-code span.sc { color: #000000; } /* SpecialChar */
-code span.ss { color: #4e9a06; } /* SpecialString */
-code span.st { color: #4e9a06; } /* String */
-code span.va { color: #000000; } /* Variable */
-code span.vs { color: #4e9a06; } /* VerbatimString */
-code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warning */
-
-</style>
-<script>
-// apply pandoc div.sourceCode style to pre.sourceCode instead
-(function() {
-  var sheets = document.styleSheets;
-  for (var i = 0; i < sheets.length; i++) {
-    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
-    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
-    for (var j = 0; j < rules.length; j++) {
-      var rule = rules[j];
-      // check if there is a div.sourceCode rule
-      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
-      var style = rule.style.cssText;
-      // check if color or background-color is set
-      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
-      // replace div.sourceCode by a pre.sourceCode rule
-      sheets[i].deleteRule(j);
-      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
-    }
-  }
-})();
-</script>
 
 
 
@@ -1582,7 +1488,7 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Single-cell RNA-squencing ~ Session 1
+<h1 class="title toc-ignore">Single-cell RNA sequencing ~ Session 1
 <html>
 <div style="float:left">
 
@@ -1595,98 +1501,42 @@ div.tocify {
 </div>
 
 
-<div id="my-course-name-session1" class="section level1">
-<h1>???My Course name (session1)???</h1>
-<hr />
 <div id="overview" class="section level2">
 <h2>Overview</h2>
-<p>In this session, we will introduce the default results of <a href="https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/what-is-cell-ranger">Cell Ranger</a>, which is the most commonly used for 10X Genomics single-cell squencing data analysis. - <a href="%22data/WT.html%22">QC Report</a> - cloupe file: can be processed by <a href="https://support.10xgenomics.com/single-cell-gene-expression/software/visualization/latest/what-is-loupe-cell-browser">LOUPE Browder</a></p>
+<p>In this course we are going to introduce basic analysis for single-cell RNAseq, with a specific focus on the 10X system. The course is divided into three sessions. In the first session, we will introduce how to interpret the Cell Ranger QC report and how to do analysis with the LOUPE Browser. We will also demonstrate the customized analysis we can support right know. In the Second session, we will demonstrate how to process scRNAseq data and make QC reports with Seurat. In the third session, we will discuss how to to do more advanced analysis and QC with Bioconductor packages.</p>
 </div>
-<div id="materials" class="section level2">
-<h2>Materials</h2>
-<p>??We try to denote each major section of content with these title slides (see above for set up). The hierarchy will help with the different versions of the teaching content i.e. slides and single page.??</p>
-<p>?? Materials just gives the links to download the package Just ensure links are up to date??</p>
-<p>All prerequisites, links to material and slides for this course can be found on github.</p>
-<ul>
-<li><a href="https://rockefelleruniversity.github.io/Intro_To_R_1Day/">Intro_To_R_1</a></li>
-</ul>
-<p>Or can be downloaded as a zip archive from here.</p>
-<ul>
-<li><a href="https://github.com/rockefelleruniversity/Intro_To_R_1Day/zipball/master">Download zip</a></li>
-</ul>
-</div>
-<div id="course-materials" class="section level2">
-<h2>Course materials</h2>
-<p>?? this slide just shows where thye can get the course content from the download. You do not need to populate these directories. It will be made during compilation??</p>
-<p>Once the zip file in unarchived. All presentations as HTML slides and pages, their R code and HTML practical sheets will be available in the directories underneath.</p>
-<ul>
-<li><strong>r_course/presentations/slides/</strong> Presentations as an HTML slide show.</li>
-<li><strong>r_course/presentations/singlepage/</strong> Presentations as an HTML single page.</li>
-<li><strong>r_course/presentations/r_code/</strong> R code in presentations.</li>
-<li><strong>r_course/exercises/</strong> Practicals as HTML pages.</li>
-<li><strong>r_course/answers/</strong> Practicals with answers as HTML pages and R code solutions.</li>
-</ul>
-</div>
-<div id="set-the-working-directory" class="section level2">
-<h2>Set the Working directory</h2>
-<p>Before running any of the code in the practicals or slides we need to set the working directory to the folder we unarchived.</p>
-<p>You may navigate to the unarchived RU_Course_help folder in the Rstudio menu.</p>
-<p><strong>Session -&gt; Set Working Directory -&gt; Choose Directory</strong></p>
-<p>or in the console.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">setwd</span>(<span class="st">&quot;/PathToMyDownload/RU_Course_template/r_course&quot;</span>)</span>
-<span id="cb1-2"><a href="#cb1-2"></a><span class="co"># e.g. setwd(&#39;~/Downloads/Intro_To_R_1Day/r_course&#39;)</span></span></code></pre></div>
-</div>
-</div>
-<div id="another-section-header" class="section level1">
-<h1>Another section header</h1>
+<div id="cell-ranger-results" class="section level1">
+<h1>Cell Ranger results</h1>
 <hr />
-<div id="slide-structure" class="section level2">
-<h2>Slide Structure</h2>
-<p>We use the a double has/pound for slides. This is important for hierarchy. If you use 1 it will work for the slides, but will mess up the single page version.</p>
+<div id="cell-ranger" class="section level2">
+<h2>Cell Ranger</h2>
+<p><a href="https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/what-is-cell-ranger">Cell Ranger</a> is a widely used software for single-cell sequencing data analysis. It supports various kinds of analysis for 10X single-cell sequencing data.</p>
+<ul>
+<li>Alignment and counting</li>
+<li>Analysis of VDJ changes</li>
+<li>Datasets aggregation</li>
+<li>Convert BCL files (raw files) into FASTQ files</li>
+<li>Generation of customized GTF and Genome files</li>
+</ul>
 </div>
-<div id="leftright-alignment" class="section level2">
-<h2>Left/Right alignment</h2>
-<p>To show things side by side on a slide you can use pull left/right. t is important to keep the tab on the second square bracket. On single page it will just be one after the other:</p>
-<p>This will be on left of slide</p>
-<p>This will be on right</p>
-<p>]</p>
+<div id="basic-reports-of-cell-ranger" class="section level2">
+<h2>Basic reports of Cell Ranger</h2>
+<ul>
+<li><a href="%22data/WT.html%22">QC Report</a></li>
+<li>cloupe file: can be processed by <a href="https://support.10xgenomics.com/single-cell-gene-expression/software/visualization/latest/what-is-loupe-cell-browser">LOUPE Browser</a></li>
+</ul>
 </div>
-<div id="data-from-external-sources" class="section level2">
-<h2>Data from external sources</h2>
-<p>everything in the rmd is relative to the inst/extdata directory so you have some data to load in, just put it in the data directory, read it in along the path. The structure is maintained for those attending the course and download the package using the instructions. The same rules are followed for imgs and scripts that you may call.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>Table &lt;-<span class="st"> </span><span class="kw">read.table</span>(<span class="st">&quot;data/readThisTable.csv&quot;</span>, <span class="dt">sep =</span> <span class="st">&quot;,&quot;</span>, <span class="dt">header =</span> T)</span></code></pre></div>
 </div>
-<div id="big-processes" class="section level2">
-<h2>Big Processes</h2>
-<p>If what you want to do is super intense computationally you can use the eval=F arguments to prevent it being done during compilation.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="co"># Intense computation</span></span>
-<span id="cb3-2"><a href="#cb3-2"></a>myresult &lt;-<span class="st"> </span><span class="dv">10</span><span class="op">^</span><span class="dv">6</span> <span class="op">+</span><span class="st"> </span><span class="dv">1</span></span></code></pre></div>
-<p>You can then just load in the result of the computation, and keep using the result after that. If you do want them to evaluate the intense computation, then you can hide this intermediate file that you are loading in with echo=F.</p>
-<p>– ## Exercises The following few slides show you how to structure exercise slides.</p>
-<p>We often have several exercise slides per session. So you can just copy and paste and change the directory to the appropriate name. All 3 file types are made from you single exercise Rmd.</p>
+<div id="customized-analysis" class="section level1">
+<h1>Customized Analysis</h1>
+<hr />
+<div id="demonstration" class="section level2">
+<h2>Demonstration</h2>
+<p>Here we use an article published by Fuchs Lab as an example to demonstrate the customized analysis we have done here at the BRC. Please access this <a href="https://elifesciences.org/articles/56980">article</a>. - General QC plots - Data integration and normalization - Clustering - Annotate cell types - Pseudotime analysis - Differential gene expression and single-cell pathway analysis</p>
 </div>
-<div id="time-for-an-exercise" class="section level2">
-<h2>Time for an exercise!</h2>
-<p>??? exercise description here?? <a href="../../exercises/exercises/MyExercise1_exercises.html">here</a></p>
-</div>
-<div id="answers-to-exercise" class="section level2">
-<h2>Answers to exercise</h2>
-<p>Answers can be found <a href="../../exercises/answers/MyExercise1_answers.html">here</a></p>
-<p>R code for solutions can be found <a href="../../exercises/answers/MyExercise1_answers.R">here</a></p>
-</div>
-<div id="exercise-again" class="section level2">
-<h2>Exercise again</h2>
-<p>So we can have some more sections here describing some new important topic</p>
-<p>Then more exercises</p>
-</div>
-<div id="time-for-an-exercise-1" class="section level2">
-<h2>Time for an exercise!</h2>
-<p>??? exercise description here?? <a href="../../exercises/exercises/MyExercise2_exercises.html">here</a></p>
-</div>
-<div id="answers-to-exercise-1" class="section level2">
-<h2>Answers to exercise</h2>
-<p>Answers can be found <a href="../../exercises/answers/MyExercise2_answers.html">here</a></p>
-<p>R code for solutions can be found <a href="../../exercises/answers/MyExercise2_answers.R">here</a></p>
+<div id="the-next-two-sessions" class="section level2">
+<h2>The next two sessions</h2>
+<p>We will also use the data of the eLife paper in next two sessions. You can download the data from GEO <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE147415">link</a> or from BOX <a href="https://rockefeller.box.com/s/hdy0vex38dlph5pglafrkw68b7uemndr">link</a>.</p>
 </div>
 </div>
 

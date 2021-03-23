@@ -12,7 +12,7 @@
     <textarea id="source">
 class: center, middle, inverse, title-slide
 
-# Single-cell RNA-seq ~ Session 3
+# Single-cell RNA sequencing ~ Session 3
 <html>
 <div style="float:left">
 
@@ -20,43 +20,68 @@ class: center, middle, inverse, title-slide
 <hr color='#EB811B' size=1px width=796px>
 </html>
 ### Rockefeller University, Bioinformatics Resource Centre
-### <a href="http://rockefelleruniversity.github.io/RU_course_template/" class="uri">http://rockefelleruniversity.github.io/RU_course_template/</a>
+### <a href="https://rockefelleruniversity.github.io/scRNA-seq/" class="uri">https://rockefelleruniversity.github.io/scRNA-seq/</a>
 
 ---
 
 
 
----
+
 ## Outline
-There are more and more bioconductor packages supporting single-cell data analysis. R Amezquita, A Lun, S Hicks, and R Gottardo wrote an integrated workflow, [Orchestrating Single-Cell Analysis with Bioconductor](https://bioconductor.org/books/release/OSCA/), for single-cell data analysis and quality accessment. In this session, we will go through several important QC metrics which can't be made with Seurat. 
+There are more and more Bioconductor packages supporting single-cell data analysis. R Amezquita, A Lun, S Hicks, and R Gottardo wrote an integrated workflow, [Orchestrating Single-Cell Analysis with Bioconductor](https://bioconductor.org/books/release/OSCA/), for single-cell data analysis and quality assessment. In this session, we will go through several important QC metrics which can't be made with Seurat. 
 
-- how to differentiate empty droplets?
-- how to estimate ambient RNA and remove them?
-- how to identify doublets?
-- any confounded effect?
+- How to differentiate empty droplets?
+- How to estimate ambient RNA and remove them?
+- How to identify doublets?
+- Checking for confounded effect?
 
 ---
+class: inverse, center, middle
 
+# Loading data and empty droplets
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=720px&gt;&lt;/html&gt; 
+
+---
 
 ## Load data from Cell Ranger Result
+We can load the data in from 10X with the *DropletUtils* function, *read10xCounts()*.
 
 ```r
 library(DropletUtils)
 library(DropletTestFiles)
-fname &lt;- "file path to Cell Ranger results"
+fname &lt;- "~/filepath/toCellRanger/results"
 sce &lt;- read10xCounts(fname, col.names = TRUE)
 cellID &lt;- colData(sce)$Barcode
-cellID_sel &lt;- sample(cellID, 1e+05, replace = FALSE)  # make subsets
-sce_sub &lt;- sce[, cellID_sel]
 ```
 
+---
+## Subset dataset
+We have a small subset version of this dataset that you can load in from the *data/* directory to try this out. 
 
+
+```
+## class: SingleCellExperiment 
+## dim: 27998 100000 
+## metadata(1): Samples
+## assays(1): counts
+## rownames(27998): ENSMUSG00000051951 ENSMUSG00000089699 ...
+##   ENSMUSG00000096730 ENSMUSG00000095742
+## rowData names(2): ID Symbol
+## colnames(100000): CGTGTCTTCGCATGAT-1 TTTATGCGTCGAACAG-1 ...
+##   TTATGCTGTGTTTGTG-1 GCTGCGACACGTTGGC-1
+## colData names(2): Sample Barcode
+## reducedDimNames(0):
+## altExpNames(0):
+```
 
 ---
 ## SingleCellExperiment Object
 
+*read10xCounts()* reads the data in as a specialist object called a SingleCellExperiment. 
+
 ```r
-sce_sub
+sce
 ```
 
 ```
@@ -74,9 +99,14 @@ sce_sub
 ## altExpNames(0):
 ```
 
+---
+## SingleCellExperiment Object
+The *colData()* and *rowData()* functions can be used to access experiment metadata. 
+
+
 ```r
 # cell information
-colData(sce_sub)[1:2, ]
+colData(sce)[1:2, ]
 ```
 
 ```
@@ -89,7 +119,7 @@ colData(sce_sub)[1:2, ]
 
 ```r
 # gene information
-rowData(sce_sub)[1:2, ]
+rowData(sce)[1:2, ]
 ```
 
 ```
@@ -98,10 +128,6 @@ rowData(sce_sub)[1:2, ]
 ##                           &lt;character&gt; &lt;character&gt;
 ## ENSMUSG00000051951 ENSMUSG00000051951        Xkr4
 ## ENSMUSG00000089699 ENSMUSG00000089699      Gm1992
-```
-
-```r
-sce &lt;- sce_sub
 ```
 
 ---
@@ -147,9 +173,10 @@ legend("bottomleft", legend = c("Inflection", "Knee"), col = c("darkgreen", "dod
 ![](Session3_files/figure-html/rankUMI_knee2-1.png)&lt;!-- --&gt;
 
 ---
-## Identify non-empyt droplets
+## Identify non-empty droplets
+  The *emptydrops* function can be used to identify goog/bad droplets. 2 keys arguments are:
 - limit: lowest counts per cell
-- test.ambient: Could be used to estimate embient RNA contamination
+- test.ambient: Could be used to estimate ambient RNA contamination
 
 
 ```r
@@ -203,7 +230,9 @@ table(Sig = e.out$FDR &lt;= 0.001, Limited = e.out$Limited)
 ```
 
 ---
-## distribution of significance of non-empty reads
+## Distribution of non-empty reads
+We can plot the distribution of significance of non-empty reads
+
 
 ```r
 hist(e.out$PValue[e.out$Total &lt;= limit &amp; e.out$Total &gt; 0], xlab = "P-value", main = "", 
@@ -214,13 +243,21 @@ hist(e.out$PValue[e.out$Total &lt;= limit &amp; e.out$Total &gt; 0], xlab = "P-v
 
 ---
 ## Subset non-empty droplets
+We can filter to just our non-empty droplets using a simple which query on the FDR from *emptyDrops()*. Here we are using a 0.001 cut-off. 
 
 ```r
 sce2 &lt;- sce[, which(e.out$FDR &lt;= 0.001)]
 ```
 
----
 
+---
+class: inverse, center, middle
+
+# Normalization and clustering
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=720px&gt;&lt;/html&gt; 
+
+---
 
 ## Counts normalization
 
@@ -333,11 +370,17 @@ plotTSNE(sce2, colour_by = "label")
 ![](Session3_files/figure-html/plotTSNE-1.png)&lt;!-- --&gt;
 
 ---
+class: inverse, center, middle
 
+# Removing Ambient RNA
 
-## Abmient RNA
-- cell-free RNAs contaminated in droplet
-- could be estimated by empty droplets
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=720px&gt;&lt;/html&gt; 
+
+---
+
+## Ambient RNA
+- Cell-free RNAs can contaminate droplets.
+- They can be estimated by empty droplets.
 
 ```r
 # extrat potential ambient RNA and thee estimated score
@@ -361,7 +404,7 @@ stripped &lt;- sce2[names(amb), ]
 out &lt;- removeAmbience(counts(stripped), ambient = amb, groups = colLabels(stripped))
 ```
 
---
+---
 ## Integrate corrected counts
 
 ```r
@@ -370,23 +413,31 @@ stripped &lt;- logNormCounts(stripped)
 ```
 
 ---
-## Before/After removement
+## Before/After removal
 - Hemoglobin A1 (Hba-a1) as example
-- in most cases the Hbs are contaminated from residual RBCs
+- In most cases the Hbs are contaminated from residual RBCs
 
 ```r
 ensmbl_id &lt;- rowData(sce2)$ID[rowData(sce2)$Symbol == "Hba-a1"]
 plotExpression(sce2, x = "label", colour_by = "label", features = ensmbl_id) + ggtitle("Before")
+
 plotExpression(stripped, x = "label", colour_by = "label", features = ensmbl_id) + 
     ggtitle("After")
 ```
 
 ---
-## Before/After removement
-![](Session3_files/figure-html/compRMAmb_pres-1.png)&lt;!-- --&gt;![](Session3_files/figure-html/compRMAmb_pres-2.png)&lt;!-- --&gt;
+## Before/After removal
+- Hemoglobin A1 (Hba-a1) as example
+.pull-left[
+![](Session3_files/figure-html/compRMAmb_pres1-1.png)&lt;!-- --&gt;
+  ]
 
+.pull-right[
+![](Session3_files/figure-html/compRMAmb_pres2-1.png)&lt;!-- --&gt;
+  ]
+  
 ---
-## Before/After removement
+## Before/After removal
 - Krt17 as example
 
 ```r
@@ -397,23 +448,37 @@ plotExpression(stripped, x = "label", colour_by = "label", features = ensmbl_id)
 ```
 
 ---
-## Before/After removement
-![](Session3_files/figure-html/compRMAmb2_pres-1.png)&lt;!-- --&gt;![](Session3_files/figure-html/compRMAmb2_pres-2.png)&lt;!-- --&gt;
+## Before/After removal
+- Krt17 as example
+.pull-left[
+![](Session3_files/figure-html/compRMAmb2_pres-1.png)&lt;!-- --&gt;
+  ]
+
+.pull-right[
+![](Session3_files/figure-html/compRMAmb2_pres2-1.png)&lt;!-- --&gt;
 
 ---
 ## Save result
+Again we can save our results for later using a Rds object.
 
 ```r
 saveRDS(stripped, "scSeq_CTRL_sceSub_rmAmbRNA.rds")
 ```
 
+
+---
+class: inverse, center, middle
+
+# Removing Doublets
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=720px&gt;&lt;/html&gt; 
+
 ---
 
 
----
 ## Doublets
 - Doublets means two or more cells clumped in a single droplet. Thus, the read counts and genes detected in this droplet would be much higher than other droplets.
-- here, we demonstrate how to identify doublets by silmulation with [scran](https://bioconductor.org/packages/release/bioc/manuals/scran/man/scran.pdf)
+- Here, we demonstrate how to identify doublets using simulation with [scran](https://bioconductor.org/packages/release/bioc/manuals/scran/man/scran.pdf)
 
 ---
 ## Normalization and clustering
@@ -435,6 +500,7 @@ plotUMAP(stripped, colour_by = "label")
 
 ---
 ## Estimate doublets
+The *computeDoubletDensity()* fucntion can be used on your SingleCellExperiment object to estimate doublets. 
 
 ```r
 dbl.dens &lt;- computeDoubletDensity(stripped, #subset.row=top.mam, 
@@ -453,6 +519,7 @@ stripped$DoubletScore &lt;- dbl.dens
 
 ---
 ## Plot doublets scores ~ UMAP
+We can project the doublet scores onto our UMPA to see if doublet correlates with the data distribution.
 
 ```r
 plotUMAP(stripped, colour_by = "DoubletScore")
@@ -462,6 +529,7 @@ plotUMAP(stripped, colour_by = "DoubletScore")
 
 ---
 ## Plot doublets scores by cluster
+Likewise we can look for over representation of doublets in clusters.
 
 ```r
 plotColData(stripped, x = "label", y = "DoubletScore", colour_by = "label") + geom_hline(yintercept = quantile(colData(stripped)$DoubletScore, 
@@ -469,11 +537,12 @@ plotColData(stripped, x = "label", y = "DoubletScore", colour_by = "label") + ge
 ```
 
 ![](Session3_files/figure-html/doublerScorebyClust-1.png)&lt;!-- --&gt;
-- No clusters have significantly higher doublet scores than other clusters.No clusters would be removed.
-- Red dash line representd 95% quantile of doublet score. The cells with higher doublrt score than this cut-off would be removed.
+- No clusters have significantly higher doublet scores than other clusters. No clusters would be removed.
+- Red dash line represented 95% quantile of doublet score. The cells with higher doublet score than this cut-off would be removed.
 
 ---
 ## Remove doublets
+We can clean our data up based on this 95% quantile cut-off. 
 
 ```r
 cut_off &lt;- quantile(stripped$DoubletScore, 0.95)
@@ -493,11 +562,20 @@ sce_clean &lt;- stripped[stripped$isDoublet == "no", ]
 saveRDS(sce_clean, "scSeq_CTRL_sceSub_rmAmbRNA_rmDoublet.rds")
 ```
 
+
+
+---
+class: inverse, center, middle
+
+# QC plots after clearance
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=720px&gt;&lt;/html&gt; 
+
 ---
 
 
 ## QC plots
-- mitochondrial content
+- Mitochondrial content
 - Genes detected
 - Reads per cell
 
@@ -509,32 +587,46 @@ sce_clean &lt;- addPerCellQC(sce_clean, subsets = list(Mito = is.mito))
 ```
 
 ---
-## QC plots 
-- violin plot of read counts, gene counts, and mitochondrial contents per cell
+## QC plots - Read counts
+
+
+Post-clean
 
 ```r
 plotColData(sce_clean, x = "label", y = "sum", colour_by = "label") + ggtitle("read counts")
 ```
 
-![](Session3_files/figure-html/qc_mrg-1.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/qc_mrgr-1.png)&lt;!-- --&gt;
+
+
+---
+## QC plots - Gene counts
+
+Post-clean
 
 ```r
 plotColData(sce_clean, x = "label", y = "detected", colour_by = "label") + ggtitle("gene counts")
 ```
 
-![](Session3_files/figure-html/qc_mrg-2.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/qc_mrg2r-1.png)&lt;!-- --&gt;
+
+
+---
+## QC plots - Mitochondrial %
+
+Post-clean
 
 ```r
 plotColData(sce_clean, x = "label", y = "subsets_Mito_percent", colour_by = "label") + 
     ggtitle("mitocondrial content")
 ```
 
-![](Session3_files/figure-html/qc_mrg-3.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/qc_mrg3r-1.png)&lt;!-- --&gt;
+
 
 ---
 ## QC plots ~ comparison
-- mitochondrial contents vs read counts
-- gene counts vs read counts
+- Mitochondrial contents vs read counts
 
 ```r
 plotColData(sce_clean, x = "sum", y = "subsets_Mito_percent", colour_by = "label") + 
@@ -543,20 +635,36 @@ plotColData(sce_clean, x = "sum", y = "subsets_Mito_percent", colour_by = "label
 
 ![](Session3_files/figure-html/qc_complex-1.png)&lt;!-- --&gt;
 
+---
+## QC plots ~ comparison
+- Gene counts vs read counts
+
 ```r
 plotColData(sce_clean, x = "sum", y = "detected", colour_by = "label") + ggtitle("gene counts vs read counts")
 ```
 
-![](Session3_files/figure-html/qc_complex-2.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/qc_complex2-1.png)&lt;!-- --&gt;
 
 ---
 ## Estimate variance explaination
-- clustering (leable), mitochindrial content (subsets_Mito_percent), doublets (DoubletScore), read counts (sum), and gene counts (detected) were tested.
+- Clustering (label), mitochondrial content (subsets_Mito_percent), doublets (DoubletScore), read counts (sum), and gene counts (detected) were tested.
 - We would suppose "label" (clustering) would explain more variances than other controls.
 
 ```r
 vars &lt;- getVarianceExplained(sce_clean, variables = c("DoubletScore", "label", "sum", 
     "detected", "subsets_Mito_percent"))
+```
+
+```r
+plotExplanatoryVariables(vars)
+```
+
+
+---
+## Estimate variance explaination
+
+
+```r
 plotExplanatoryVariables(vars)
 ```
 
@@ -564,7 +672,7 @@ plotExplanatoryVariables(vars)
 ## Warning: Removed 2765 rows containing non-finite values (stat_density).
 ```
 
-![](Session3_files/figure-html/varExp-1.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/varExp3-1.png)&lt;!-- --&gt;
 
 ---
 ## Exercise Time
