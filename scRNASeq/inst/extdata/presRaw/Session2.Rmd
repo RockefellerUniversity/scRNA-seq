@@ -478,5 +478,5 @@ saveRDS(obj_sub,"scSeq_Seurat_clean.rds")
 
 ---
 ## Exercise time
-- [Exerise]()
-- [Answer]()
+- [Exerise](../../exercises/exercises/exercise1_exercise.html)
+- [Answer](../../exercises/answers/exercise1_answers.html)
