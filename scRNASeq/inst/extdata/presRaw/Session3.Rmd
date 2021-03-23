@@ -80,7 +80,6 @@ We have a small subset version of this dataset that you can load in from the *da
 
 ```{r loadSCE_io,include=TRUE,echo=FALSE,eval=TRUE}
 sce <- readRDS("data/scSeq_CTRL_sceSub.rds")
-sce
 ```
 
 ---
@@ -319,7 +318,8 @@ plotExpression(stripped, x="label", colour_by="label", features=ensmbl_id) +
 
 ---
 ## Before/After removal
-- Hemoglobin A1 (Hba-a1) as example
+Hemoglobin A1 (Hba-a1) as example
+
 .pull-left[
 ```{r compRMAmb_pres1,eval=TRUE,echo=FALSE,include=TRUE}
 ensmbl_id <- rowData(sce2)$ID[rowData(sce2)$Symbol=="Hba-a1"]
@@ -348,7 +348,8 @@ plotExpression(stripped, x="label", colour_by="label", features=ensmbl_id) +
 
 ---
 ## Before/After removal
-- Krt17 as example
+Krt17 as example
+
 .pull-left[
 ```{r compRMAmb2_pres,eval=TRUE,echo=FALSE,include=TRUE}
 ensmbl_id <- rowData(sce2)$ID[rowData(sce2)$Symbol=="Krt17"]
@@ -362,6 +363,7 @@ plotExpression(sce2, x="label", colour_by="label", features=ensmbl_id) +
 plotExpression(stripped, x="label", colour_by="label", features=ensmbl_id) + 
         ggtitle("After")
 ```
+  ]
 
 ---
 ## Save result
@@ -414,7 +416,7 @@ plotUMAP(stripped,colour_by="label")
 
 ---
 ## Normalization and clustering
-```{r normClust2,eval=TRUE,echo=FALSE,include=TRUE}
+```{r normClust2,eval=TRUE,echo=FALSE,include=TRUE,fig.height=4,fig.width=4}
 dec <- modelGeneVar(stripped)
 hvgs <- getTopHVGs(dec,n=1000)
 stripped <- runPCA(stripped, ncomponents=10, subset_row=hvgs)
@@ -505,7 +507,7 @@ sce_clean <- addPerCellQC(sce_clean, subsets=list(Mito=is.mito))
 
 
 Post-clean
-```{r qc_mrgr,eval=TRUE,echo=TRUE,include=TRUE}
+```{r qc_mrgr,eval=TRUE,echo=TRUE,include=TRUE,fig.height=4,fig.width=4}
 plotColData(sce_clean,x="label", y="sum", colour_by="label")+ggtitle("read counts")
 ```
 
@@ -514,7 +516,7 @@ plotColData(sce_clean,x="label", y="sum", colour_by="label")+ggtitle("read count
 ## QC plots - Gene counts
 
 Post-clean
-```{r qc_mrg2r,eval=TRUE,echo=TRUE,include=TRUE}
+```{r qc_mrg2r,eval=TRUE,echo=TRUE,include=TRUE,fig.height=4,fig.width=4}
 plotColData(sce_clean,x="label", y="detected", colour_by="label")+ggtitle("gene counts")
 ```
 
@@ -523,7 +525,7 @@ plotColData(sce_clean,x="label", y="detected", colour_by="label")+ggtitle("gene 
 ## QC plots - Mitochondrial %
 
 Post-clean
-```{r qc_mrg3r,eval=TRUE,echo=TRUE,include=TRUE}
+```{r qc_mrg3r,eval=TRUE,echo=TRUE,include=TRUE,fig.height=4,fig.width=4}
 plotColData(sce_clean,x="label", y="subsets_Mito_percent", colour_by="label")+ggtitle("mitocondrial content")
 ```
 
@@ -531,14 +533,14 @@ plotColData(sce_clean,x="label", y="subsets_Mito_percent", colour_by="label")+gg
 ---
 ## QC plots ~ comparison
 - Mitochondrial contents vs read counts
-```{r qc_complex,eval=TRUE,echo=TRUE,include=TRUE}
+```{r qc_complex,eval=TRUE,echo=TRUE,include=TRUE,fig.height=4,fig.width=4}
 plotColData(sce_clean,x="sum",y="subsets_Mito_percent",colour_by="label")+ggtitle("is.mito vs read counts")
 ```
 
 ---
 ## QC plots ~ comparison
 - Gene counts vs read counts
-```{r qc_complex2,eval=TRUE,echo=TRUE,include=TRUE}
+```{r qc_complex2,eval=TRUE,echo=TRUE,include=TRUE,fig.height=4,fig.width=4}
 plotColData(sce_clean,x="sum",y="detected",colour_by="label")+ggtitle("gene counts vs read counts")
 ```
 
@@ -558,7 +560,7 @@ plotExplanatoryVariables(vars)
 ---
 ## Estimate variance explaination
 
-```{r varExp3,eval=TRUE,echo=TRUE,include=TRUE}
+```{r varExp3,eval=TRUE,echo=TRUE,include=TRUE,fig.height=4,fig.width=4}
 plotExplanatoryVariables(vars)
 ```
 
