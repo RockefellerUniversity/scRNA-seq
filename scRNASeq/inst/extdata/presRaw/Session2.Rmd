@@ -84,7 +84,7 @@ cellID_sel <- sample(cellID,1000,replace = FALSE)
 obj_sel <- obj[,cellID_sel]
 saveRDS(obj_sel,file.path("data",paste0("scSeq_",samID,"_1kCell_ori.rds")))
 ```
-```{r loadCR2Seurat3,echo=TRUE,eval=FALSE,include=FALSE}
+```{r loadCR2Seurat3,echo=TRUE,eval=TRUE,include=FALSE}
 #obj <- readRDS("../data/scSeq_CTRL_1kCell_ori.rds")
 obj <- readRDS("data/scSeq_CTRL_1kCell_ori.rds")
 ```
