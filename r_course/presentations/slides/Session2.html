@@ -1239,8 +1239,8 @@ obj@meta.data[1:2, ]
 ## CTRL_CACTCCATCTTATCTG-1       CTRL       7748         2372 CTRL   5.201342
 ## CTRL_CCTCTGACAGTAGAGC-1       CTRL       9301         2715 CTRL   5.053220
 ##                            S.Score G2M.Score Phase old.ident
-## CTRL_CACTCCATCTTATCTG-1 -0.2165702 0.2097861   G2M      CTRL
-## CTRL_CCTCTGACAGTAGAGC-1 -0.1521609 0.4504510   G2M      CTRL
+## CTRL_CACTCCATCTTATCTG-1 -0.2282139 0.2227935   G2M      CTRL
+## CTRL_CCTCTGACAGTAGAGC-1 -0.1394009 0.4563161   G2M      CTRL
 ```
 
 ---
@@ -1253,9 +1253,9 @@ head(yd_dat)
 
 ```
 ##   Var1 Var2 Freq
-## 1 CTRL   G1  263
-## 2 CTRL  G2M  208
-## 3 CTRL    S  221
+## 1 CTRL   G1  255
+## 2 CTRL  G2M  212
+## 3 CTRL    S  225
 ```
 
 ---
@@ -1346,11 +1346,11 @@ obj &lt;- FindClusters(obj, resolution = 0.5)
 ## Modularity Optimizer version 1.3.0 by Ludo Waltman and Nees Jan van Eck
 ## 
 ## Number of nodes: 692
-## Number of edges: 21742
+## Number of edges: 21529
 ## 
 ## Running Louvain algorithm...
-## Maximum modularity in 10 random starts: 0.7633
-## Number of communities: 5
+## Maximum modularity in 10 random starts: 0.7683
+## Number of communities: 6
 ## Elapsed time: 0 seconds
 ```
 
@@ -1368,19 +1368,19 @@ obj &lt;- RunUMAP(obj, reduction = "pca", dims = 1:maxPC)
 ```
 
 ```
-## 06:59:16 UMAP embedding parameters a = 0.9922 b = 1.112
+## 16:05:54 UMAP embedding parameters a = 0.9922 b = 1.112
 ```
 
 ```
-## 06:59:16 Read 692 rows and found 15 numeric columns
+## 16:05:54 Read 692 rows and found 15 numeric columns
 ```
 
 ```
-## 06:59:16 Using Annoy for neighbor search, n_neighbors = 30
+## 16:05:54 Using Annoy for neighbor search, n_neighbors = 30
 ```
 
 ```
-## 06:59:16 Building Annoy index with metric = cosine, n_trees = 50
+## 16:05:54 Building Annoy index with metric = cosine, n_trees = 50
 ```
 
 ```
@@ -1393,13 +1393,13 @@ obj &lt;- RunUMAP(obj, reduction = "pca", dims = 1:maxPC)
 
 ```
 ## **************************************************|
-## 06:59:16 Writing NN index file to temp file /tmp/Rtmp4WMPA5/file189615317aea
-## 06:59:16 Searching Annoy index using 1 thread, search_k = 3000
-## 06:59:16 Annoy recall = 100%
-## 06:59:17 Commencing smooth kNN distance calibration using 1 thread
-## 06:59:18 Initializing from normalized Laplacian + noise
-## 06:59:18 Commencing optimization for 500 epochs, with 25714 positive edges
-## 06:59:19 Optimization finished
+## 16:05:54 Writing NN index file to temp file /tmp/RtmpIXlFn2/file18bd34b58df2
+## 16:05:54 Searching Annoy index using 1 thread, search_k = 3000
+## 16:05:54 Annoy recall = 100%
+## 16:05:55 Commencing smooth kNN distance calibration using 1 thread
+## 16:05:55 Initializing from normalized Laplacian + noise
+## 16:05:56 Commencing optimization for 500 epochs, with 25720 positive edges
+## 16:05:57 Optimization finished
 ```
 
 ```r
@@ -1461,18 +1461,22 @@ clust.markers &lt;- FindAllMarkers(obj, only.pos = TRUE, min.pct = 0.25, logfc.t
 ## Calculating cluster 4
 ```
 
+```
+## Calculating cluster 5
+```
+
 ```r
 head(clust.markers)
 ```
 
 ```
 ##                  p_val avg_log2FC pct.1 pct.2    p_val_adj cluster      gene
-## Igfbp2    1.752215e-32  0.9006342 0.809 0.365 2.542114e-28       0    Igfbp2
-## Serpinb10 6.070933e-31  0.7489313 0.757 0.308 8.807710e-27       0 Serpinb10
-## Fth1      3.211758e-30  0.5659543 1.000 0.929 4.659618e-26       0      Fth1
-## Krt14     4.872202e-26  0.7039186 1.000 0.978 7.068591e-22       0     Krt14
-## Postn     7.877745e-21  0.4991132 0.834 0.496 1.142903e-16       0     Postn
-## H19       1.254973e-19  0.6728618 0.948 0.785 1.820714e-15       0       H19
+## Igfbp2    8.552554e-34  0.9171823 0.814 0.369 1.240805e-29       0    Igfbp2
+## Serpinb10 6.925776e-29  0.6928208 0.755 0.318 1.004792e-24       0 Serpinb10
+## Fth1      1.196405e-27  0.5400346 1.000 0.930 1.735744e-23       0      Fth1
+## Krt14     5.074614e-27  0.7192202 1.000 0.979 7.362250e-23       0     Krt14
+## H19       1.679739e-21  0.6911974 0.962 0.775 2.436966e-17       0       H19
+## Col17a1   1.162110e-19  0.6412752 0.821 0.500 1.685989e-15       0   Col17a1
 ```
 
 ---
@@ -1489,12 +1493,12 @@ head(topG)
 ## # Groups:   cluster [2]
 ##      p_val avg_log2FC pct.1 pct.2 p_val_adj cluster gene     
 ##      &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt; &lt;fct&gt;   &lt;chr&gt;    
-## 1 1.75e-32      0.901 0.809 0.365  2.54e-28 0       Igfbp2   
-## 2 6.07e-31      0.749 0.757 0.308  8.81e-27 0       Serpinb10
-## 3 4.87e-26      0.704 1     0.978  7.07e-22 0       Krt14    
-## 4 1.25e-19      0.673 0.948 0.785  1.82e-15 0       H19      
-## 5 8.36e-18      0.716 0.563 0.251  1.21e-13 0       Slc1a3   
-## 6 2.12e-61      2.35  0.585 0.04   3.08e-57 1       Pthlh
+## 1 8.55e-34      0.917 0.814 0.369  1.24e-29 0       Igfbp2   
+## 2 6.93e-29      0.693 0.755 0.318  1.00e-24 0       Serpinb10
+## 3 5.07e-27      0.719 1     0.979  7.36e-23 0       Krt14    
+## 4 1.68e-21      0.691 0.962 0.775  2.44e-17 0       H19      
+## 5 1.16e-19      0.641 0.821 0.5    1.69e-15 0       Col17a1  
+## 6 5.50e-62      2.36  0.589 0.04   7.97e-58 1       Pthlh
 ```
 
 
@@ -1568,8 +1572,8 @@ tbl_dat[1:2, ]
 
 ```
 ##   Var1 Var2 Freq  to      prop
-## 1    0   G1  152 325 0.4676923
-## 2    1   G1   56 147 0.3809524
+## 1    0   G1  145 318 0.4559748
+## 2    1   G1   57 146 0.3904110
 ```
 
 ---
@@ -1592,10 +1596,13 @@ saveRDS(obj_sub, "scSeq_Seurat_clean.rds")
 - Seurat objects can be converted into different objects for further analysis with other tools i.e. Monocle or Velocity.
 - For detailed information please refer to the Github repository for [SeuratWrappers](https://github.com/satijalab/seurat-wrappers).
 
+
 ---
-## Exercise time
-- [Exerise](../../exercises/exercises/exercise1_exercise.html)
-- [Answer](../../exercises/answers/exercise1_answers.html)
+## Time for an exercise!
+
+Exercise on Seurat can be found [here](../../exercises/exercises/exercise1_exercise.html).
+
+Answers can be found [here](../../exercises/answers/exercise1_answers.html).
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
