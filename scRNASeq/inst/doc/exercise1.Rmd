@@ -1,5 +1,5 @@
 ---
-title: "Exercise 1"
+title: "Exercise 1 - Seurat"
 author: "Rockefeller University, Bioinformatics Resource Centre"
 date: "https://rockefelleruniversity.github.io/scRNA-seq"
 output: 
@@ -35,10 +35,10 @@ saveRDS(obj,"~/Documents/packDev_ALL/scRNA-seq/scRNASeq/inst/extdata/data/scSeq_
 ```
 
 
-**Exercise 1** - **Data manipulation with Seurat**
+## **Exercise 1** - **Data manipulation with Seurat**
 
-## loading data
-1. Please create a Seurat object by reading counting data from BOX or by loading the rds file. Then calculate mitochondrial contents of each ell
+### Loading data
+1. Create a Seurat object by reading the count data from BOX or by loading the rds file. Then calculate mitochondrial contents of each ell
 ```{r,echo=toMessage}
 library(Seurat)
 obj <- readRDS("data/scSeq_CKO_1kCell_ori.rds")
@@ -46,23 +46,23 @@ obj[["percent.mt"]] <- PercentageFeatureSet(obj, pattern = "^mt-")
 head(obj@meta.data)
 ```
 
-## Basi QC plot
-2. Please access the read counts (nCount_RNA), gene counts (nFeature_RNA), and mitochondrial content (percent.mt) for each cell and draw violin plot
+### Basic QC
+2. Access the read counts (nCount_RNA), gene counts (nFeature_RNA), and mitochondrial content (percent.mt) for each cell and draw a violin plot of each.
 ```{r,echo=toMessage}
 VlnPlot(obj,features = c("nCount_RNA","nFeature_RNA","percent.mt"),pt.size = 0.2)
 ```
 
-3. Please made a dot plot for nCount_RNA vs nFeature_RNA and try to point out potential doublets
+3. Mmake a dot plot for nCount_RNA vs nFeature_RNA. *NOTE: Try to keep an eye out potential doublets.*
 ```{r,echo=toMessage}
 FeatureScatter(obj,feature1="nCount_RNA",feature2="nFeature_RNA")
 ```
 
-4. Please made a dot plot for nount_RNA vs percent.mt and try to point out potential cell debris
+4. Make a dot plot for nCount_RNA vs percent.mt. *NOTE: Try to keep an eye out potential doublets.*
 ```{r,echo=toMessage}
 FeatureScatter(obj,feature1="nCount_RNA",feature2="percent.mt")
 ```
 
-5. Please remove cells with percent.mt >= 10 for following analysis
+5. Remove cells with percent.mt >= 10 for following analysis
 ```{r,echo=toMessage}
 mt_cutH <- 10
 obj_unfiltered <- obj
@@ -70,8 +70,8 @@ obj <- subset(obj,subset = percent.mt < mt_cutH)
 obj
 ```
 
-## Cell cycle
-6. Please estimate cell cycle phase of each cell and a table to describe how many cells per phase
+### Cell cycle
+6. Please estimate cell cycle phase of each cell and make a table to describe how many cells per phase.
 ```{r,echo=toMessage}
 convertHumanGeneList <- function(x){
   require("biomaRt")
@@ -94,16 +94,16 @@ obj <- CellCycleScoring(obj, s.features = s_gene,
 table(obj@meta.data$Phase)
 ```
 
-## Normalization and clustering
+### Normalization and clustering
 7. Please scale data regressing to mitochondrial content (percent.mt) and cell cycle (S.score, G2M.score, Phase).
 ```{r,echo=toMessage}
 obj <- FindVariableFeatures(obj)
 obj <- ScaleData(obj,vars.to.regress = c("percent.mt","S.score","G2M.score","Phase"))
 ```
 
-8. Please make priciple component analysis (PCA), estimate how many PCs would best represent this data, then make clustering and UMAP plot
-- checkin 30 PCs
-- elbow plot can be used to determine PCs
+8. Please make principle component analysis (PCA), estimate how many PCs would best represent this data, then make clustering and UMAP plot.
+- check for up to 30 PCs.
+- elbow plot can be used to determine PCs.
 ```{r,echo=toMessage}
 set.seed(0)
 obj <- RunPCA(obj, npcs = 30, verbose = FALSE)
@@ -120,8 +120,8 @@ obj <- RunTSNE(obj, reduction = "pca", dims = 1:maxPC)
 DimPlot(obj,reduction = "umap")
 ```
 
-## Marker genes
-9. Try to select marker genes for each cluster and generate heatmap of top five marker genes
+### Marker genes
+9. Try to select marker genes for each cluster and generate a heatmap of the top five marker genes for each cluster. 
 ```{r,echo=toMessage}
 obj <- SetIdent(obj,value = "seurat_clusters")
 clust.markers <- FindAllMarkers(obj, 
@@ -137,7 +137,7 @@ topG <- clust.markers %>%
 DoHeatmap(obj, features = topG$gene) + NoLegend()
 ```
 
-## Advanced plots
+### Advanced plots
 10. Please display the top marker gene of each cluster in FeaturePlot and RidgePlot
 ```{r,echo=toMessage}
 topG <- clust.markers %>% 
