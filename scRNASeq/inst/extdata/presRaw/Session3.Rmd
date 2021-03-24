@@ -572,7 +572,10 @@ plotExplanatoryVariables(vars)
 plotExplanatoryVariables(vars)
 ```
 
+
 ---
-## Exercise Time
-- [Exercise](../../exercises/exercises/exercise2_exercise.html)
-- [Answer](../../exercises/answers/exercise2_answers.html)
+## Time for an exercise!
+
+Exercise on scRNAseq analysis with Bioconductor can be found [here](../../exercises/exercises/exercise2_exercise.html).
+
+Answers can be found [here](../../exercises/answers/exercise2_answers.html).

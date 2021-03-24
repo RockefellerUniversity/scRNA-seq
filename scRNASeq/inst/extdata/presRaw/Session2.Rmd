@@ -477,7 +477,10 @@ saveRDS(obj_sub,"scSeq_Seurat_clean.rds")
 - Seurat objects can be converted into different objects for further analysis with other tools i.e. Monocle or Velocity.
 - For detailed information please refer to the Github repository for [SeuratWrappers](https://github.com/satijalab/seurat-wrappers).
 
+
 ---
-## Exercise time
-- [Exerise](../../exercises/exercises/exercise1_exercise.html)
-- [Answer](../../exercises/answers/exercise1_answers.html)
+## Time for an exercise!
+
+Exercise on Seurat can be found [here](../../exercises/exercises/exercise1_exercise.html).
+
+Answers can be found [here](../../exercises/answers/exercise1_answers.html).
