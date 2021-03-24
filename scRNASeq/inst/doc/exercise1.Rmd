@@ -1,5 +1,5 @@
 ---
-title: ""
+title: "Exercise 1"
 author: "Rockefeller University, Bioinformatics Resource Centre"
 date: "https://rockefelleruniversity.github.io/scRNA-seq"
 output: 
