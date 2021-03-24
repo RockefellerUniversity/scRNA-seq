@@ -257,8 +257,30 @@ plotExpression(stripped, x="label", colour_by="label", features=ensmbl_id) +
         ggtitle("After")
 
 
+## ----normClust,eval=FALSE,echo=TRUE,include=TRUE------------------------------
+## dec <- modelGeneVar(stripped)
+## hvgs <- getTopHVGs(dec,n=1000)
+## stripped <- runPCA(stripped, ncomponents=10, subset_row=hvgs)
+## stripped <- runUMAP(stripped, dimred="PCA")
+## g <- buildSNNGraph(stripped, k=10, use.dimred = 'PCA')
+## clust <- igraph::cluster_walktrap(g)$membership
+## colLabels(stripped) <- factor(clust)
+## plotUMAP(stripped,colour_by="label")
+
+
+## ----normClust2,eval=TRUE,echo=FALSE,include=TRUE,fig.height=4,fig.width=4----
+dec <- modelGeneVar(stripped)
+hvgs <- getTopHVGs(dec,n=1000)
+stripped <- runPCA(stripped, ncomponents=10, subset_row=hvgs)
+stripped <- runUMAP(stripped, dimred="PCA")
+g <- buildSNNGraph(stripped, k=10, use.dimred = 'PCA')
+clust <- igraph::cluster_walktrap(g)$membership
+colLabels(stripped) <- factor(clust)
+plotUMAP(stripped,colour_by="label")
+
+
 ## ----rmAmb_store,eval=TRUE,echo=TRUE,include=TRUE-----------------------------
-saveRDS(stripped,"scSeq_CTRL_sceSub_rmAmbRNA.rds")
+saveRDS(stripped,"data/scSeq_CTRL_sceSub_rmAmbRNA.rds")
 
 
 ## ---- results='asis',include=TRUE,echo=FALSE----------------------------------
@@ -283,28 +305,6 @@ if(params$isSlides == "yes"){
 
 
 
-## ----normClust,eval=FALSE,echo=TRUE,include=TRUE------------------------------
-## dec <- modelGeneVar(stripped)
-## hvgs <- getTopHVGs(dec,n=1000)
-## stripped <- runPCA(stripped, ncomponents=10, subset_row=hvgs)
-## stripped <- runUMAP(stripped, dimred="PCA")
-## g <- buildSNNGraph(stripped, k=10, use.dimred = 'PCA')
-## clust <- igraph::cluster_walktrap(g)$membership
-## colLabels(stripped) <- factor(clust)
-## plotUMAP(stripped,colour_by="label")
-
-
-## ----normClust2,eval=TRUE,echo=FALSE,include=TRUE,fig.height=4,fig.width=4----
-dec <- modelGeneVar(stripped)
-hvgs <- getTopHVGs(dec,n=1000)
-stripped <- runPCA(stripped, ncomponents=10, subset_row=hvgs)
-stripped <- runUMAP(stripped, dimred="PCA")
-g <- buildSNNGraph(stripped, k=10, use.dimred = 'PCA')
-clust <- igraph::cluster_walktrap(g)$membership
-colLabels(stripped) <- factor(clust)
-plotUMAP(stripped,colour_by="label")
-
-
 ## ----estDoublet,eval=TRUE,echo=TRUE,include=TRUE------------------------------
 dbl.dens <- computeDoubletDensity(stripped, #subset.row=top.mam, 
     d=ncol(reducedDim(stripped)),subset.row=hvgs)
@@ -326,7 +326,7 @@ cut_off <- quantile(stripped$DoubletScore,0.95)
 stripped$isDoublet <- c("no","yes")[factor(as.integer(stripped$DoubletScore>=cut_off),levels=c(0,1))]
 table(stripped$isDoublet)
 sce_clean <- stripped[stripped$isDoublet=="no",]
-saveRDS(sce_clean,"scSeq_CTRL_sceSub_rmAmbRNA_rmDoublet.rds")
+saveRDS(sce_clean,"data/scSeq_CTRL_sceSub_rmAmbRNA_rmDoublet.rds")
 
 
 ## ---- results='asis',include=TRUE,echo=FALSE----------------------------------

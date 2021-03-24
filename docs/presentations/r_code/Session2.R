@@ -66,7 +66,7 @@ head(obj@assays$RNA@counts)
 head(obj@assays$RNA@data)
 
 
-## ----eval_readCount_geneCount_mitoCont,echo=TRUE,eval=TRUE,include=TRUE,fig.height=3,fig.width=3----
+## ----eval_readCount_geneCount_mitoCont,echo=TRUE,eval=TRUE,include=TRUE,fig.height=3,fig.width=9----
 VlnPlot(obj,features = c("nCount_RNA","nFeature_RNA","percent.mt"),pt.size = 0.2)
 
 
@@ -322,7 +322,7 @@ ggplot(tbl_dat,aes(x=Var1,y=prop,fill=Var2))+
 
 
 ## ----saveRDS_surat,echo=TRUE,eval=TRUE,include=TRUE---------------------------
-cellID <- rownames(obj@meta.data)[!obj@meta.data$seurat_clusters==2]
+cellID <- rownames(obj@meta.data)[!obj@meta.data$seurat_clusters==1]
 obj_sub <- obj[,cellID]
 saveRDS(obj_sub,"scSeq_Seurat_clean.rds")
 

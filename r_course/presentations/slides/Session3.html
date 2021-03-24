@@ -134,6 +134,14 @@ bcrank[1:2, ]
 
 ---
 ## Knee plot
+Knee plot is a useful QC plot for single-cell seuqnecing. It reflects the threshold to validate cell for analysis. 
+- x-axis is the cell barcodes (droplet) ranked by their UMI counts
+- y-axis is the UMI counts in each droplet
+- inflection point: the point while UMI counts  start decreasing rapidly
+- knee point: the cut-off of UMI counts to differentiate cells valid for analysis 
+
+---
+## Knee plot
 
 ```r
 uniq &lt;- !duplicated(bcrank$rank)
@@ -447,29 +455,6 @@ Krt17 as example
   ]
 
 ---
-## Save result
-Again we can save our results for later using a Rds object.
-
-```r
-saveRDS(stripped, "scSeq_CTRL_sceSub_rmAmbRNA.rds")
-```
-
-
----
-class: inverse, center, middle
-
-# Removing Doublets
-
-&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=720px&gt;&lt;/html&gt; 
-
----
-
-
-## Doublets
-- Doublets means two or more cells clumped in a single droplet. Thus, the read counts and genes detected in this droplet would be much higher than other droplets.
-- Here, we demonstrate how to identify doublets using simulation with [scran](https://bioconductor.org/packages/release/bioc/manuals/scran/man/scran.pdf)
-
----
 ## Normalization and clustering
 
 ```r
@@ -486,6 +471,29 @@ plotUMAP(stripped, colour_by = "label")
 ---
 ## Normalization and clustering
 ![](Session3_files/figure-html/normClust2-1.png)&lt;!-- --&gt;
+
+---
+## Save result
+Again we can save our results for later using a Rds object.
+
+```r
+saveRDS(stripped, "data/scSeq_CTRL_sceSub_rmAmbRNA.rds")
+```
+
+
+---
+class: inverse, center, middle
+
+# Removing Doublets
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=720px&gt;&lt;/html&gt; 
+
+---
+
+
+## Doublets
+- Doublets means two or more cells clumped in a single droplet. Thus, the read counts and genes detected in this droplet would be much higher than other droplets.
+- Here, we demonstrate how to identify doublets using simulation with [scran](https://bioconductor.org/packages/release/bioc/manuals/scran/man/scran.pdf)
 
 ---
 ## Estimate doublets
@@ -548,7 +556,7 @@ table(stripped$isDoublet)
 
 ```r
 sce_clean &lt;- stripped[stripped$isDoublet == "no", ]
-saveRDS(sce_clean, "scSeq_CTRL_sceSub_rmAmbRNA_rmDoublet.rds")
+saveRDS(sce_clean, "data/scSeq_CTRL_sceSub_rmAmbRNA_rmDoublet.rds")
 ```
 
 
@@ -665,8 +673,8 @@ plotExplanatoryVariables(vars)
 
 ---
 ## Exercise Time
-- [Exercise]()
-- [Answer]()
+- [Exercise](../../exercises/exercises/exercise2_exercise.html)
+- [Answer](../../exercises/answers/exercise2_answers.html)
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>

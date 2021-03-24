@@ -1239,8 +1239,8 @@ obj@meta.data[1:2, ]
 ## CTRL_CACTCCATCTTATCTG-1       CTRL       7748         2372 CTRL   5.201342
 ## CTRL_CCTCTGACAGTAGAGC-1       CTRL       9301         2715 CTRL   5.053220
 ##                            S.Score G2M.Score Phase old.ident
-## CTRL_CACTCCATCTTATCTG-1 -0.2324545 0.2300319   G2M      CTRL
-## CTRL_CCTCTGACAGTAGAGC-1 -0.1520243 0.4664935   G2M      CTRL
+## CTRL_CACTCCATCTTATCTG-1 -0.2165702 0.2097861   G2M      CTRL
+## CTRL_CCTCTGACAGTAGAGC-1 -0.1521609 0.4504510   G2M      CTRL
 ```
 
 ---
@@ -1253,9 +1253,9 @@ head(yd_dat)
 
 ```
 ##   Var1 Var2 Freq
-## 1 CTRL   G1  258
-## 2 CTRL  G2M  212
-## 3 CTRL    S  222
+## 1 CTRL   G1  263
+## 2 CTRL  G2M  208
+## 3 CTRL    S  221
 ```
 
 ---
@@ -1346,10 +1346,10 @@ obj &lt;- FindClusters(obj, resolution = 0.5)
 ## Modularity Optimizer version 1.3.0 by Ludo Waltman and Nees Jan van Eck
 ## 
 ## Number of nodes: 692
-## Number of edges: 21519
+## Number of edges: 21742
 ## 
 ## Running Louvain algorithm...
-## Maximum modularity in 10 random starts: 0.7663
+## Maximum modularity in 10 random starts: 0.7633
 ## Number of communities: 5
 ## Elapsed time: 0 seconds
 ```
@@ -1368,19 +1368,19 @@ obj &lt;- RunUMAP(obj, reduction = "pca", dims = 1:maxPC)
 ```
 
 ```
-## 23:05:21 UMAP embedding parameters a = 0.9922 b = 1.112
+## 06:59:16 UMAP embedding parameters a = 0.9922 b = 1.112
 ```
 
 ```
-## 23:05:21 Read 692 rows and found 15 numeric columns
+## 06:59:16 Read 692 rows and found 15 numeric columns
 ```
 
 ```
-## 23:05:21 Using Annoy for neighbor search, n_neighbors = 30
+## 06:59:16 Using Annoy for neighbor search, n_neighbors = 30
 ```
 
 ```
-## 23:05:21 Building Annoy index with metric = cosine, n_trees = 50
+## 06:59:16 Building Annoy index with metric = cosine, n_trees = 50
 ```
 
 ```
@@ -1393,13 +1393,13 @@ obj &lt;- RunUMAP(obj, reduction = "pca", dims = 1:maxPC)
 
 ```
 ## **************************************************|
-## 23:05:21 Writing NN index file to temp file /tmp/RtmpWakK3e/file1898440dff66
-## 23:05:21 Searching Annoy index using 1 thread, search_k = 3000
-## 23:05:21 Annoy recall = 100%
-## 23:05:22 Commencing smooth kNN distance calibration using 1 thread
-## 23:05:23 Initializing from normalized Laplacian + noise
-## 23:05:23 Commencing optimization for 500 epochs, with 25668 positive edges
-## 23:05:24 Optimization finished
+## 06:59:16 Writing NN index file to temp file /tmp/Rtmp4WMPA5/file189615317aea
+## 06:59:16 Searching Annoy index using 1 thread, search_k = 3000
+## 06:59:16 Annoy recall = 100%
+## 06:59:17 Commencing smooth kNN distance calibration using 1 thread
+## 06:59:18 Initializing from normalized Laplacian + noise
+## 06:59:18 Commencing optimization for 500 epochs, with 25714 positive edges
+## 06:59:19 Optimization finished
 ```
 
 ```r
@@ -1467,12 +1467,12 @@ head(clust.markers)
 
 ```
 ##                  p_val avg_log2FC pct.1 pct.2    p_val_adj cluster      gene
-## Krt14     1.343016e-29  0.7638423 1.000 0.980 1.948448e-25       0     Krt14
-## Igfbp2    2.971085e-29  0.8239887 0.812 0.400 4.310451e-25       0    Igfbp2
-## H19       7.355421e-26  0.7842511 0.969 0.782 1.067124e-21       0       H19
-## Serpinb10 6.691868e-24  0.6374286 0.743 0.355 9.708562e-20       0 Serpinb10
-## Fth1      6.379660e-23  0.4836349 1.000 0.935 9.255610e-19       0      Fth1
-## Col17a1   7.513434e-23  0.7006950 0.849 0.500 1.090049e-18       0   Col17a1
+## Igfbp2    1.752215e-32  0.9006342 0.809 0.365 2.542114e-28       0    Igfbp2
+## Serpinb10 6.070933e-31  0.7489313 0.757 0.308 8.807710e-27       0 Serpinb10
+## Fth1      3.211758e-30  0.5659543 1.000 0.929 4.659618e-26       0      Fth1
+## Krt14     4.872202e-26  0.7039186 1.000 0.978 7.068591e-22       0     Krt14
+## Postn     7.877745e-21  0.4991132 0.834 0.496 1.142903e-16       0     Postn
+## H19       1.254973e-19  0.6728618 0.948 0.785 1.820714e-15       0       H19
 ```
 
 ---
@@ -1487,14 +1487,14 @@ head(topG)
 ```
 ## # A tibble: 6 x 7
 ## # Groups:   cluster [2]
-##      p_val avg_log2FC pct.1 pct.2 p_val_adj cluster gene   
-##      &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt; &lt;fct&gt;   &lt;chr&gt;  
-## 1 1.34e-29      0.764 1     0.98   1.95e-25 0       Krt14  
-## 2 2.97e-29      0.824 0.812 0.4    4.31e-25 0       Igfbp2 
-## 3 7.36e-26      0.784 0.969 0.782  1.07e-21 0       H19    
-## 4 7.51e-23      0.701 0.849 0.5    1.09e-18 0       Col17a1
-## 5 3.68e-18      0.653 0.733 0.442  5.35e-14 0       Cdkn1c 
-## 6 3.42e-14      0.800 0.887 0.701  4.96e-10 1       Ifitm3
+##      p_val avg_log2FC pct.1 pct.2 p_val_adj cluster gene     
+##      &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt; &lt;fct&gt;   &lt;chr&gt;    
+## 1 1.75e-32      0.901 0.809 0.365  2.54e-28 0       Igfbp2   
+## 2 6.07e-31      0.749 0.757 0.308  8.81e-27 0       Serpinb10
+## 3 4.87e-26      0.704 1     0.978  7.07e-22 0       Krt14    
+## 4 1.25e-19      0.673 0.948 0.785  1.82e-15 0       H19      
+## 5 8.36e-18      0.716 0.563 0.251  1.21e-13 0       Slc1a3   
+## 6 2.12e-61      2.35  0.585 0.04   3.08e-57 1       Pthlh
 ```
 
 
@@ -1567,9 +1567,9 @@ tbl_dat[1:2, ]
 ```
 
 ```
-##   Var1 Var2 Freq  to       prop
-## 1    0   G1  142 292 0.48630137
-## 2    1   G1   11 151 0.07284768
+##   Var1 Var2 Freq  to      prop
+## 1    0   G1  152 325 0.4676923
+## 2    1   G1   56 147 0.3809524
 ```
 
 ---
@@ -1582,7 +1582,7 @@ tbl_dat[1:2, ]
 First we filter out the second cluster, and then save the data object.
 
 ```r
-cellID &lt;- rownames(obj@meta.data)[!obj@meta.data$seurat_clusters == 2]
+cellID &lt;- rownames(obj@meta.data)[!obj@meta.data$seurat_clusters == 1]
 obj_sub &lt;- obj[, cellID]
 saveRDS(obj_sub, "scSeq_Seurat_clean.rds")
 ```
