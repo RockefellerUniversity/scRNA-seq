@@ -52,12 +52,12 @@ head(obj@meta.data)
 VlnPlot(obj,features = c("nCount_RNA","nFeature_RNA","percent.mt"),pt.size = 0.2)
 ```
 
-3. Mmake a dot plot for nCount_RNA vs nFeature_RNA. *NOTE: Try to keep an eye out potential doublets.*
+3. Mmake a dot plot for nCount_RNA vs nFeature_RNA. *NOTE: At this step try to keep an eye out potential doublets.*
 ```{r,echo=toMessage}
 FeatureScatter(obj,feature1="nCount_RNA",feature2="nFeature_RNA")
 ```
 
-4. Make a dot plot for nCount_RNA vs percent.mt. *NOTE: Try to keep an eye out potential doublets.*
+4. Make a dot plot for nCount_RNA vs percent.mt. *NOTE: At this step try to keep an eye out potential cell debris.*
 ```{r,echo=toMessage}
 FeatureScatter(obj,feature1="nCount_RNA",feature2="percent.mt")
 ```
