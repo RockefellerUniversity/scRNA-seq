@@ -65,7 +65,7 @@ if(params$isSlides == "yes"){
 
 ---
 ## Basic reports of Cell Ranger
-- [QC Report](data/WT.html)
+- [QC Report](../../data/WT.html)
 - cloupe file: can be processed by [LOUPE Browser](https://support.10xgenomics.com/single-cell-gene-expression/software/visualization/latest/what-is-loupe-cell-browser)
 
 
