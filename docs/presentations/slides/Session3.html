@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="" xml:lang="">
   <head>
-    <title>Session3.utf8</title>
+    <title>Session3.knit</title>
     <meta charset="utf-8" />
     <meta name="author" content="Rockefeller University, Bioinformatics Resource Centre" />
+    <script src="libs/header-attrs-2.10/header-attrs.js"></script>
     <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
     <link rel="stylesheet" href="metropolisCustom.css" type="text/css" />
     <link rel="stylesheet" href="metropolis-fontsCustom.css" type="text/css" />
@@ -82,6 +83,7 @@ sce
 ##   TTATGCTGTGTTTGTG-1 GCTGCGACACGTTGGC-1
 ## colData names(2): Sample Barcode
 ## reducedDimNames(0):
+## mainExpName: NULL
 ## altExpNames(0):
 ```
 
@@ -127,7 +129,7 @@ bcrank[1:2, ]
 ```
 ## DataFrame with 2 rows and 3 columns
 ##                         rank     total    fitted
-##                    &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt;
+##                    &lt;numeric&gt; &lt;integer&gt; &lt;numeric&gt;
 ## CGTGTCTTCGCATGAT-1   41200.5         1        NA
 ## TTTATGCGTCGAACAG-1   41200.5         1        NA
 ```
@@ -145,14 +147,14 @@ Knee plot is a useful QC plot for single-cell seuqnecing. It reflects the thresh
 
 ```r
 uniq &lt;- !duplicated(bcrank$rank)
-# 
-plot(bcrank$rank[uniq], bcrank$total[uniq], log = "xy", xlab = "Rank", ylab = "Total UMI count", 
+#
+plot(bcrank$rank[uniq], bcrank$total[uniq], log = "xy", xlab = "Rank", ylab = "Total UMI count",
     cex.lab = 1.2)
 
 abline(h = metadata(bcrank)$inflection, col = "darkgreen", lty = 2)
 abline(h = metadata(bcrank)$knee, col = "dodgerblue", lty = 2)
 
-legend("bottomleft", legend = c("Inflection", "Knee"), col = c("darkgreen", "dodgerblue"), 
+legend("bottomleft", legend = c("Inflection", "Knee"), col = c("darkgreen", "dodgerblue"),
     lty = 2, cex = 1.2)
 ```
 
@@ -177,25 +179,25 @@ legend("bottomleft", legend = c("Inflection", "Knee"), col = c("darkgreen", "dod
 set.seed(100)
 limit &lt;- 100
 e.out &lt;- emptyDrops(counts(sce), lower = limit, test.ambient = TRUE)
-# 
+#
 e.out
 ```
 
 ```
 ## DataFrame with 100000 rows and 5 columns
-##                        Total     LogProb     PValue   Limited        FDR
-##                    &lt;integer&gt;   &lt;numeric&gt;  &lt;numeric&gt; &lt;logical&gt;  &lt;numeric&gt;
-## CGTGTCTTCGCATGAT-1         1    -5.34170 0.70912909     FALSE 0.95697174
-## TTTATGCGTCGAACAG-1         1    -6.44503 0.50414959     FALSE 0.92603663
-## CATGACACAAGTCTGT-1         0          NA         NA        NA         NA
-## ACATACGCACCACCAG-1        58  -266.20222 0.01839816     FALSE 0.45640979
-## CGTCCATAGCTGCAAG-1      1601 -2917.18710 0.00009999      TRUE 0.00507393
-## ...                      ...         ...        ...       ...        ...
-## GTGCTTCGTCACCCAG-1         0          NA         NA        NA         NA
-## GGAAAGCCAAGGCTCC-1         1    -9.06371 0.20007999     FALSE   0.818381
-## TGCCCTAGTAGCTCCG-1         1   -13.51757 0.00309969     FALSE   0.125927
-## TTATGCTGTGTTTGTG-1         0          NA         NA        NA         NA
-## GCTGCGACACGTTGGC-1         0          NA         NA        NA         NA
+##                        Total     LogProb     PValue   Limited         FDR
+##                    &lt;integer&gt;   &lt;numeric&gt;  &lt;numeric&gt; &lt;logical&gt;   &lt;numeric&gt;
+## CGTGTCTTCGCATGAT-1         1    -5.34170 0.70912909     FALSE          NA
+## TTTATGCGTCGAACAG-1         1    -6.44503 0.50414959     FALSE          NA
+## CATGACACAAGTCTGT-1         0          NA         NA        NA          NA
+## ACATACGCACCACCAG-1        58  -266.20222 0.01839816     FALSE          NA
+## CGTCCATAGCTGCAAG-1      1601 -2917.18710 0.00009999      TRUE 0.000200166
+## ...                      ...         ...        ...       ...         ...
+## GTGCTTCGTCACCCAG-1         0          NA         NA        NA          NA
+## GGAAAGCCAAGGCTCC-1         1    -9.06371 0.20007999     FALSE          NA
+## TGCCCTAGTAGCTCCG-1         1   -13.51757 0.00309969     FALSE          NA
+## TTATGCTGTGTTTGTG-1         0          NA         NA        NA          NA
+## GCTGCGACACGTTGGC-1         0          NA         NA        NA          NA
 ```
 
 ---
@@ -208,7 +210,7 @@ summary(e.out$FDR &lt;= 0.001)
 
 ```
 ##    Mode   FALSE    TRUE    NA's 
-## logical   54010     591   45399
+## logical    1072    1080   97848
 ```
 
 ```r
@@ -218,9 +220,9 @@ table(Sig = e.out$FDR &lt;= 0.001, Limited = e.out$Limited)
 
 ```
 ##        Limited
-## Sig     FALSE  TRUE
-##   FALSE 53525   485
-##   TRUE      1   590
+## Sig     FALSE TRUE
+##   FALSE  1072    0
+##   TRUE      6 1074
 ```
 
 ---
@@ -229,7 +231,7 @@ We can plot the distribution of significance of non-empty reads
 
 
 ```r
-hist(e.out$PValue[e.out$Total &lt;= limit &amp; e.out$Total &gt; 0], xlab = "P-value", main = "", 
+hist(e.out$PValue[e.out$Total &lt;= limit &amp; e.out$Total &gt; 0], xlab = "P-value", main = "",
     col = "grey80")
 ```
 
@@ -267,16 +269,17 @@ sce2
 
 ```
 ## class: SingleCellExperiment 
-## dim: 27998 591 
+## dim: 27998 1080 
 ## metadata(1): Samples
 ## assays(2): counts logcounts
 ## rownames(27998): ENSMUSG00000051951 ENSMUSG00000089699 ...
 ##   ENSMUSG00000096730 ENSMUSG00000095742
 ## rowData names(2): ID Symbol
-## colnames(591): GCTCCTAAGGCACATG-1 GTAACTGTCGGATGGA-1 ...
-##   CACCAGGTCACCTTAT-1 AGGTCATCATGTAAGA-1
+## colnames(1080): CGTCCATAGCTGCAAG-1 GCTCCTAAGGCACATG-1 ...
+##   ACTGAGTCACACCGAC-1 GAACGGAAGCTTATCG-1
 ## colData names(3): Sample Barcode sizeFactor
 ## reducedDimNames(0):
+## mainExpName: NULL
 ## altExpNames(0):
 ```
 
@@ -311,38 +314,38 @@ sce2 &lt;- runUMAP(sce2, dimred = "PCA")
 g &lt;- buildSNNGraph(sce2, k = 10, use.dimred = "PCA")
 clust &lt;- igraph::cluster_walktrap(g)$membership
 colLabels(sce2) &lt;- factor(clust)
-# 
+#
 colData(sce2)
 ```
 
 ```
-## DataFrame with 591 rows and 4 columns
+## DataFrame with 1080 rows and 4 columns
 ##                                    Sample            Barcode sizeFactor
 ##                               &lt;character&gt;        &lt;character&gt;  &lt;numeric&gt;
-## GCTCCTAAGGCACATG-1 ~/Desktop/01_scSeq_t.. GCTCCTAAGGCACATG-1   0.913482
-## GTAACTGTCGGATGGA-1 ~/Desktop/01_scSeq_t.. GTAACTGTCGGATGGA-1   0.970723
-## CGGACACCATTACGAC-1 ~/Desktop/01_scSeq_t.. CGGACACCATTACGAC-1   0.725295
-## GCGAGAAAGCTACCGC-1 ~/Desktop/01_scSeq_t.. GCGAGAAAGCTACCGC-1   0.700158
-## AAACGGGCAGATGGGT-1 ~/Desktop/01_scSeq_t.. AAACGGGCAGATGGGT-1   1.636871
+## CGTCCATAGCTGCAAG-1 ~/Desktop/01_scSeq_t.. CGTCCATAGCTGCAAG-1   0.220604
+## GCTCCTAAGGCACATG-1 ~/Desktop/01_scSeq_t.. GCTCCTAAGGCACATG-1   1.293722
+## CGGACACAGTACGACG-1 ~/Desktop/01_scSeq_t.. CGGACACAGTACGACG-1   0.477037
+## GTAACTGTCGGATGGA-1 ~/Desktop/01_scSeq_t.. GTAACTGTCGGATGGA-1   1.411181
+## TGACTAGAGTAGGCCA-1 ~/Desktop/01_scSeq_t.. TGACTAGAGTAGGCCA-1   0.394843
 ## ...                                   ...                ...        ...
-## GTGGGTCAGCACCGTC-1 ~/Desktop/01_scSeq_t.. GTGGGTCAGCACCGTC-1   1.026750
-## CGCTATCAGTACGACG-1 ~/Desktop/01_scSeq_t.. CGCTATCAGTACGACG-1   0.677916
-## GTACTTTTCCTTTCGG-1 ~/Desktop/01_scSeq_t.. GTACTTTTCCTTTCGG-1   0.978623
-## CACCAGGTCACCTTAT-1 ~/Desktop/01_scSeq_t.. CACCAGGTCACCTTAT-1   1.130759
-## AGGTCATCATGTAAGA-1 ~/Desktop/01_scSeq_t.. AGGTCATCATGTAAGA-1   1.689680
+## ACGATACCAATGCCAT-1 ~/Desktop/01_scSeq_t.. ACGATACCAATGCCAT-1   0.392299
+## AGGTCATCATGTAAGA-1 ~/Desktop/01_scSeq_t.. AGGTCATCATGTAAGA-1   2.538163
+## CCGGGATAGCCACCTG-1 ~/Desktop/01_scSeq_t.. CCGGGATAGCCACCTG-1   0.261304
+## ACTGAGTCACACCGAC-1 ~/Desktop/01_scSeq_t.. ACTGAGTCACACCGAC-1   0.363430
+## GAACGGAAGCTTATCG-1 ~/Desktop/01_scSeq_t.. GAACGGAAGCTTATCG-1   0.656362
 ##                       label
 ##                    &lt;factor&gt;
-## GCTCCTAAGGCACATG-1        2
-## GTAACTGTCGGATGGA-1        2
-## CGGACACCATTACGAC-1        2
-## GCGAGAAAGCTACCGC-1        6
-## AAACGGGCAGATGGGT-1        4
+## CGTCCATAGCTGCAAG-1        4
+## GCTCCTAAGGCACATG-1        3
+## CGGACACAGTACGACG-1        5
+## GTAACTGTCGGATGGA-1        3
+## TGACTAGAGTAGGCCA-1        5
 ## ...                     ...
-## GTGGGTCAGCACCGTC-1        6
-## CGCTATCAGTACGACG-1        6
-## GTACTTTTCCTTTCGG-1        1
-## CACCAGGTCACCTTAT-1        7
-## AGGTCATCATGTAAGA-1        4
+## ACGATACCAATGCCAT-1        2
+## AGGTCATCATGTAAGA-1        3
+## CCGGGATAGCCACCTG-1        2
+## ACTGAGTCACACCGAC-1        1
+## GAACGGAAGCTTATCG-1        3
 ```
 
 ---
@@ -415,7 +418,7 @@ stripped &lt;- logNormCounts(stripped)
 ensmbl_id &lt;- rowData(sce2)$ID[rowData(sce2)$Symbol == "Hba-a1"]
 plotExpression(sce2, x = "label", colour_by = "label", features = ensmbl_id) + ggtitle("Before")
 
-plotExpression(stripped, x = "label", colour_by = "label", features = ensmbl_id) + 
+plotExpression(stripped, x = "label", colour_by = "label", features = ensmbl_id) +
     ggtitle("After")
 ```
 
@@ -438,7 +441,7 @@ Hemoglobin A1 (Hba-a1) as example
 ```r
 ensmbl_id &lt;- rowData(sce2)$ID[rowData(sce2)$Symbol == "Krt17"]
 plotExpression(sce2, x = "label", colour_by = "label", features = ensmbl_id) + ggtitle("Before")
-plotExpression(stripped, x = "label", colour_by = "label", features = ensmbl_id) + 
+plotExpression(stripped, x = "label", colour_by = "label", features = ensmbl_id) +
     ggtitle("After")
 ```
 
@@ -507,7 +510,7 @@ summary(dbl.dens)
 
 ```
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##  0.2908  0.7978  1.1442  1.2442  1.6010  4.1961
+##  0.0324  0.5011  0.9396  1.0330  1.4796  4.5122
 ```
 
 ```r
@@ -529,7 +532,7 @@ plotUMAP(stripped, colour_by = "DoubletScore")
 Likewise we can look for over representation of doublets in clusters.
 
 ```r
-plotColData(stripped, x = "label", y = "DoubletScore", colour_by = "label") + geom_hline(yintercept = quantile(colData(stripped)$DoubletScore, 
+plotColData(stripped, x = "label", y = "DoubletScore", colour_by = "label") + geom_hline(yintercept = quantile(colData(stripped)$DoubletScore,
     0.95), lty = "dashed", color = "red")
 ```
 
@@ -543,15 +546,15 @@ We can clean our data up based on this 95% quantile cut-off.
 
 ```r
 cut_off &lt;- quantile(stripped$DoubletScore, 0.95)
-stripped$isDoublet &lt;- c("no", "yes")[factor(as.integer(stripped$DoubletScore &gt;= cut_off), 
+stripped$isDoublet &lt;- c("no", "yes")[factor(as.integer(stripped$DoubletScore &gt;= cut_off),
     levels = c(0, 1))]
 table(stripped$isDoublet)
 ```
 
 ```
 ## 
-##  no yes 
-## 561  30
+##   no  yes 
+## 1025   55
 ```
 
 ```r
@@ -614,7 +617,7 @@ plotColData(sce_clean, x = "label", y = "detected", colour_by = "label") + ggtit
 Post-clean
 
 ```r
-plotColData(sce_clean, x = "label", y = "subsets_Mito_percent", colour_by = "label") + 
+plotColData(sce_clean, x = "label", y = "subsets_Mito_percent", colour_by = "label") +
     ggtitle("mitocondrial content")
 ```
 
@@ -626,7 +629,7 @@ plotColData(sce_clean, x = "label", y = "subsets_Mito_percent", colour_by = "lab
 - Mitochondrial contents vs read counts
 
 ```r
-plotColData(sce_clean, x = "sum", y = "subsets_Mito_percent", colour_by = "label") + 
+plotColData(sce_clean, x = "sum", y = "subsets_Mito_percent", colour_by = "label") +
     ggtitle("is.mito vs read counts")
 ```
 
@@ -648,7 +651,7 @@ plotColData(sce_clean, x = "sum", y = "detected", colour_by = "label") + ggtitle
 - We would suppose "label" (clustering) would explain more variances than other controls.
 
 ```r
-vars &lt;- getVarianceExplained(sce_clean, variables = c("DoubletScore", "label", "sum", 
+vars &lt;- getVarianceExplained(sce_clean, variables = c("DoubletScore", "label", "sum",
     "detected", "subsets_Mito_percent"))
 ```
 
@@ -666,7 +669,7 @@ plotExplanatoryVariables(vars)
 ```
 
 ```
-## Warning: Removed 2765 rows containing non-finite values (stat_density).
+## Warning: Removed 800 rows containing non-finite values (stat_density).
 ```
 
 ![](Session3_files/figure-html/varExp3-1.png)&lt;!-- --&gt;
