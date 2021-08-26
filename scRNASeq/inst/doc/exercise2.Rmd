@@ -39,7 +39,7 @@ saveRDS(sce,"path to rds file")
 ### If you want to load a subset of the data
 ```{r include=TRUE,eval=TRUE,echo=TRUE}
 library(DropletUtils)
-library(DropletTestFiles)
+# library(DropletTestFiles)
 sce <- readRDS("data/scSeq_CKO_sceSub.rds")
 ```
 
