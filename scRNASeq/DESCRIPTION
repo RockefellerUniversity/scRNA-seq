@@ -8,7 +8,7 @@ Description: This pacakge shows an example framework to build a teaching course.
 License: What license is it under?
 LazyData: TRUE
 biocViews: Training
-Remotes: satijalab/seurat-wrappers
+Remotes: 
 Depends: DropletUtils, scDblFinder, SingleCellExperiment, scran, scater, Seurat, dplyr, scuttle, biomaRt
 Suggests: knitr,
     rmarkdown,
