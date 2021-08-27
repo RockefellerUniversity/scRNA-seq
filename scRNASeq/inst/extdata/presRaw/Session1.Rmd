@@ -68,31 +68,31 @@ if(params$isSlides == "yes"){
 
 --- 
 ## General information
-<img src="imgs/cell_count.png",width=6,height=6,align='center'>
+<img src="imgs/cell_count.png",width="200px">
 *Is this good enough?*
 
 ---
 ## General information ~ session info
-<img src="imgs/session_info.png",width=6,height=6,align='center'>
+<img src="imgs/session_info.png",width="200px">
 
 ---
 ## Sequencing QC
-<img src="imgs/seq_qc.png",width=6,height=6,align='center'>
+<img src="imgs/seq_qc.png",width="200px">
 
 ---
 ## Mapping QC
-<img src="imgs/map_info.png",width=6,height=6,align='center'>
+<img src="imgs/map_info.png",width="200px">
 
 ---
 ## General information
-<img src="imgs/cell_count.png",width=6,height=6,align='center'>
+<img src="imgs/cell_count.png",width="200px">
 - How many cells should we get?
 - Is the throughput enough?
 *It depends on the sample characteristics and library complexities*
 
 ---
-## How to determin cell numbers? ~ Knee plot
-<img src="imgs/knee_plot.png",wwidth=6,height=6,align='center'>
+## How to determin cell numbers?
+<img src="imgs/knee_plot.png",width="200px">
 
 ---
 ## Knee plot
@@ -109,19 +109,19 @@ if(params$isSlides == "yes"){
 
 ---
 ## genes vs throughput
-<img src="imgs/gene_eval.png",width=6,height=6,align='center'>
+<img src="imgs/gene_eval.png",width="200px">
 *Seems not saturated yet*
 
 ---
 ## Saturation vs throughput
 - Saturation: uniquely detected UMIs in total UMI
 - Can evaluate both saturation and library complexity, like PCR duplication
-<img src="imgs/umi_eval.png",width=6,height=6,align='center'>
+<img src="imgs/umi_eval.png",width="200px">
 *Seems still not saturated and with lower library complexity, probably higher PCR duplicates.*
 
 ---
 ## tSNE plot and clustering
-<img src="imgs/tsne.png",width=6,height=6,align='center'>
+<img src="imgs/tsne.png",width="200px">
 *Seems the cells were grouped by UMI counts.*
 
 ---
