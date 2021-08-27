@@ -15,11 +15,12 @@ params:
 toMessage <- ifelse(!is.null(params$toMessage),params$toMessage,FALSE)
 message(toMessage)
 suppressPackageStartupMessages(require(Seurat))
+suppressPackageStartupMessages(require(dplyr))
 ```
 
 
 <p>&nbsp;</p>
-These exercises are about manipulate single-cell data with Seurat. Please download the counting matrix from [BOX](https://rockefeller.box.com/s/d6dvkjljprvqyglul1zxudv0ktfvwhsg) and loading them into a Seurat object. Or you may also used the rds file *data/scSeq_CKO_1kCell_ori.rds*. 
+These exercises are about manipulate single-cell data with Seurat. Please download the counting matrix from [DropBox](https://www.dropbox.com/sh/ztu0pucvu21szxm/AABGUhTryKp1T1CsoEUFRPcwa?dl=0) and loading them into a Seurat object. Or you may also used the rds file *data/scSeq_CKO_1kCell_ori.rds*. 
 
 ```{r loading_data,include=FALSE,eval=FALSE}
 library(Seurat)
@@ -75,8 +76,8 @@ obj
 ```{r,echo=toMessage,tidy=FALSE}
 convertHumanGeneList <- function(x){
   require("biomaRt")
-  human = useMart("ensembl", dataset = "hsapiens_gene_ensembl")
-  mouse = useMart("ensembl", dataset = "mmusculus_gene_ensembl")
+  human = useMart("ensembl", dataset = "hsapiens_gene_ensembl",mirror = "useast")
+  mouse = useMart("ensembl", dataset = "mmusculus_gene_ensembl",mirror = "useast")
   genesV2 = getLDS(attributes = c("hgnc_symbol"), 
                    filters = "hgnc_symbol", 
                    values = x , 

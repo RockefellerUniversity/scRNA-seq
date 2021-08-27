@@ -69,7 +69,7 @@ if(params$isSlides == "yes"){
 ```
 
 ## Cell Ranger counting matrix
-- The data is available on [BOX](https://rockefeller.box.com/s/hdy0vex38dlph5pglafrkw68b7uemndr)
+- The data is available on [DropBox](https://www.dropbox.com/sh/ztu0pucvu21szxm/AABGUhTryKp1T1CsoEUFRPcwa?dl=0)
 
 ```{r loadCR2Seurat,echo=TRUE,eval=FALSE,include=TRUE}
 tar_dir <- "~/path/to/raw/data"
@@ -222,8 +222,8 @@ if(params$isSlides == "yes"){
 ```{r cellCycle_est1,echo=TRUE,eval=TRUE,include=TRUE}
 convertHumanGeneList <- function(x){
   require("biomaRt")
-  human = useMart("ensembl", dataset = "hsapiens_gene_ensembl")
-  mouse = useMart("ensembl", dataset = "mmusculus_gene_ensembl")
+  human = useMart("ensembl", dataset = "hsapiens_gene_ensembl",mirror = "useast")
+  mouse = useMart("ensembl", dataset = "mmusculus_gene_ensembl",mirror = "useast")
   genesV2 = getLDS(attributes = c("hgnc_symbol"), 
                    filters = "hgnc_symbol", 
                    values = x , 

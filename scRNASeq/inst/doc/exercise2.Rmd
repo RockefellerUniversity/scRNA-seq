@@ -24,7 +24,7 @@ suppressPackageStartupMessages(require(scDblFinder))
 
 
 <p>&nbsp;</p>
-These exercises are about manipulate single-cell data with Bioconductor packages. Please download the counting matrix from [BOX](https://rockefeller.box.com/s/d6dvkjljprvqyglul1zxudv0ktfvwhsg) and loading them into a Seurat object. Or you may also used the rds file *data/scSeq_CKO_sceSub.rds*. 
+These exercises are about manipulate single-cell data with Bioconductor packages. Please download the counting matrix from [DropBox](https://www.dropbox.com/sh/ztu0pucvu21szxm/AABGUhTryKp1T1CsoEUFRPcwa?dl=0) and loading them into a Seurat object. Or you may also used the rds file *data/scSeq_CKO_sceSub.rds*. 
 
 
 ### If you want to load the whole dataset
