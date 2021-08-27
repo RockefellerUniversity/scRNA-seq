@@ -54,7 +54,7 @@ if(params$isSlides == "yes"){
 ```
 
 ## Cell Ranger
-[Cell Ranger](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/what-is-cell-ranger) is a widely used software for single-cell sequencing data analysis. It supports various kinds of analysis for **10X single-cell sequencing data**.
+[Cell Ranger](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/what-is-cell-ranger) is a widely used software for single-cell sequencing data analysis. It supports various kinds of analysis for *10X single-cell sequencing data*.
 - Alignment and counting
 - Analysis of VDJ changes
 - Datasets aggregation
@@ -68,31 +68,46 @@ if(params$isSlides == "yes"){
 
 --- 
 ## General information
-<img src="imgs/cell_count.png",width="150px">
+```{r scSeq_GI_cellCCount,echo=FALSE,out.width = "50%",fig.align="center"}
+knitr::include_graphics("imgs/cell_count.png")
+```
+
 *Is this good enough?*
 
 ---
-## General information ~ session info
-<img src="imgs/session_info.png",width="50px">
+## Session information
+```{r scSeq_GI_sessionInfot,echo=FALSE,out.width = "50%",fig.align="center"}
+knitr::include_graphics("imgs/session_info.png")
+```
 
 ---
 ## Sequencing QC
-<img src="imgs/seq_qc.png",width="50px">
+```{r scSeq_GI_seqQC,echo=FALSE,out.width = "50%",fig.align="center"}
+knitr::include_graphics("imgs/seq_qc.png")
+```
 
 ---
 ## Mapping QC
-<img src="imgs/map_info.png",width="50px">
+```{r scSeq_GI_mapQC,echo=FALSE,out.width = "50%",fig.align="center"}
+knitr::include_graphics("imgs/map_info.png")
+```
 
 ---
 ## General information
-<img src="imgs/cell_count.png",width="200px">
+```{r scSeq_GI_cellCount2,echo=FALSE,out.width = "50%",fig.align="center"}
+knitr::include_graphics("imgs/cell_count.png")
+```
+
 - How many cells should we get?
 - Is the throughput enough?
+
 *It depends on the sample characteristics and library complexities*
 
 ---
 ## How to determin cell numbers?
-<img src="imgs/knee_plot.png",width="20px">
+```{r scSeq_GI_detCellNum,echo=FALSE,out.width = "25%",fig.align="center"}
+knitr::include_graphics("imgs/knee_plot.png")
+```
 
 ---
 ## Knee plot
@@ -109,19 +124,29 @@ if(params$isSlides == "yes"){
 
 ---
 ## genes vs throughput
-<img src="imgs/gene_eval.png",width="50px">
+```{r scSeq_GI_geneEvl,echo=FALSE,out.width = "50%",fig.align="center"}
+knitr::include_graphics("imgs/gene_eval.png")
+```
+
 *Seems not saturated yet*
 
 ---
 ## Saturation vs throughput
 - Saturation: uniquely detected UMIs in total UMI
 - Can evaluate both saturation and library complexity, like PCR duplication
-<img src="imgs/umi_eval.png",width="50px">
+
+```{r scSeq_GI_satPlot,echo=FALSE,out.width = "25%",fig.align="center"}
+knitr::include_graphics("imgs/umi_eval.png")
+```
+
 *Seems still not saturated and with lower library complexity, probably higher PCR duplicates.*
 
 ---
 ## tSNE plot and clustering
-<img src="imgs/tsne.png",width="200px">
+```{r scSeq_GI_tsnePlot,echo=FALSE,out.width = "75%",fig.align="center"}
+knitr::include_graphics("imgs/tsne.png")
+```
+
 *Seems the cells were grouped by UMI counts.*
 
 ---

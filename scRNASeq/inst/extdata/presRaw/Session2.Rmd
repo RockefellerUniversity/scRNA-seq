@@ -89,16 +89,13 @@ obj$dset <- samID
 obj <- Seurat::RenameCells(obj,add.cell.id=samID)
 #
 obj[["percent.mt"]] <- PercentageFeatureSet(obj, pattern = "^mt-")
-
 ```
-
 
 ---
 ## Subset dataset
 We have a small subset version of this dataset that you can load in from the *data/* directory to try this out. 
 
 ```{r loadCR2Seurat3,echo=TRUE,eval=TRUE,include=FALSE}
-
 obj <- readRDS("data/scSeq_CTRL_1kCell_ori.rds")
 obj
 ```
@@ -106,6 +103,7 @@ obj
 ---
 ## Cell information
 The object metadata contains cell barcode, mitochondrial contents, datasets, and clustering etc
+
 ```{r objInfo_cell,echo=TRUE,eval=TRUE,include=TRUE}
 head(obj@meta.data)
 ```
