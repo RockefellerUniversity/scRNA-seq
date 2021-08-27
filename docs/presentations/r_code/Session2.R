@@ -45,11 +45,9 @@ if(params$isSlides == "yes"){
 ## obj <- Seurat::RenameCells(obj,add.cell.id=samID)
 ## #
 ## obj[["percent.mt"]] <- PercentageFeatureSet(obj, pattern = "^mt-")
-## 
 
 
 ## ----loadCR2Seurat3,echo=TRUE,eval=TRUE,include=FALSE-------------------------
-
 obj <- readRDS("data/scSeq_CTRL_1kCell_ori.rds")
 obj
 

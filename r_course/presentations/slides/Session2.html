@@ -77,7 +77,6 @@ obj &lt;- Seurat::RenameCells(obj, add.cell.id = samID)
 obj[["percent.mt"]] &lt;- PercentageFeatureSet(obj, pattern = "^mt-")
 ```
 
-
 ---
 ## Subset dataset
 We have a small subset version of this dataset that you can load in from the *data/* directory to try this out. 
@@ -87,6 +86,7 @@ We have a small subset version of this dataset that you can load in from the *da
 ---
 ## Cell information
 The object metadata contains cell barcode, mitochondrial contents, datasets, and clustering etc
+
 
 ```r
 head(obj@meta.data)
@@ -1240,8 +1240,8 @@ obj@meta.data[1:2, ]
 ## CTRL_CACTCCATCTTATCTG-1       CTRL       7748         2372 CTRL   5.201342
 ## CTRL_CCTCTGACAGTAGAGC-1       CTRL       9301         2715 CTRL   5.053220
 ##                            S.Score G2M.Score Phase old.ident
-## CTRL_CACTCCATCTTATCTG-1 -0.2108446 0.2785228   G2M      CTRL
-## CTRL_CCTCTGACAGTAGAGC-1 -0.1458832 0.4474545   G2M      CTRL
+## CTRL_CACTCCATCTTATCTG-1 -0.2344878 0.2891239   G2M      CTRL
+## CTRL_CCTCTGACAGTAGAGC-1 -0.1553710 0.4661289   G2M      CTRL
 ```
 
 ---
@@ -1254,9 +1254,9 @@ head(yd_dat)
 
 ```
 ##   Var1 Var2 Freq
-## 1 CTRL   G1  242
-## 2 CTRL  G2M  213
-## 3 CTRL    S  237
+## 1 CTRL   G1  255
+## 2 CTRL  G2M  224
+## 3 CTRL    S  213
 ```
 
 ---
@@ -1347,10 +1347,10 @@ obj &lt;- FindClusters(obj, resolution = 0.5)
 ## Modularity Optimizer version 1.3.0 by Ludo Waltman and Nees Jan van Eck
 ## 
 ## Number of nodes: 692
-## Number of edges: 21593
+## Number of edges: 21777
 ## 
 ## Running Louvain algorithm...
-## Maximum modularity in 10 random starts: 0.7691
+## Maximum modularity in 10 random starts: 0.7699
 ## Number of communities: 7
 ## Elapsed time: 0 seconds
 ```
@@ -1369,19 +1369,19 @@ obj &lt;- RunUMAP(obj, reduction = "pca", dims = 1:maxPC)
 ```
 
 ```
-## 09:09:48 UMAP embedding parameters a = 0.9922 b = 1.112
+## 14:22:04 UMAP embedding parameters a = 0.9922 b = 1.112
 ```
 
 ```
-## 09:09:48 Read 692 rows and found 15 numeric columns
+## 14:22:04 Read 692 rows and found 15 numeric columns
 ```
 
 ```
-## 09:09:48 Using Annoy for neighbor search, n_neighbors = 30
+## 14:22:04 Using Annoy for neighbor search, n_neighbors = 30
 ```
 
 ```
-## 09:09:48 Building Annoy index with metric = cosine, n_trees = 50
+## 14:22:04 Building Annoy index with metric = cosine, n_trees = 50
 ```
 
 ```
@@ -1394,13 +1394,13 @@ obj &lt;- RunUMAP(obj, reduction = "pca", dims = 1:maxPC)
 
 ```
 ## **************************************************|
-## 09:09:48 Writing NN index file to temp file /tmp/RtmpkBu3U5/file176518b21be5
-## 09:09:48 Searching Annoy index using 1 thread, search_k = 3000
-## 09:09:48 Annoy recall = 100%
-## 09:09:48 Commencing smooth kNN distance calibration using 1 thread
-## 09:09:49 Initializing from normalized Laplacian + noise
-## 09:09:49 Commencing optimization for 500 epochs, with 25750 positive edges
-## 09:09:51 Optimization finished
+## 14:22:04 Writing NN index file to temp file /tmp/RtmpwAObxN/file176257a1c95f
+## 14:22:04 Searching Annoy index using 1 thread, search_k = 3000
+## 14:22:04 Annoy recall = 100%
+## 14:22:05 Commencing smooth kNN distance calibration using 1 thread
+## 14:22:07 Initializing from normalized Laplacian + noise
+## 14:22:07 Commencing optimization for 500 epochs, with 25726 positive edges
+## 14:22:08 Optimization finished
 ```
 
 ```r
@@ -1476,12 +1476,12 @@ head(clust.markers)
 
 ```
 ##                  p_val avg_log2FC pct.1 pct.2    p_val_adj cluster      gene
-## Krt14     2.972500e-28  0.7439342 1.000 0.981 4.312503e-24       0     Krt14
-## Igfbp2    1.125140e-27  0.7997274 0.817 0.409 1.632353e-23       0    Igfbp2
-## H19       1.680062e-26  0.7946896 0.978 0.782 2.437434e-22       0       H19
-## Serpinb10 5.582716e-24  0.6423139 0.753 0.361 8.099404e-20       0 Serpinb10
-## Fth1      4.662517e-22  0.4750064 1.000 0.937 6.764380e-18       0      Fth1
-## Col17a1   2.520029e-21  0.6809692 0.849 0.511 3.656059e-17       0   Col17a1
+## Krt14     5.316217e-30  0.7725085 1.000 0.980 7.712768e-26       0     Krt14
+## Igfbp2    5.260905e-29  0.8557456 0.815 0.404 7.632521e-25       0    Igfbp2
+## H19       2.657439e-27  0.8187862 0.969 0.786 3.855412e-23       0       H19
+## Serpinb10 3.912719e-24  0.6431824 0.748 0.357 5.676573e-20       0 Serpinb10
+## Fth1      4.201684e-22  0.4665164 1.000 0.936 6.095803e-18       0      Fth1
+## Krt15     1.065142e-21  0.6969255 0.997 0.951 1.545308e-17       0     Krt15
 ```
 
 ---
@@ -1500,12 +1500,12 @@ head(topG)
 ## # Groups:   cluster [2]
 ##      p_val avg_log2FC pct.1 pct.2 p_val_adj cluster gene   
 ##      &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt; &lt;fct&gt;   &lt;chr&gt;  
-## 1 2.97e-28      0.744 1     0.981  4.31e-24 0       Krt14  
-## 2 1.13e-27      0.800 0.817 0.409  1.63e-23 0       Igfbp2 
-## 3 1.68e-26      0.795 0.978 0.782  2.44e-22 0       H19    
-## 4 2.52e-21      0.681 0.849 0.511  3.66e-17 0       Col17a1
-## 5 1.52e-17      0.665 0.731 0.453  2.21e-13 0       Cdkn1c 
-## 6 1.86e-79      1.76  0.826 0.076  2.70e-75 1       Sox9
+## 1 5.32e-30      0.773 1     0.98   7.71e-26 0       Krt14  
+## 2 5.26e-29      0.856 0.815 0.404  7.63e-25 0       Igfbp2 
+## 3 2.66e-27      0.819 0.969 0.786  3.86e-23 0       H19    
+## 4 1.07e-21      0.697 0.997 0.951  1.55e-17 0       Krt15  
+## 5 5.37e-21      0.682 0.839 0.512  7.79e-17 0       Col17a1
+## 6 1.75e-77      1.72  0.807 0.075  2.54e-73 1       Sox9
 ```
 
 
@@ -1579,8 +1579,8 @@ tbl_dat[1:2, ]
 
 ```
 ##   Var1 Var2 Freq  to      prop
-## 1    0   G1  129 279 0.4623656
-## 2    1   G1   40 115 0.3478261
+## 1    0   G1  141 286 0.4930070
+## 2    1   G1   44 119 0.3697479
 ```
 
 ---

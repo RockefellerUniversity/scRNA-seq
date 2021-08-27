@@ -29,6 +29,42 @@ if(params$isSlides == "yes"){
 
 
 
+## ----scSeq_GI_cellCCount,echo=FALSE,out.width = "50%",fig.align="center"------
+knitr::include_graphics("imgs/cell_count.png")
+
+
+## ----scSeq_GI_sessionInfot,echo=FALSE,out.width = "50%",fig.align="center"----
+knitr::include_graphics("imgs/session_info.png")
+
+
+## ----scSeq_GI_seqQC,echo=FALSE,out.width = "50%",fig.align="center"-----------
+knitr::include_graphics("imgs/seq_qc.png")
+
+
+## ----scSeq_GI_mapQC,echo=FALSE,out.width = "50%",fig.align="center"-----------
+knitr::include_graphics("imgs/map_info.png")
+
+
+## ----scSeq_GI_cellCount2,echo=FALSE,out.width = "50%",fig.align="center"------
+knitr::include_graphics("imgs/cell_count.png")
+
+
+## ----scSeq_GI_detCellNum,echo=FALSE,out.width = "25%",fig.align="center"------
+knitr::include_graphics("imgs/knee_plot.png")
+
+
+## ----scSeq_GI_geneEvl,echo=FALSE,out.width = "50%",fig.align="center"---------
+knitr::include_graphics("imgs/gene_eval.png")
+
+
+## ----scSeq_GI_satPlot,echo=FALSE,out.width = "25%",fig.align="center"---------
+knitr::include_graphics("imgs/umi_eval.png")
+
+
+## ----scSeq_GI_tsnePlot,echo=FALSE,out.width = "75%",fig.align="center"--------
+knitr::include_graphics("imgs/tsne.png")
+
+
 ## ---- results='asis',include=TRUE,echo=FALSE----------------------------------
 if(params$isSlides == "yes"){
   cat("class: inverse, center, middle

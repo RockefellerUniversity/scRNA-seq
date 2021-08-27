@@ -41,7 +41,7 @@ class: inverse, center, middle
 ---
 
 ## Cell Ranger
-[Cell Ranger](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/what-is-cell-ranger) is a widely used software for single-cell sequencing data analysis. It supports various kinds of analysis for **10X single-cell sequencing data**.
+[Cell Ranger](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/what-is-cell-ranger) is a widely used software for single-cell sequencing data analysis. It supports various kinds of analysis for *10X single-cell sequencing data*.
 - Alignment and counting
 - Analysis of VDJ changes
 - Datasets aggregation
@@ -55,31 +55,34 @@ class: inverse, center, middle
 
 --- 
 ## General information
-&lt;img src="imgs/cell_count.png",width="150px"&gt;
+&lt;img src="imgs/cell_count.png" width="50%" style="display: block; margin: auto;" /&gt;
+
 *Is this good enough?*
 
 ---
-## General information ~ session info
-&lt;img src="imgs/session_info.png",width="50px"&gt;
+## Session information
+&lt;img src="imgs/session_info.png" width="50%" style="display: block; margin: auto;" /&gt;
 
 ---
 ## Sequencing QC
-&lt;img src="imgs/seq_qc.png",width="50px"&gt;
+&lt;img src="imgs/seq_qc.png" width="50%" style="display: block; margin: auto;" /&gt;
 
 ---
 ## Mapping QC
-&lt;img src="imgs/map_info.png",width="50px"&gt;
+&lt;img src="imgs/map_info.png" width="50%" style="display: block; margin: auto;" /&gt;
 
 ---
 ## General information
-&lt;img src="imgs/cell_count.png",width="200px"&gt;
+&lt;img src="imgs/cell_count.png" width="50%" style="display: block; margin: auto;" /&gt;
+
 - How many cells should we get?
 - Is the throughput enough?
+
 *It depends on the sample characteristics and library complexities*
 
 ---
 ## How to determin cell numbers?
-&lt;img src="imgs/knee_plot.png",width="20px"&gt;
+&lt;img src="imgs/knee_plot.png" width="25%" style="display: block; margin: auto;" /&gt;
 
 ---
 ## Knee plot
@@ -96,19 +99,23 @@ class: inverse, center, middle
 
 ---
 ## genes vs throughput
-&lt;img src="imgs/gene_eval.png",width="50px"&gt;
+&lt;img src="imgs/gene_eval.png" width="50%" style="display: block; margin: auto;" /&gt;
+
 *Seems not saturated yet*
 
 ---
 ## Saturation vs throughput
 - Saturation: uniquely detected UMIs in total UMI
 - Can evaluate both saturation and library complexity, like PCR duplication
-&lt;img src="imgs/umi_eval.png",width="50px"&gt;
+
+&lt;img src="imgs/umi_eval.png" width="25%" style="display: block; margin: auto;" /&gt;
+
 *Seems still not saturated and with lower library complexity, probably higher PCR duplicates.*
 
 ---
 ## tSNE plot and clustering
-&lt;img src="imgs/tsne.png",width="200px"&gt;
+&lt;img src="imgs/tsne.png" width="75%" style="display: block; margin: auto;" /&gt;
+
 *Seems the cells were grouped by UMI counts.*
 
 ---
