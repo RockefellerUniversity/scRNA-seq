@@ -70,11 +70,11 @@ head(obj@assays$RNA@data)
 VlnPlot(obj,features = c("nCount_RNA","nFeature_RNA","percent.mt"),pt.size = 0.2)
 
 
-## ----eval_readCount_geneCount,echo=TRUE,eval=TRUE,include=TRUE----------------
+## ----eval_readCount_geneCount,echo=TRUE,eval=TRUE,include=TRUE,fig.width=5,fig.height=5,fig.align='center'----
 FeatureScatter(obj, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
 
 
-## ----eval_readCount_mitoCont,echo=TRUE,eval=TRUE,include=TRUE-----------------
+## ----eval_readCount_mitoCont,echo=TRUE,eval=TRUE,include=TRUE,fig.width=5,fig.height=5,fig.align='center'----
 FeatureScatter(obj, feature1 = "nCount_RNA", feature2 = "percent.mt")
 
 
@@ -152,7 +152,7 @@ yd_dat <- as.data.frame(table(obj@meta.data$dset,obj@meta.data$Phase))
 head(yd_dat)
 
 
-## ----cellCycle_plot2,echo=TRUE,eval=TRUE,include=TRUE,fig.height=4,fig.width=2----
+## ----cellCycle_plot2,echo=TRUE,eval=TRUE,include=TRUE,fig.width=5,fig.height=5,fig.align='center'----
 library(ggplot2)
 ggplot(yd_dat,aes(x=Var1,y=Freq,fill=Var2))+geom_bar(stat="identity",position="stack")+labs(x="",y="Counts",fill="Phase")+theme_classic()
 
@@ -189,7 +189,7 @@ set.seed(1000)
 obj <- RunPCA(obj, npcs = 30, verbose = FALSE)
 
 
-## ----pcSel,echo=TRUE,eval=TRUE,include=TRUE,fig.height=4,fig.width=4----------
+## ----pcSel,echo=TRUE,eval=TRUE,include=TRUE,fig.width=5,fig.height=5,fig.align='center'----
 ElbowPlot(obj,ndims=30)
 #
 numPC <- 15
