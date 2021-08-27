@@ -53,7 +53,7 @@ class: inverse, center, middle
 ---
 
 ## Cell Ranger counting matrix
-- The data is available on [BOX](https://rockefeller.box.com/s/hdy0vex38dlph5pglafrkw68b7uemndr)
+- The data is available on [DropBox](https://www.dropbox.com/sh/ztu0pucvu21szxm/AABGUhTryKp1T1CsoEUFRPcwa?dl=0)
 
 
 ```r
@@ -1208,8 +1208,8 @@ class: inverse, center, middle
 ```r
 convertHumanGeneList &lt;- function(x) {
     require("biomaRt")
-    human = useMart("ensembl", dataset = "hsapiens_gene_ensembl")
-    mouse = useMart("ensembl", dataset = "mmusculus_gene_ensembl")
+    human = useMart("ensembl", dataset = "hsapiens_gene_ensembl", host = "http://useast.ensembl.org")
+    mouse = useMart("ensembl", dataset = "mmusculus_gene_ensembl", host = "http://useast.ensembl.org")
     genesV2 = getLDS(attributes = c("hgnc_symbol"), filters = "hgnc_symbol", values = x,
         mart = human, attributesL = c("mgi_symbol"), martL = mouse, uniqueRows = T)
     humanx &lt;- unique(genesV2[, 2])
@@ -1240,8 +1240,8 @@ obj@meta.data[1:2, ]
 ## CTRL_CACTCCATCTTATCTG-1       CTRL       7748         2372 CTRL   5.201342
 ## CTRL_CCTCTGACAGTAGAGC-1       CTRL       9301         2715 CTRL   5.053220
 ##                            S.Score G2M.Score Phase old.ident
-## CTRL_CACTCCATCTTATCTG-1 -0.2236306 0.2647763   G2M      CTRL
-## CTRL_CCTCTGACAGTAGAGC-1 -0.1454147 0.4665665   G2M      CTRL
+## CTRL_CACTCCATCTTATCTG-1 -0.2061254 0.2604811   G2M      CTRL
+## CTRL_CCTCTGACAGTAGAGC-1 -0.1400432 0.4576227   G2M      CTRL
 ```
 
 ---
@@ -1254,9 +1254,9 @@ head(yd_dat)
 
 ```
 ##   Var1 Var2 Freq
-## 1 CTRL   G1  251
-## 2 CTRL  G2M  222
-## 3 CTRL    S  219
+## 1 CTRL   G1  248
+## 2 CTRL  G2M  215
+## 3 CTRL    S  229
 ```
 
 ---
@@ -1347,10 +1347,10 @@ obj &lt;- FindClusters(obj, resolution = 0.5)
 ## Modularity Optimizer version 1.3.0 by Ludo Waltman and Nees Jan van Eck
 ## 
 ## Number of nodes: 692
-## Number of edges: 21718
+## Number of edges: 21627
 ## 
 ## Running Louvain algorithm...
-## Maximum modularity in 10 random starts: 0.7720
+## Maximum modularity in 10 random starts: 0.7689
 ## Number of communities: 7
 ## Elapsed time: 0 seconds
 ```
@@ -1369,19 +1369,19 @@ obj &lt;- RunUMAP(obj, reduction = "pca", dims = 1:maxPC)
 ```
 
 ```
-## 20:37:33 UMAP embedding parameters a = 0.9922 b = 1.112
+## 06:00:13 UMAP embedding parameters a = 0.9922 b = 1.112
 ```
 
 ```
-## 20:37:33 Read 692 rows and found 15 numeric columns
+## 06:00:13 Read 692 rows and found 15 numeric columns
 ```
 
 ```
-## 20:37:33 Using Annoy for neighbor search, n_neighbors = 30
+## 06:00:13 Using Annoy for neighbor search, n_neighbors = 30
 ```
 
 ```
-## 20:37:33 Building Annoy index with metric = cosine, n_trees = 50
+## 06:00:13 Building Annoy index with metric = cosine, n_trees = 50
 ```
 
 ```
@@ -1394,13 +1394,13 @@ obj &lt;- RunUMAP(obj, reduction = "pca", dims = 1:maxPC)
 
 ```
 ## **************************************************|
-## 20:37:33 Writing NN index file to temp file /tmp/Rtmpw5Qk5O/file873a2ed730c9
-## 20:37:33 Searching Annoy index using 1 thread, search_k = 3000
-## 20:37:33 Annoy recall = 100%
-## 20:37:34 Commencing smooth kNN distance calibration using 1 thread
-## 20:37:35 Initializing from normalized Laplacian + noise
-## 20:37:35 Commencing optimization for 500 epochs, with 25824 positive edges
-## 20:37:36 Optimization finished
+## 06:00:13 Writing NN index file to temp file /tmp/RtmpK12A3h/file17681852eacc
+## 06:00:13 Searching Annoy index using 1 thread, search_k = 3000
+## 06:00:13 Annoy recall = 100%
+## 06:00:14 Commencing smooth kNN distance calibration using 1 thread
+## 06:00:15 Initializing from normalized Laplacian + noise
+## 06:00:15 Commencing optimization for 500 epochs, with 25684 positive edges
+## 06:00:16 Optimization finished
 ```
 
 ```r
@@ -1476,12 +1476,12 @@ head(clust.markers)
 
 ```
 ##                  p_val avg_log2FC pct.1 pct.2    p_val_adj cluster      gene
-## Krt14     2.492227e-29  0.7610849 1.000 0.980 3.615723e-25       0     Krt14
-## Igfbp2    1.670002e-27  0.8243103 0.811 0.406 2.422838e-23       0    Igfbp2
-## H19       3.960938e-26  0.7910975 0.972 0.783 5.746529e-22       0       H19
-## Serpinb10 1.211015e-25  0.6648281 0.755 0.352 1.756941e-21       0 Serpinb10
-## Fth1      9.980316e-24  0.4874328 1.000 0.936 1.447944e-19       0      Fth1
-## Krt15     3.733057e-21  0.6717311 1.000 0.948 5.415919e-17       0     Krt15
+## Krt14     3.895153e-28  0.7406786 1.000 0.980 5.651088e-24       0     Krt14
+## Igfbp2    1.209071e-26  0.7692456 0.808 0.407 1.754120e-22       0    Igfbp2
+## H19       2.960966e-26  0.7836562 0.972 0.783 4.295770e-22       0       H19
+## Serpinb10 1.011799e-24  0.6515569 0.749 0.356 1.467918e-20       0 Serpinb10
+## Col17a1   2.048939e-22  0.6914105 0.847 0.506 2.972601e-18       0   Col17a1
+## Fth1      2.297020e-22  0.4746868 1.000 0.936 3.332517e-18       0      Fth1
 ```
 
 ---
@@ -1500,12 +1500,12 @@ head(topG)
 ## # Groups:   cluster [2]
 ##      p_val avg_log2FC pct.1 pct.2 p_val_adj cluster gene   
 ##      &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt; &lt;fct&gt;   &lt;chr&gt;  
-## 1 2.49e-29      0.761 1     0.98   3.62e-25 0       Krt14  
-## 2 1.67e-27      0.824 0.811 0.406  2.42e-23 0       Igfbp2 
-## 3 3.96e-26      0.791 0.972 0.783  5.75e-22 0       H19    
-## 4 3.73e-21      0.672 1     0.948  5.42e-17 0       Krt15  
-## 5 4.04e-21      0.667 0.843 0.51   5.86e-17 0       Col17a1
-## 6 1.80e-79      1.77  0.832 0.078  2.61e-75 1       Sox9
+## 1 3.90e-28      0.741 1     0.98   5.65e-24 0       Krt14  
+## 2 1.21e-26      0.769 0.808 0.407  1.75e-22 0       Igfbp2 
+## 3 2.96e-26      0.784 0.972 0.783  4.30e-22 0       H19    
+## 4 2.05e-22      0.691 0.847 0.506  2.97e-18 0       Col17a1
+## 5 4.14e-21      0.664 1     0.948  6.00e-17 0       Krt15  
+## 6 4.33e-78      2.63  0.726 0.045  6.28e-74 1       Pthlh
 ```
 
 
@@ -1579,8 +1579,8 @@ tbl_dat[1:2, ]
 
 ```
 ##   Var1 Var2 Freq  to      prop
-## 1    0   G1  138 286 0.4825175
-## 2    1   G1   40 113 0.3539823
+## 1    0   G1  137 287 0.4773519
+## 2    1   G1   39 113 0.3451327
 ```
 
 ---

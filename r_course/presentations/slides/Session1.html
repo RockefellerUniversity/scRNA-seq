@@ -29,7 +29,7 @@ class: center, middle, inverse, title-slide
 
 
 ## Overview
-In this course we are going to introduce basic analysis for single-cell RNAseq, with a specific focus on the 10X system. The course is divided into three sessions. In the first session, we will introduce how to interpret the Cell  Ranger QC report and how to do analysis with the LOUPE Browser. We will also demonstrate the customized analysis we can support right know. In the Second session, we will demonstrate how to process scRNAseq data and make QC reports with Seurat. In the third session, we will discuss how to to do more advanced analysis and QC with Bioconductor packages. 
+In this course we are going to introduce basic analysis for single-cell RNAseq, with a specific focus on the *10X system*. The course is divided into three sessions. In the first session, we will introduce how to interpret the **Cell  Ranger QC report** and how to do analysis with the **LOUPE Browser**. We will also demonstrate the customized analysis we can support right know. In the Second session, we will demonstrate how to process scRNAseq data and make QC reports with **Seurat**. In the third session, we will discuss how to to do more advanced analysis and QC with **Bioconductor** packages. 
 
 ---
 class: inverse, center, middle
@@ -40,15 +40,15 @@ class: inverse, center, middle
 
 ---
 
+---
 ## Cell Ranger
-[Cell Ranger](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/what-is-cell-ranger) is a widely used software for single-cell sequencing data analysis. It supports various kinds of analysis for 10X single-cell sequencing data.
+[Cell Ranger](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/what-is-cell-ranger) is a widely used software for single-cell sequencing data analysis. It supports various kinds of analysis for **10X single-cell sequencing data**.
 
 - Alignment and counting
 - Analysis of VDJ changes
 - Datasets aggregation
 - Convert BCL files (raw files) into FASTQ files
 - Generation of customized GTF and Genome files
-
 
 ---
 ## Basic reports of Cell Ranger
@@ -57,22 +57,24 @@ class: inverse, center, middle
 
 --- 
 ## General information
-![cell number](imgs/cell_count.png){width=100%}
+&lt;img src="imgs/cell_count.png"&gt;
 ** Is this good enough?**
 
 ---
 ## General information ~ session info
-![session info](imgs/session_info.png){width=100%}
----
-## Sequencing QC
-![sequencing qc](imgs/seq_qc.png){width=100%}
----
-## Mapping QC
-![map qc](imgs/map_info.png){width=100%}
+&lt;img src="imgs/session_info.png",width=50%&gt;
 
 ---
-## General information in this dataset ~ What is a good data?
-![cell number](imgs/cell_count.png){width=100%}
+## Sequencing QC
+&lt;img src="imgs/seq_qc.png",width=50%&gt;
+
+---
+## Mapping QC
+&lt;img src="imgs/map_info.png",width=50%&gt;
+
+---
+## General information
+&lt;img src="imgs/cell_count.png",width=50%&gt;
 - How many cells should we get?
 - Is the throughput enough?
 
@@ -80,12 +82,13 @@ class: inverse, center, middle
 
 ---
 ## How to determin cell numbers? ~ Knee plot
-![knee plot](imgs/knee_plot.png){width=100%}
+&lt;img src="imgs/knee_plot.png",width=50%&gt;
+
 ---
 ## Knee plot
 - [Knee plot](https://liorpachter.wordpress.com/tag/knee-plot/) is applied to determine real cell numbers in a single-cell cohort.
-- The x-axis represented the barcodes ranked by UMI counts inside the cell barcodes. Y-axis represents the UMI counts detected per cell barcode.
-- A knee plot usually contains two bumps. We would take the mid-point of the first bump as a cut-off to differentiate real cells and backgrounds (empty droplets).
+- The x-axis represented the barcodes **ranked by UMI counts** inside the cell barcodes. Y-axis represents the UMI counts detected per cell barcode.
+- A knee plot usually contains two bumps. We would take the **mid-point** of the first bump as a cut-off to differentiate real cells and backgrounds (empty droplets).
 - As we defined the real cells and empty droplets, we could estimate the transcripts detected in real cell or empty droplets. 
 - The transcripts in empty droplet, so call **ambient RNA**, are cell-free RNAs falsely included in droplets. We will demonstrate how to remove interference of ambient RNAs  in session 3.
 
@@ -96,19 +99,20 @@ class: inverse, center, middle
 
 ---
 ## genes vs throughput
-![gene_eval](imgs/gene_eval.png){width=50%}
+&lt;img src="imgs/gene_eval.png",width=50%&gt;
 **Seems not saturated yet** 
 
 ---
 ## Saturation vs throughput
 - Saturation: uniquely detected UMIs in total UMI
 - Can evaluate both saturation and library complexity, like PCR duplication
-![gene_eval](imgs/umi_eval.png){width=50%}
+
+&lt;img src="imgs/umi_eval.png",width=50%&gt;
 ** Seems still not saturated and with lower library complexity, probably higher PCR duplicates.**
 
 ---
 ## tSNE plot and clustering
-![gene_eval](imgs/tsne.png){width=50%}
+&lt;img src="imgs/tsne.png",width=50%&gt;
 **Seems the cells were grouped by UMI counts.**
 
 ---

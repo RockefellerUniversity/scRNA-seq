@@ -126,8 +126,8 @@ if(params$isSlides == "yes"){
 ## ----cellCycle_est1,echo=TRUE,eval=TRUE,include=TRUE--------------------------
 convertHumanGeneList <- function(x){
   require("biomaRt")
-  human = useMart("ensembl", dataset = "hsapiens_gene_ensembl")
-  mouse = useMart("ensembl", dataset = "mmusculus_gene_ensembl")
+  human = useMart("ensembl", dataset = "hsapiens_gene_ensembl",host = "http://useast.ensembl.org")
+  mouse = useMart("ensembl", dataset = "mmusculus_gene_ensembl",host="http://useast.ensembl.org")
   genesV2 = getLDS(attributes = c("hgnc_symbol"), 
                    filters = "hgnc_symbol", 
                    values = x , 
