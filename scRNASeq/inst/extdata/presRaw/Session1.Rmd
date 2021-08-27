@@ -66,35 +66,31 @@ if(params$isSlides == "yes"){
 - [QC Report](../../data/web_summary.html)
 - cloupe file: can be processed by [LOUPE Browser](https://support.10xgenomics.com/single-cell-gene-expression/software/visualization/latest/what-is-loupe-cell-browser)
 
---- 
-## General information
 ```{r scSeq_GI_cellCCount,echo=FALSE,out.width = "50%",fig.align="center"}
 knitr::include_graphics("imgs/cell_count.png")
 ```
 
-*Is this good enough?*
-
 ---
 ## Session information
-```{r scSeq_GI_sessionInfot,echo=FALSE,out.width = "50%",fig.align="center"}
+```{r scSeq_GI_sessionInfot,echo=FALSE,out.width = "75%",fig.align="center"}
 knitr::include_graphics("imgs/session_info.png")
 ```
 
 ---
 ## Sequencing QC
-```{r scSeq_GI_seqQC,echo=FALSE,out.width = "50%",fig.align="center"}
+```{r scSeq_GI_seqQC,echo=FALSE,out.width = "75%",fig.align="center"}
 knitr::include_graphics("imgs/seq_qc.png")
 ```
 
 ---
 ## Mapping QC
-```{r scSeq_GI_mapQC,echo=FALSE,out.width = "50%",fig.align="center"}
+```{r scSeq_GI_mapQC,echo=FALSE,out.width = "75%",fig.align="center"}
 knitr::include_graphics("imgs/map_info.png")
 ```
 
 ---
 ## General information
-```{r scSeq_GI_cellCount2,echo=FALSE,out.width = "50%",fig.align="center"}
+```{r scSeq_GI_cellCount2,echo=FALSE,out.width = "75%",fig.align="center"}
 knitr::include_graphics("imgs/cell_count.png")
 ```
 
@@ -105,7 +101,7 @@ knitr::include_graphics("imgs/cell_count.png")
 
 ---
 ## How to determin cell numbers?
-```{r scSeq_GI_detCellNum,echo=FALSE,out.width = "25%",fig.align="center"}
+```{r scSeq_GI_detCellNum,echo=FALSE,out.width = "50%",fig.align="center"}
 knitr::include_graphics("imgs/knee_plot.png")
 ```
 
@@ -124,7 +120,7 @@ knitr::include_graphics("imgs/knee_plot.png")
 
 ---
 ## genes vs throughput
-```{r scSeq_GI_geneEvl,echo=FALSE,out.width = "50%",fig.align="center"}
+```{r scSeq_GI_geneEvl,echo=FALSE,out.width = "75%",fig.align="center"}
 knitr::include_graphics("imgs/gene_eval.png")
 ```
 
@@ -135,7 +131,7 @@ knitr::include_graphics("imgs/gene_eval.png")
 - Saturation: uniquely detected UMIs in total UMI
 - Can evaluate both saturation and library complexity, like PCR duplication
 
-```{r scSeq_GI_satPlot,echo=FALSE,out.width = "25%",fig.align="center"}
+```{r scSeq_GI_satPlot,echo=FALSE,out.width = "50%",fig.align="center"}
 knitr::include_graphics("imgs/umi_eval.png")
 ```
 
@@ -143,7 +139,7 @@ knitr::include_graphics("imgs/umi_eval.png")
 
 ---
 ## tSNE plot and clustering
-```{r scSeq_GI_tsnePlot,echo=FALSE,out.width = "75%",fig.align="center"}
+```{r scSeq_GI_tsnePlot,echo=FALSE,out.width = "100%",fig.align="center"}
 knitr::include_graphics("imgs/tsne.png")
 ```
 
