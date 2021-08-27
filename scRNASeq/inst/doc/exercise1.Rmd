@@ -72,7 +72,7 @@ obj
 
 ### Cell cycle
 6. Please estimate cell cycle phase of each cell and make a table to describe how many cells per phase.
-```{r,echo=toMessage}
+```{r,echo=toMessage,tidy=FALSE}
 convertHumanGeneList <- function(x){
   require("biomaRt")
   human = useMart("ensembl", dataset = "hsapiens_gene_ensembl")
