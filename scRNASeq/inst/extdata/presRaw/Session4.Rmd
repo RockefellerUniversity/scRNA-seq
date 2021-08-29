@@ -69,7 +69,7 @@ if(!dir.exists(reticulate::miniconda_path())){
   install_miniconda()
 }
 conda_install(
-  packages=c("python-igraph","scanpy","louvain")
+  packages=c("python-igraph","scanpy","louvain","leidenalg")
 )
 
 
@@ -334,6 +334,37 @@ sc$tl$leiden(adata)
 ```{r plotumapCells,eval=FALSE}
 sc$pl$umap(adata, color=list('leiden'))
 ```
+
+
+---
+## Cell
+```{r saveToLoom,eval=FALSE}
+adata$write_h5ad(filename = "PBMC_Scanpy.h5ad")
+```
+
+---
+## Cell
+```{r readLoom,eval=FALSE}
+require(LoomExperiment)
+loom <- LoomExperiment::import(con = "PBMC_Scanpy.loom")
+loom
+```
+
+---
+## Cell
+```{r loomToSCE,eval=FALSE}
+sce_loom <- as(loom,"SingleCellExperiment")
+sce_loom
+```
+
+---
+## Cell
+```{r replaceUMAP,eval=FALSE}
+
+reducedDim(sce_loom, "UMAP") <- adata$obsm[["X_umap"]]
+```
+
+
 
 ---
 ## Time for an exercise!
