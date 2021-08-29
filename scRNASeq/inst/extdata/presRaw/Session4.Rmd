@@ -1,5 +1,5 @@
 ---
-title: "Single-cell RNA sequencing ~ Session 3<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>"
+title: "Single-cell RNA sequencing ~ Session 4<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>"
 author: "Rockefeller University, Bioinformatics Resource Centre"
 date: "https://rockefelleruniversity.github.io/scRNA-seq/"
 output: 
@@ -218,20 +218,20 @@ adata$obs[1:2,]
 
 ---
 ## Cell information - PBMC
-```{r plotHiExpr,eval=FALSE}
+```{r plotHiExpr}
 sc$pl$highest_expr_genes(adata,gene_symbols = "gene_symbols")
 ```
 
 ---
 ## Cell information - PBMC
-```{r plotQCpy2,eval=FALSE}
+```{r plotQCpy2}
 sc$pl$violin(adata, list('n_genes_by_counts', 'total_counts', 'pct_counts_mito'),
              jitter=0.4, multi_panel=TRUE)
 ```
 
 ---
 ## Cell information - PBMC
-```{r plotQCpy3,eval=FALSE}
+```{r plotQCpy3}
 sc$pl$scatter(adata, x='total_counts', y='n_genes_by_counts')
 
 ```
@@ -331,40 +331,51 @@ sc$tl$leiden(adata)
 
 ---
 ## Cell
-```{r plotumapCells,eval=FALSE}
+```{r plotumapCells}
 sc$pl$umap(adata, color=list('leiden'))
 ```
 
 
 ---
 ## Cell
-```{r saveToLoom,eval=FALSE}
+```{r saveToLoom}
 adata$write_h5ad(filename = "PBMC_Scanpy.h5ad")
 ```
 
 ---
 ## Cell
-```{r readLoom,eval=FALSE}
-require(LoomExperiment)
+```{r readLoom}
+if(!require(LoomExperiment)){
+  BiocManager::install("LoomExperiment")
+  require(LoomExperiment)
+}
 loom <- LoomExperiment::import(con = "PBMC_Scanpy.loom")
 loom
 ```
 
 ---
 ## Cell
-```{r loomToSCE,eval=FALSE}
+```{r loomToSCE}
 sce_loom <- as(loom,"SingleCellExperiment")
 sce_loom
 ```
 
 ---
 ## Cell
-```{r replaceUMAP,eval=FALSE}
-
+```{r replaceUMAP}
+if(!require(scater)){
+  BiocManager::install("scater")
+  require(scater)
+}
 reducedDim(sce_loom, "UMAP") <- adata$obsm[["X_umap"]]
+reducedDim(sce_loom, "PCA") <- adata$obsm[["X_pca"]]
 ```
 
-
+---
+## Cell
+```{r replaceUMAP}
+plotUMAP(sce_loom,colour_by="leiden")
+```
 
 ---
 ## Time for an exercise!
