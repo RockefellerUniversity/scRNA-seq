@@ -45,7 +45,7 @@ if(!dir.exists(reticulate::miniconda_path())){
   install_miniconda()
 }
 conda_install(
-  packages=c("python-igraph","scanpy","louvain")
+  packages=c("python-igraph","scanpy","louvain","leidenalg")
 )
 
 
@@ -134,6 +134,10 @@ adata$var <- var_df
 adata$var[1:2,]
 
 
+## ----santize------------------------------------------------------------------
+# sc$utils$sanitize_anndata(adata)
+
+
 ## ----mitoQC,tidy=FALSE--------------------------------------------------------
 sc$pp$calculate_qc_metrics(adata,
                            qc_vars = list("mito"),
@@ -151,4 +155,103 @@ adata$obs[1:2,]
 
 ## ----plotHiExpr,eval=FALSE----------------------------------------------------
 ## sc$pl$highest_expr_genes(adata,gene_symbols = "gene_symbols")
+
+
+## ----plotQCpy2,eval=FALSE-----------------------------------------------------
+## sc$pl$violin(adata, list('n_genes_by_counts', 'total_counts', 'pct_counts_mito'),
+##              jitter=0.4, multi_panel=TRUE)
+
+
+## ----plotQCpy3,eval=FALSE-----------------------------------------------------
+## sc$pl$scatter(adata, x='total_counts', y='n_genes_by_counts')
+## 
+
+
+## ----filtercells--------------------------------------------------------------
+adata = adata[adata$obs$n_genes < 2500]
+adata = adata[adata$obs$n_genes > 200]
+adata = adata[adata$obs$pct_counts_mito < 5]
+adata
+
+
+## ----filtergenes--------------------------------------------------------------
+sc$pp$filter_genes(adata,
+                   min_cells=3)
+adata
+
+
+## ----normCells----------------------------------------------------------------
+sc$pp$normalize_per_cell(adata, counts_per_cell_after=10000)
+
+
+## ----logCells-----------------------------------------------------------------
+# log transform the data.
+sc$pp$log1p(adata)
+
+
+
+## ----variableGenes------------------------------------------------------------
+# identify highly variable genes.
+sc$pp$highly_variable_genes(adata, min_mean=0.0125, max_mean=3, min_disp=0.5)
+# sc$pl$highly_variable_genes(adata)
+
+
+## ----filterToVariable---------------------------------------------------------
+# keep only highly variable genes:
+adata = adata$copy()
+adata = adata[,adata$var$highly_variable]
+adata = adata$copy()
+# regress out total counts per cell and the percentage of mitochondrial genes expressed
+# adata.copy = adata
+# sc$pp$regress_out(adata, list('n_counts', 'pct_counts_mito'),copy=FALSE) #, n_jobs=args.threads)
+
+
+## ----regress------------------------------------------------------------------
+sc$pp$regress_out(adata, list('n_counts', 'pct_counts_mito'))
+
+# adata = adata2
+# scale each gene to unit variance, clip values exceeding SD 10.
+
+
+## ----scale--------------------------------------------------------------------
+sc$pp$scale(adata, max_value=10)
+
+
+## ----pca----------------------------------------------------------------------
+sc$tl$pca(adata, svd_solver='arpack')
+
+
+## ----neighbours---------------------------------------------------------------
+sc$pp$neighbors(adata, n_neighbors=10L, n_pcs=40L)
+sc$tl$umap(adata)
+
+
+## ----louvain------------------------------------------------------------------
+sc$tl$louvain(adata)
+sc$tl$leiden(adata)
+# 
+
+
+## ----plotumapCells,eval=FALSE-------------------------------------------------
+## sc$pl$umap(adata, color=list('leiden'))
+
+
+## ----saveToLoom,eval=FALSE----------------------------------------------------
+## adata$write_h5ad(filename = "PBMC_Scanpy.h5ad")
+
+
+## ----readLoom,eval=FALSE------------------------------------------------------
+## require(LoomExperiment)
+## loom <- LoomExperiment::import(con = "PBMC_Scanpy.loom")
+## loom
+
+
+## ----loomToSCE,eval=FALSE-----------------------------------------------------
+## sce_loom <- as(loom,"SingleCellExperiment")
+## sce_loom
+
+
+## ----replaceUMAP,eval=FALSE---------------------------------------------------
+## 
+## reducedDim(sce_loom, "UMAP") <- adata$obsm[["X_umap"]]
 

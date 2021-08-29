@@ -350,7 +350,7 @@ div.tocify {
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">dir.exists</span>(reticulate<span class="sc">::</span><span class="fu">miniconda_path</span>())) {</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">install_miniconda</span>()</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">conda_install</span>(<span class="at">packages =</span> <span class="fu">c</span>(<span class="st">&quot;python-igraph&quot;</span>, <span class="st">&quot;scanpy&quot;</span>, <span class="st">&quot;louvain&quot;</span>))</span></code></pre></div>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">conda_install</span>(<span class="at">packages =</span> <span class="fu">c</span>(<span class="st">&quot;python-igraph&quot;</span>, <span class="st">&quot;scanpy&quot;</span>, <span class="st">&quot;louvain&quot;</span>, <span class="st">&quot;leidenalg&quot;</span>))</span></code></pre></div>
 </div>
 <div id="use-conda-python" class="section level2">
 <h2>Use conda python</h2>
@@ -478,17 +478,21 @@ div.tocify {
 </div>
 <div id="cell-information---pbmc-6" class="section level2">
 <h2>Cell information - PBMC</h2>
-<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>sc<span class="sc">$</span>pp<span class="sc">$</span><span class="fu">calculate_qc_metrics</span>(adata,</span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>                           <span class="at">qc_vars =</span> <span class="fu">list</span>(<span class="st">&quot;mito&quot;</span>),</span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>                           <span class="at">inplace =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>adata</span></code></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># sc$utils$sanitize_anndata(adata)</span></span></code></pre></div>
+</div>
+<div id="cell-information---pbmc-7" class="section level2">
+<h2>Cell information - PBMC</h2>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>sc<span class="sc">$</span>pp<span class="sc">$</span><span class="fu">calculate_qc_metrics</span>(adata,</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>                           <span class="at">qc_vars =</span> <span class="fu">list</span>(<span class="st">&quot;mito&quot;</span>),</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>                           <span class="at">inplace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>adata</span></code></pre></div>
 <pre><code>## AnnData object with n_obs × n_vars = 2700 × 32738
 ##     obs: &#39;n_genes&#39;, &#39;n_genes_by_counts&#39;, &#39;log1p_n_genes_by_counts&#39;, &#39;total_counts&#39;, &#39;log1p_total_counts&#39;, &#39;pct_counts_in_top_50_genes&#39;, &#39;pct_counts_in_top_100_genes&#39;, &#39;pct_counts_in_top_200_genes&#39;, &#39;pct_counts_in_top_500_genes&#39;, &#39;total_counts_mito&#39;, &#39;log1p_total_counts_mito&#39;, &#39;pct_counts_mito&#39;
 ##     var: &#39;gene_symbols&#39;, &#39;n_cells&#39;, &#39;mito&#39;, &#39;n_cells_by_counts&#39;, &#39;mean_counts&#39;, &#39;log1p_mean_counts&#39;, &#39;pct_dropout_by_counts&#39;, &#39;total_counts&#39;, &#39;log1p_total_counts&#39;</code></pre>
 </div>
-<div id="cell-information---pbmc-7" class="section level2">
+<div id="cell-information---pbmc-8" class="section level2">
 <h2>Cell information - PBMC</h2>
-<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>adata<span class="sc">$</span>var[<span class="dv">5</span><span class="sc">:</span><span class="dv">10</span>,]</span></code></pre></div>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>adata<span class="sc">$</span>var[<span class="dv">5</span><span class="sc">:</span><span class="dv">10</span>,]</span></code></pre></div>
 <pre><code>##                  gene_symbols n_cells  mito n_cells_by_counts mean_counts
 ## ENSG00000239945  RP11-34P13.8       0 FALSE                 0 0.000000000
 ## ENSG00000237683    AL627309.1       9 FALSE                 9 0.003333333
@@ -511,9 +515,9 @@ div.tocify {
 ## ENSG00000228463           1.386294
 ## ENSG00000237094           0.000000</code></pre>
 </div>
-<div id="cell-information---pbmc-8" class="section level2">
+<div id="cell-information---pbmc-9" class="section level2">
 <h2>Cell information - PBMC</h2>
-<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>adata<span class="sc">$</span>obs[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>,]</span></code></pre></div>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>adata<span class="sc">$</span>obs[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>,]</span></code></pre></div>
 <pre><code>##                  n_genes n_genes_by_counts log1p_n_genes_by_counts total_counts
 ## AAACATACAACCAC-1     781               781                6.661855         2421
 ## AAACATTGAGCTAC-1    1352              1352                7.210080         4903
@@ -530,9 +534,109 @@ div.tocify {
 ## AAACATACAACCAC-1                4.304065        3.015283
 ## AAACATTGAGCTAC-1                5.231109        3.793596</code></pre>
 </div>
-<div id="cell-information---pbmc-9" class="section level2">
+<div id="cell-information---pbmc-10" class="section level2">
 <h2>Cell information - PBMC</h2>
-<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>sc<span class="sc">$</span>pl<span class="sc">$</span><span class="fu">highest_expr_genes</span>(adata, <span class="at">gene_symbols =</span> <span class="st">&quot;gene_symbols&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>sc<span class="sc">$</span>pl<span class="sc">$</span><span class="fu">highest_expr_genes</span>(adata, <span class="at">gene_symbols =</span> <span class="st">&quot;gene_symbols&quot;</span>)</span></code></pre></div>
+</div>
+<div id="cell-information---pbmc-11" class="section level2">
+<h2>Cell information - PBMC</h2>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>sc<span class="sc">$</span>pl<span class="sc">$</span><span class="fu">violin</span>(adata, <span class="fu">list</span>(<span class="st">&quot;n_genes_by_counts&quot;</span>, <span class="st">&quot;total_counts&quot;</span>, <span class="st">&quot;pct_counts_mito&quot;</span>),</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">jitter =</span> <span class="fl">0.4</span>, <span class="at">multi_panel =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+</div>
+<div id="cell-information---pbmc-12" class="section level2">
+<h2>Cell information - PBMC</h2>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>sc<span class="sc">$</span>pl<span class="sc">$</span><span class="fu">scatter</span>(adata, <span class="at">x =</span> <span class="st">&quot;total_counts&quot;</span>, <span class="at">y =</span> <span class="st">&quot;n_genes_by_counts&quot;</span>)</span></code></pre></div>
+</div>
+<div id="cell-information---pbmc-13" class="section level2">
+<h2>Cell information - PBMC</h2>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>adata <span class="ot">=</span> adata[adata<span class="sc">$</span>obs<span class="sc">$</span>n_genes <span class="sc">&lt;</span> <span class="dv">2500</span>]</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>adata <span class="ot">=</span> adata[adata<span class="sc">$</span>obs<span class="sc">$</span>n_genes <span class="sc">&gt;</span> <span class="dv">200</span>]</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>adata <span class="ot">=</span> adata[adata<span class="sc">$</span>obs<span class="sc">$</span>pct_counts_mito <span class="sc">&lt;</span> <span class="dv">5</span>]</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>adata</span></code></pre></div>
+<pre><code>## View of AnnData object with n_obs × n_vars = 2638 × 32738
+##     obs: &#39;n_genes&#39;, &#39;n_genes_by_counts&#39;, &#39;log1p_n_genes_by_counts&#39;, &#39;total_counts&#39;, &#39;log1p_total_counts&#39;, &#39;pct_counts_in_top_50_genes&#39;, &#39;pct_counts_in_top_100_genes&#39;, &#39;pct_counts_in_top_200_genes&#39;, &#39;pct_counts_in_top_500_genes&#39;, &#39;total_counts_mito&#39;, &#39;log1p_total_counts_mito&#39;, &#39;pct_counts_mito&#39;
+##     var: &#39;gene_symbols&#39;, &#39;n_cells&#39;, &#39;mito&#39;, &#39;n_cells_by_counts&#39;, &#39;mean_counts&#39;, &#39;log1p_mean_counts&#39;, &#39;pct_dropout_by_counts&#39;, &#39;total_counts&#39;, &#39;log1p_total_counts&#39;</code></pre>
+</div>
+<div id="cell-information---pbmc-14" class="section level2">
+<h2>Cell information - PBMC</h2>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>sc<span class="sc">$</span>pp<span class="sc">$</span><span class="fu">filter_genes</span>(adata, <span class="at">min_cells =</span> <span class="dv">3</span>)</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>adata</span></code></pre></div>
+<pre><code>## AnnData object with n_obs × n_vars = 2638 × 13656
+##     obs: &#39;n_genes&#39;, &#39;n_genes_by_counts&#39;, &#39;log1p_n_genes_by_counts&#39;, &#39;total_counts&#39;, &#39;log1p_total_counts&#39;, &#39;pct_counts_in_top_50_genes&#39;, &#39;pct_counts_in_top_100_genes&#39;, &#39;pct_counts_in_top_200_genes&#39;, &#39;pct_counts_in_top_500_genes&#39;, &#39;total_counts_mito&#39;, &#39;log1p_total_counts_mito&#39;, &#39;pct_counts_mito&#39;
+##     var: &#39;gene_symbols&#39;, &#39;n_cells&#39;, &#39;mito&#39;, &#39;n_cells_by_counts&#39;, &#39;mean_counts&#39;, &#39;log1p_mean_counts&#39;, &#39;pct_dropout_by_counts&#39;, &#39;total_counts&#39;, &#39;log1p_total_counts&#39;</code></pre>
+</div>
+<div id="cell-information---pbmc-15" class="section level2">
+<h2>Cell information - PBMC</h2>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>sc<span class="sc">$</span>pp<span class="sc">$</span><span class="fu">normalize_per_cell</span>(adata, <span class="at">counts_per_cell_after =</span> <span class="dv">10000</span>)</span></code></pre></div>
+</div>
+<div id="cell-information---pbmc-16" class="section level2">
+<h2>Cell information - PBMC</h2>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co"># log transform the data.</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>sc<span class="sc">$</span>pp<span class="sc">$</span><span class="fu">log1p</span>(adata)</span></code></pre></div>
+</div>
+<div id="cell-information---pbmc-17" class="section level2">
+<h2>Cell information - PBMC</h2>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="co"># identify highly variable genes.</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>sc<span class="sc">$</span>pp<span class="sc">$</span><span class="fu">highly_variable_genes</span>(adata, <span class="at">min_mean =</span> <span class="fl">0.0125</span>, <span class="at">max_mean =</span> <span class="dv">3</span>, <span class="at">min_disp =</span> <span class="fl">0.5</span>)</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a><span class="co"># sc$pl$highly_variable_genes(adata)</span></span></code></pre></div>
+</div>
+<div id="cell-information---pbmc-18" class="section level2">
+<h2>Cell information - PBMC</h2>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co"># keep only highly variable genes:</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>adata <span class="ot">=</span> adata<span class="sc">$</span><span class="fu">copy</span>()</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>adata <span class="ot">=</span> adata[, adata<span class="sc">$</span>var<span class="sc">$</span>highly_variable]</span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>adata <span class="ot">=</span> adata<span class="sc">$</span><span class="fu">copy</span>()</span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a><span class="co"># regress out total counts per cell and the percentage of mitochondrial genes</span></span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a><span class="co"># expressed adata.copy = adata sc$pp$regress_out(adata, list(&#39;n_counts&#39;,</span></span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a><span class="co"># &#39;pct_counts_mito&#39;),copy=FALSE) #, n_jobs=args.threads)</span></span></code></pre></div>
+</div>
+<div id="cell-information---pbmc-19" class="section level2">
+<h2>Cell information - PBMC</h2>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>sc<span class="sc">$</span>pp<span class="sc">$</span><span class="fu">regress_out</span>(adata, <span class="fu">list</span>(<span class="st">&quot;n_counts&quot;</span>, <span class="st">&quot;pct_counts_mito&quot;</span>))</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a><span class="co"># adata = adata2 scale each gene to unit variance, clip values exceeding SD 10.</span></span></code></pre></div>
+</div>
+<div id="cell-information---pbmc-20" class="section level2">
+<h2>Cell information - PBMC</h2>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>sc<span class="sc">$</span>pp<span class="sc">$</span><span class="fu">scale</span>(adata, <span class="at">max_value =</span> <span class="dv">10</span>)</span></code></pre></div>
+</div>
+<div id="cell-information---pbmc-21" class="section level2">
+<h2>Cell information - PBMC</h2>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>sc<span class="sc">$</span>tl<span class="sc">$</span><span class="fu">pca</span>(adata, <span class="at">svd_solver =</span> <span class="st">&quot;arpack&quot;</span>)</span></code></pre></div>
+</div>
+<div id="cell-information---pbmc-22" class="section level2">
+<h2>Cell information - PBMC</h2>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>sc<span class="sc">$</span>pp<span class="sc">$</span><span class="fu">neighbors</span>(adata, <span class="at">n_neighbors =</span> 10L, <span class="at">n_pcs =</span> 40L)</span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>sc<span class="sc">$</span>tl<span class="sc">$</span><span class="fu">umap</span>(adata)</span></code></pre></div>
+</div>
+<div id="cell-information---pbmc-23" class="section level2">
+<h2>Cell information - PBMC</h2>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>sc<span class="sc">$</span>tl<span class="sc">$</span><span class="fu">louvain</span>(adata)</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>sc<span class="sc">$</span>tl<span class="sc">$</span><span class="fu">leiden</span>(adata)</span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span></code></pre></div>
+</div>
+<div id="cell" class="section level2">
+<h2>Cell</h2>
+<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>sc<span class="sc">$</span>pl<span class="sc">$</span><span class="fu">umap</span>(adata, <span class="at">color =</span> <span class="fu">list</span>(<span class="st">&quot;leiden&quot;</span>))</span></code></pre></div>
+</div>
+<div id="cell-1" class="section level2">
+<h2>Cell</h2>
+<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>adata<span class="sc">$</span><span class="fu">write_h5ad</span>(<span class="at">filename =</span> <span class="st">&quot;PBMC_Scanpy.h5ad&quot;</span>)</span></code></pre></div>
+</div>
+<div id="cell-2" class="section level2">
+<h2>Cell</h2>
+<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">require</span>(LoomExperiment)</span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>loom <span class="ot">&lt;-</span> LoomExperiment<span class="sc">::</span><span class="fu">import</span>(<span class="at">con =</span> <span class="st">&quot;PBMC_Scanpy.loom&quot;</span>)</span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>loom</span></code></pre></div>
+</div>
+<div id="cell-3" class="section level2">
+<h2>Cell</h2>
+<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>sce_loom <span class="ot">&lt;-</span> <span class="fu">as</span>(loom, <span class="st">&quot;SingleCellExperiment&quot;</span>)</span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>sce_loom</span></code></pre></div>
+</div>
+<div id="cell-4" class="section level2">
+<h2>Cell</h2>
+<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="fu">reducedDim</span>(sce_loom, <span class="st">&quot;UMAP&quot;</span>) <span class="ot">&lt;-</span> adata<span class="sc">$</span>obsm[[<span class="st">&quot;X_umap&quot;</span>]]</span></code></pre></div>
 </div>
 <div id="time-for-an-exercise" class="section level2">
 <h2>Time for an exercise!</h2>
