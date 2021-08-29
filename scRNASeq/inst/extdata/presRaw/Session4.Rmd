@@ -33,13 +33,7 @@ knitr::opts_chunk$set(echo = TRUE, tidy = T)
 ```
 
 
-## Outline
-There are more and more Bioconductor packages supporting single-cell data analysis. R Amezquita, A Lun, S Hicks, and R Gottardo wrote an integrated workflow, [Orchestrating Single-Cell Analysis with Bioconductor](https://bioconductor.org/books/release/OSCA/), for single-cell data analysis and quality assessment. In this session, we will go through several important QC metrics which can't be made with Seurat. 
-
-- How to differentiate empty droplets?
-- How to estimate ambient RNA and remove them?
-- How to identify doublets?
-- Checking for confounded effect?
+## Overview
 
 ---
 ```{r, results='asis',include=TRUE,echo=FALSE}
@@ -168,17 +162,63 @@ sc$pp$filter_genes(adata, min_cells=0)
 
 ---
 ## Cell information - PBMC
-```{r obsdf2}
+```{r vardf2}
 var_df <- adata$var
 var_df[1:2,]
 ```
 
 ---
 ## Cell information - PBMC
-```{r vardf2}
+```{r obsdf2}
 obs_df <- adata$obs
 obs_df[1:2,,drop=FALSE]
 ```
+
+---
+## Cell information - PBMC
+```{r vardfRe}
+var_df$mito <- grepl("MT-",var_df$gene_symbols)
+var_df[var_df$mito == TRUE,]
+```
+---
+
+## Cell information - PBMC
+```{r vardfRe2}
+adata$var <- var_df
+adata$var[1:2,]
+```
+
+---
+
+## Cell information - PBMC
+```{r mitoQC,tidy=FALSE}
+sc$pp$calculate_qc_metrics(adata,
+                           qc_vars = list("mito"),
+                           inplace = TRUE)
+adata
+```
+
+---
+
+## Cell information - PBMC
+```{r moreQC,tidy=FALSE}
+adata$var[5:10,]
+```
+
+---
+
+## Cell information - PBMC
+```{r moreQC2,tidy=FALSE}
+adata$obs[1:2,]
+```
+
+
+---
+## Cell information - PBMC
+```{r plotHiExpr,eval=FALSE}
+sc$pl$highest_expr_genes(adata,gene_symbols = "gene_symbols")
+```
+
 
 ---
 ## Time for an exercise!
