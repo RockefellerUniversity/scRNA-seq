@@ -373,25 +373,87 @@ div.tocify {
 <div id="load-python-library" class="section level2">
 <h2>Load python library</h2>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>sc <span class="ot">&lt;-</span> <span class="fu">import</span>(<span class="st">&quot;scanpy&quot;</span>)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>sc<span class="sc">$</span>settings</span></code></pre></div>
-<pre><code>## N_PCS = 50
-## autosave = False
-## autoshow = True
-## cache_compression = &#39;lzf&#39;
-## cachedir = PosixPath(&#39;cache&#39;)
-## categories_to_ignore = [&#39;N/A&#39;, &#39;dontknow&#39;, &#39;no_gate&#39;, &#39;?&#39;]
-## datasetdir = PosixPath(&#39;/__w/scRNA-seq/scRNA-seq/extdata/data&#39;)
-## figdir = PosixPath(&#39;figures&#39;)
-## file_format_data = &#39;h5ad&#39;
-## file_format_figs = &#39;pdf&#39;
-## logfile = &lt;_io.TextIOWrapper name=&#39;&lt;stderr&gt;&#39; mode=&#39;w&#39; encoding=&#39;UTF-8&#39;&gt;
-## logpath = None
-## max_memory = 15
-## n_jobs = 1
-## plot_suffix = &#39;&#39;
-## set_figure_params = &lt;bound method ScanpyConfig.set_figure_params of &lt;scanpy._settings.ScanpyConfig&gt;&gt;
-## verbosity = &lt;Verbosity.warn: 1&gt;
-## writedir = PosixPath(&#39;write&#39;)</code></pre>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>sc</span></code></pre></div>
+<pre><code>## Module(scanpy)</code></pre>
+</div>
+<div id="install-anndata-package" class="section level2">
+<h2>Install anndata package</h2>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">require</span>(anndata)) {</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">install.packages</span>(<span class="st">&quot;anndata&quot;</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">require</span>(anndata)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+<div id="download-pbmc" class="section level2">
+<h2>Download PBMC</h2>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>pathToDownload <span class="ot">&lt;-</span> <span class="st">&quot;http://cf.10xgenomics.com/samples/cell-exp/1.1.0/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz&quot;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">download.file</span>(pathToDownload, <span class="st">&quot;pbmc3k_filtered_gene_bc_matrices.tar.gz&quot;</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>utils<span class="sc">::</span><span class="fu">untar</span>(<span class="st">&quot;pbmc3k_filtered_gene_bc_matrices.tar.gz&quot;</span>)</span></code></pre></div>
+</div>
+<div id="read-pbmc" class="section level2">
+<h2>Read PBMC</h2>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>adata <span class="ot">&lt;-</span> sc<span class="sc">$</span><span class="fu">read_10x_mtx</span>(<span class="st">&quot;filtered_gene_bc_matrices/hg19/&quot;</span>, <span class="at">var_names =</span> <span class="st">&quot;gene_ids&quot;</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>adata</span></code></pre></div>
+<pre><code>## AnnData object with n_obs × n_vars = 2700 × 32738
+##     var: &#39;gene_symbols&#39;</code></pre>
+</div>
+<div id="dimensions-pbmc" class="section level2">
+<h2>Dimensions PBMC</h2>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(adata)</span></code></pre></div>
+<pre><code>## [1]  2700 32738</code></pre>
+</div>
+<div id="dimnames---pbmc" class="section level2">
+<h2>Dimnames - PBMC</h2>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(adata)[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]</span></code></pre></div>
+<pre><code>## [1] &quot;ENSG00000243485&quot; &quot;ENSG00000237613&quot; &quot;ENSG00000186092&quot;</code></pre>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(adata)[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]</span></code></pre></div>
+<pre><code>## [1] &quot;AAACATACAACCAC-1&quot; &quot;AAACATTGAGCTAC-1&quot; &quot;AAACATTGATCAGC-1&quot;</code></pre>
+</div>
+<div id="counts--pbmc" class="section level2">
+<h2>Counts- PBMC</h2>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>countsMatrix <span class="ot">&lt;-</span> adata<span class="sc">$</span>X</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>countsMatrix[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]</span></code></pre></div>
+<pre><code>## 2 x 2 sparse Matrix of class &quot;dgTMatrix&quot;
+##                  ENSG00000243485 ENSG00000237613
+## AAACATACAACCAC-1               .               .
+## AAACATTGAGCTAC-1               .               .</code></pre>
+</div>
+<div id="gene-information---pbmc" class="section level2">
+<h2>Gene information - PBMC</h2>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>var_df <span class="ot">&lt;-</span> adata<span class="sc">$</span>var</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>var_df[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span></code></pre></div>
+<pre><code>##                 gene_symbols
+## ENSG00000243485   MIR1302-10
+## ENSG00000237613      FAM138A</code></pre>
+</div>
+<div id="cell-information---pbmc" class="section level2">
+<h2>Cell information - PBMC</h2>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>obs_df <span class="ot">&lt;-</span> adata<span class="sc">$</span>obs</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>obs_df</span></code></pre></div>
+<pre><code>## data frame with 0 columns and 2700 rows</code></pre>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(obs_df)[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]</span></code></pre></div>
+<pre><code>## [1] &quot;AAACATACAACCAC-1&quot; &quot;AAACATTGAGCTAC-1&quot;</code></pre>
+</div>
+<div id="cell-information---pbmc-1" class="section level2">
+<h2>Cell information - PBMC</h2>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>sc<span class="sc">$</span>pp<span class="sc">$</span><span class="fu">filter_cells</span>(adata, <span class="at">min_genes =</span> <span class="dv">0</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>sc<span class="sc">$</span>pp<span class="sc">$</span><span class="fu">filter_genes</span>(adata, <span class="at">min_cells =</span> <span class="dv">0</span>)</span></code></pre></div>
+</div>
+<div id="cell-information---pbmc-2" class="section level2">
+<h2>Cell information - PBMC</h2>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>var_df <span class="ot">&lt;-</span> adata<span class="sc">$</span>var</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>var_df[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, ]</span></code></pre></div>
+<pre><code>##                 gene_symbols n_cells
+## ENSG00000243485   MIR1302-10       0
+## ENSG00000237613      FAM138A       0</code></pre>
+</div>
+<div id="cell-information---pbmc-3" class="section level2">
+<h2>Cell information - PBMC</h2>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>obs_df <span class="ot">&lt;-</span> adata<span class="sc">$</span>obs</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>obs_df[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span></code></pre></div>
+<pre><code>##                  n_genes
+## AAACATACAACCAC-1     781
+## AAACATTGAGCTAC-1    1352</code></pre>
 </div>
 <div id="time-for-an-exercise" class="section level2">
 <h2>Time for an exercise!</h2>
