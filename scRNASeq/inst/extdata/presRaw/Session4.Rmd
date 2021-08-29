@@ -94,7 +94,17 @@ py_config()
 ## Load python library
 ```{r importPython}
 sc <- import("scanpy")
-sc$settings
+sc
+```
+
+---
+## Install anndata package
+```{r importPython}
+if(!require(anndata)){
+  install.packages("anndata")
+  require(anndata)
+}
+
 ```
 
 ---

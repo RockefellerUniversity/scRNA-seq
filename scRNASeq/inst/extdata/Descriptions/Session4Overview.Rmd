@@ -2,7 +2,8 @@
 
 #### **Single-cell RNA sequencing , Session 3**
 
-In this session we will cover scRNA processing using AnnData and Scanpy:
+In this session we will cover scRNA processing in python from the R session using the R reticulate package and the python AnnData and Scanpy packages:
 
-* AnnData
-* Scanpy
+* Introduction to reticulate package.
+* Loading scRNA data to AnnData objects.
+* Processing scRNA as AnnData in Scanpy.
