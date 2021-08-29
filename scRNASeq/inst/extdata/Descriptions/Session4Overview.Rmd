@@ -1,0 +1,8 @@
+<br>
+
+#### **Single-cell RNA sequencing , Session 3**
+
+In this session we will cover scRNA processing using AnnData and Scanpy:
+
+* AnnData
+* Scanpy
