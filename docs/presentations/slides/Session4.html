@@ -13,7 +13,7 @@
     <textarea id="source">
 class: center, middle, inverse, title-slide
 
-# Single-cell RNA sequencing ~ Session 3
+# Single-cell RNA sequencing ~ Session 4
 <html>
 <div style="float:left">
 
@@ -75,7 +75,7 @@ if (!dir.exists(reticulate::miniconda_path())) {
 ```
 
 ```r
-conda_install(packages = c("python-igraph", "scanpy", "louvain", "leidenalg"))
+conda_install(packages = c("python-igraph", "scanpy", "louvain", "leidenalg", "loompy"))
 ```
 
 ---
@@ -99,7 +99,7 @@ py_config()
 ## Load python library
 
 ```r
-sc &lt;- import("scanpy")
+sc &lt;- reticulate::import("scanpy")
 sc
 ```
 
@@ -544,9 +544,90 @@ adata$write_h5ad(filename = "PBMC_Scanpy.h5ad")
 ## Cell
 
 ```r
-require(LoomExperiment)
+adata$write_loom(filename = "PBMC_Scanpy.loom")
+```
+
+---
+## Cell
+
+```r
+if (!require(LoomExperiment)) {
+    BiocManager::install("LoomExperiment")
+    require(LoomExperiment)
+}
+```
+
+```
+## Loading required package: LoomExperiment
+```
+
+```
+## Warning in library(package, lib.loc = lib.loc, character.only = TRUE,
+## logical.return = TRUE, : there is no package called 'LoomExperiment'
+```
+
+```
+## 'getOption("repos")' replaces Bioconductor standard repositories, see
+## '?repositories' for details
+## 
+## replacement repositories:
+##     CRAN: https://packagemanager.rstudio.com/all/__linux__/focal/latest
+```
+
+```
+## Bioconductor version 3.13 (BiocManager 1.30.16), R 4.1.0 (2021-05-18)
+```
+
+```
+## Installing package(s) 'LoomExperiment'
+```
+
+```
+## Old packages: 'cachem', 'gert', 'R6', 'stringi', 'tibble', 'waldo', 'xfun',
+##   'survival'
+```
+
+```
+## Loading required package: LoomExperiment
+```
+
+```
+## Loading required package: rhdf5
+```
+
+```
+## Loading required package: BiocIO
+```
+
+```
+## 
+## Attaching package: 'BiocIO'
+```
+
+```
+## The following object is masked from 'package:reticulate':
+## 
+##     import
+```
+
+```r
 loom &lt;- LoomExperiment::import(con = "PBMC_Scanpy.loom")
 loom
+```
+
+```
+## class: LoomExperiment 
+## dim: 1826 2638 
+## metadata(3): last_modified CreationDate LOOM_SPEC_VERSION
+## assays(1): matrix
+## rownames: NULL
+## rowData names(16): dispersions dispersions_norm ... total_counts
+##   var_names
+## colnames: NULL
+## colData names(16): leiden log1p_n_genes_by_counts ... total_counts
+##   total_counts_mito
+## rowGraphs(0): NULL
+## colGraphs(0): NULL
 ```
 
 ---
@@ -557,14 +638,42 @@ sce_loom &lt;- as(loom, "SingleCellExperiment")
 sce_loom
 ```
 
+```
+## class: SingleCellExperiment 
+## dim: 1826 2638 
+## metadata(3): last_modified CreationDate LOOM_SPEC_VERSION
+## assays(1): matrix
+## rownames: NULL
+## rowData names(16): dispersions dispersions_norm ... total_counts
+##   var_names
+## colnames: NULL
+## colData names(16): leiden log1p_n_genes_by_counts ... total_counts
+##   total_counts_mito
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+```
+
 ---
 ## Cell
 
 ```r
+if (!require(scater)) {
+    BiocManager::install("scater")
+    require(scater)
+}
 reducedDim(sce_loom, "UMAP") &lt;- adata$obsm[["X_umap"]]
+reducedDim(sce_loom, "PCA") &lt;- adata$obsm[["X_pca"]]
 ```
 
+---
+## Cell
 
+```r
+plotUMAP(sce_loom, colour_by = "leiden")
+```
+
+![](Session4_files/figure-html/plotUMAP-1.png)&lt;!-- --&gt;
 
 ---
 ## Time for an exercise!
