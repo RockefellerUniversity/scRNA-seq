@@ -180,8 +180,8 @@ obs_df[1:2,,drop=FALSE]
 var_df$mito <- grepl("MT-",var_df$gene_symbols)
 var_df[var_df$mito == TRUE,]
 ```
----
 
+---
 ## Cell information - PBMC
 ```{r vardfRe2}
 adata$var <- var_df
@@ -189,7 +189,12 @@ adata$var[1:2,]
 ```
 
 ---
+## Cell information - PBMC
+```{r santize}
+sc$utils$sanitize_anndata(adata)
+```
 
+---
 ## Cell information - PBMC
 ```{r mitoQC,tidy=FALSE}
 sc$pp$calculate_qc_metrics(adata,
@@ -199,14 +204,12 @@ adata
 ```
 
 ---
-
 ## Cell information - PBMC
 ```{r moreQC,tidy=FALSE}
 adata$var[5:10,]
 ```
 
 ---
-
 ## Cell information - PBMC
 ```{r moreQC2,tidy=FALSE}
 adata$obs[1:2,]
@@ -219,6 +222,117 @@ adata$obs[1:2,]
 sc$pl$highest_expr_genes(adata,gene_symbols = "gene_symbols")
 ```
 
+---
+## Cell information - PBMC
+```{r plotQCpy2,eval=FALSE}
+sc.pl.violin(adata, ['n_genes_by_counts', 'total_counts', 'pct_counts_mito'],
+             jitter=0.4, multi_panel=True)
+```
+
+---
+## Cell information - PBMC
+```{r plotQCpy3,eval=FALSE}
+sc.pl.scatter(adata, x='total_counts', y='n_genes_by_counts')
+
+```
+
+
+
+---
+## Cell information - PBMC
+```{r filtercells}
+adata = adata[adata$obs$n_genes < 2500]
+adata = adata[adata$obs$n_genes > 200]
+adata = adata[adata$obs$pct_counts_mito < 5]
+adata
+```
+
+---
+## Cell information - PBMC
+```{r filtergenes}
+sc$pp$filter_genes(adata,
+                   min_cells=3)
+adata
+```
+
+---
+## Cell information - PBMC
+```{r normCells}
+sc$pp$normalize_per_cell(adata, counts_per_cell_after=10000)
+```
+
+---
+## Cell information - PBMC
+```{r logCells}
+# log transform the data.
+sc$pp$log1p(adata)
+
+```
+
+---
+## Cell information - PBMC
+```{r variableGenes}
+# identify highly variable genes.
+sc$pp$highly_variable_genes(adata, min_mean=0.0125, max_mean=3, min_disp=0.5)
+# sc$pl$highly_variable_genes(adata)
+```
+
+
+---
+## Cell information - PBMC
+```{r filterToVariable}
+# keep only highly variable genes:
+adata = adata$copy()
+adata = adata[,adata$var$highly_variable]
+adata = adata$copy()
+# regress out total counts per cell and the percentage of mitochondrial genes expressed
+# adata.copy = adata
+# sc$pp$regress_out(adata, list('n_counts', 'pct_counts_mito'),copy=FALSE) #, n_jobs=args.threads)
+```
+
+---
+## Cell information - PBMC
+```{r regress}
+sc$pp$regress_out(adata, list('n_counts', 'pct_counts_mito'))
+
+# adata = adata2
+# scale each gene to unit variance, clip values exceeding SD 10.
+```
+
+
+---
+## Cell information - PBMC
+```{r scale}
+sc$pp$scale(adata, max_value=10)
+```
+
+
+---
+## Cell information - PBMC
+```{r pca}
+sc$tl$pca(adata, svd_solver='arpack')
+```
+
+
+---
+## Cell information - PBMC
+```{r neighbours}
+sc$pp$neighbors(adata, n_neighbors=15L, n_pcs=50L)
+sc$tl$umap(adata)
+```
+
+---
+## Cell information - PBMC
+```{r louvain}
+sc$tl$louvain(adata,resolution=0.8)
+# 
+```
+
+---
+## Cell
+```{r plotumapCells,eval=FALSE}
+sc$pl$umap(adata, color=list('louvain'))
+```
 
 ---
 ## Time for an exercise!
