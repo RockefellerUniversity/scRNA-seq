@@ -373,7 +373,7 @@ reducedDim(sce_loom, "PCA") <- adata$obsm[["X_pca"]]
 
 ---
 ## Cell
-```{r replaceUMAP}
+```{r plotUMAP}
 plotUMAP(sce_loom,colour_by="leiden")
 ```
 
