@@ -335,15 +335,8 @@ div.tocify {
 </div>
 
 
-<div id="outline" class="section level2">
-<h2>Outline</h2>
-<p>There are more and more Bioconductor packages supporting single-cell data analysis. R Amezquita, A Lun, S Hicks, and R Gottardo wrote an integrated workflow, <a href="https://bioconductor.org/books/release/OSCA/">Orchestrating Single-Cell Analysis with Bioconductor</a>, for single-cell data analysis and quality assessment. In this session, we will go through several important QC metrics which can’t be made with Seurat.</p>
-<ul>
-<li>How to differentiate empty droplets?</li>
-<li>How to estimate ambient RNA and remove them?</li>
-<li>How to identify doublets?</li>
-<li>Checking for confounded effect?</li>
-</ul>
+<div id="overview" class="section level2">
+<h2>Overview</h2>
 </div>
 <div id="loading-data-and-empty-drops" class="section level1">
 <h1>Loading data and empty drops</h1>
@@ -454,6 +447,92 @@ div.tocify {
 <pre><code>##                  n_genes
 ## AAACATACAACCAC-1     781
 ## AAACATTGAGCTAC-1    1352</code></pre>
+</div>
+<div id="cell-information---pbmc-4" class="section level2">
+<h2>Cell information - PBMC</h2>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>var_df<span class="sc">$</span>mito <span class="ot">&lt;-</span> <span class="fu">grepl</span>(<span class="st">&quot;MT-&quot;</span>, var_df<span class="sc">$</span>gene_symbols)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>var_df[var_df<span class="sc">$</span>mito <span class="sc">==</span> <span class="cn">TRUE</span>, ]</span></code></pre></div>
+<pre><code>##                 gene_symbols n_cells mito
+## ENSG00000254959 INMT-FAM188B       0 TRUE
+## ENSG00000198888       MT-ND1    2558 TRUE
+## ENSG00000198763       MT-ND2    2416 TRUE
+## ENSG00000198804       MT-CO1    2686 TRUE
+## ENSG00000198712       MT-CO2    2460 TRUE
+## ENSG00000228253      MT-ATP8      32 TRUE
+## ENSG00000198899      MT-ATP6    2014 TRUE
+## ENSG00000198938       MT-CO3    2647 TRUE
+## ENSG00000198840       MT-ND3     557 TRUE
+## ENSG00000212907      MT-ND4L     398 TRUE
+## ENSG00000198886       MT-ND4    2588 TRUE
+## ENSG00000198786       MT-ND5    1399 TRUE
+## ENSG00000198695       MT-ND6     249 TRUE
+## ENSG00000198727       MT-CYB    2517 TRUE</code></pre>
+</div>
+<div id="cell-information---pbmc-5" class="section level2">
+<h2>Cell information - PBMC</h2>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>adata<span class="sc">$</span>var <span class="ot">&lt;-</span> var_df</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>adata<span class="sc">$</span>var[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, ]</span></code></pre></div>
+<pre><code>##                 gene_symbols n_cells  mito
+## ENSG00000243485   MIR1302-10       0 FALSE
+## ENSG00000237613      FAM138A       0 FALSE</code></pre>
+</div>
+<div id="cell-information---pbmc-6" class="section level2">
+<h2>Cell information - PBMC</h2>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>sc<span class="sc">$</span>pp<span class="sc">$</span><span class="fu">calculate_qc_metrics</span>(adata,</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>                           <span class="at">qc_vars =</span> <span class="fu">list</span>(<span class="st">&quot;mito&quot;</span>),</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>                           <span class="at">inplace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>adata</span></code></pre></div>
+<pre><code>## AnnData object with n_obs × n_vars = 2700 × 32738
+##     obs: &#39;n_genes&#39;, &#39;n_genes_by_counts&#39;, &#39;log1p_n_genes_by_counts&#39;, &#39;total_counts&#39;, &#39;log1p_total_counts&#39;, &#39;pct_counts_in_top_50_genes&#39;, &#39;pct_counts_in_top_100_genes&#39;, &#39;pct_counts_in_top_200_genes&#39;, &#39;pct_counts_in_top_500_genes&#39;, &#39;total_counts_mito&#39;, &#39;log1p_total_counts_mito&#39;, &#39;pct_counts_mito&#39;
+##     var: &#39;gene_symbols&#39;, &#39;n_cells&#39;, &#39;mito&#39;, &#39;n_cells_by_counts&#39;, &#39;mean_counts&#39;, &#39;log1p_mean_counts&#39;, &#39;pct_dropout_by_counts&#39;, &#39;total_counts&#39;, &#39;log1p_total_counts&#39;</code></pre>
+</div>
+<div id="cell-information---pbmc-7" class="section level2">
+<h2>Cell information - PBMC</h2>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>adata<span class="sc">$</span>var[<span class="dv">5</span><span class="sc">:</span><span class="dv">10</span>,]</span></code></pre></div>
+<pre><code>##                  gene_symbols n_cells  mito n_cells_by_counts mean_counts
+## ENSG00000239945  RP11-34P13.8       0 FALSE                 0 0.000000000
+## ENSG00000237683    AL627309.1       9 FALSE                 9 0.003333333
+## ENSG00000239906 RP11-34P13.14       0 FALSE                 0 0.000000000
+## ENSG00000241599  RP11-34P13.9       0 FALSE                 0 0.000000000
+## ENSG00000228463    AP006222.2       3 FALSE                 3 0.001111111
+## ENSG00000237094 RP4-669L17.10       0 FALSE                 0 0.000000000
+##                 log1p_mean_counts pct_dropout_by_counts total_counts
+## ENSG00000239945       0.000000000             100.00000            0
+## ENSG00000237683       0.003327790              99.66667            9
+## ENSG00000239906       0.000000000             100.00000            0
+## ENSG00000241599       0.000000000             100.00000            0
+## ENSG00000228463       0.001110494              99.88889            3
+## ENSG00000237094       0.000000000             100.00000            0
+##                 log1p_total_counts
+## ENSG00000239945           0.000000
+## ENSG00000237683           2.302585
+## ENSG00000239906           0.000000
+## ENSG00000241599           0.000000
+## ENSG00000228463           1.386294
+## ENSG00000237094           0.000000</code></pre>
+</div>
+<div id="cell-information---pbmc-8" class="section level2">
+<h2>Cell information - PBMC</h2>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>adata<span class="sc">$</span>obs[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>,]</span></code></pre></div>
+<pre><code>##                  n_genes n_genes_by_counts log1p_n_genes_by_counts total_counts
+## AAACATACAACCAC-1     781               781                6.661855         2421
+## AAACATTGAGCTAC-1    1352              1352                7.210080         4903
+##                  log1p_total_counts pct_counts_in_top_50_genes
+## AAACATACAACCAC-1           7.792349                   47.74886
+## AAACATTGAGCTAC-1           8.497807                   45.50275
+##                  pct_counts_in_top_100_genes pct_counts_in_top_200_genes
+## AAACATACAACCAC-1                    63.27964                    74.96902
+## AAACATTGAGCTAC-1                    61.02386                    71.81318
+##                  pct_counts_in_top_500_genes total_counts_mito
+## AAACATACAACCAC-1                    88.39323                73
+## AAACATTGAGCTAC-1                    82.62288               186
+##                  log1p_total_counts_mito pct_counts_mito
+## AAACATACAACCAC-1                4.304065        3.015283
+## AAACATTGAGCTAC-1                5.231109        3.793596</code></pre>
+</div>
+<div id="cell-information---pbmc-9" class="section level2">
+<h2>Cell information - PBMC</h2>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>sc<span class="sc">$</span>pl<span class="sc">$</span><span class="fu">highest_expr_genes</span>(adata, <span class="at">gene_symbols =</span> <span class="st">&quot;gene_symbols&quot;</span>)</span></code></pre></div>
 </div>
 <div id="time-for-an-exercise" class="section level2">
 <h2>Time for an exercise!</h2>

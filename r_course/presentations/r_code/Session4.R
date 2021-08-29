@@ -114,12 +114,41 @@ sc$pp$filter_cells(adata, min_genes=0)
 sc$pp$filter_genes(adata, min_cells=0)
 
 
-## ----obsdf2-------------------------------------------------------------------
+## ----vardf2-------------------------------------------------------------------
 var_df <- adata$var
 var_df[1:2,]
 
 
-## ----vardf2-------------------------------------------------------------------
+## ----obsdf2-------------------------------------------------------------------
 obs_df <- adata$obs
 obs_df[1:2,,drop=FALSE]
+
+
+## ----vardfRe------------------------------------------------------------------
+var_df$mito <- grepl("MT-",var_df$gene_symbols)
+var_df[var_df$mito == TRUE,]
+
+
+## ----vardfRe2-----------------------------------------------------------------
+adata$var <- var_df
+adata$var[1:2,]
+
+
+## ----mitoQC,tidy=FALSE--------------------------------------------------------
+sc$pp$calculate_qc_metrics(adata,
+                           qc_vars = list("mito"),
+                           inplace = TRUE)
+adata
+
+
+## ----moreQC,tidy=FALSE--------------------------------------------------------
+adata$var[5:10,]
+
+
+## ----moreQC2,tidy=FALSE-------------------------------------------------------
+adata$obs[1:2,]
+
+
+## ----plotHiExpr,eval=FALSE----------------------------------------------------
+## sc$pl$highest_expr_genes(adata,gene_symbols = "gene_symbols")
 
