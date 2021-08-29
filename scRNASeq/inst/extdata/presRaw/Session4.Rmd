@@ -338,8 +338,14 @@ sc$pl$umap(adata, color=list('leiden'))
 
 ---
 ## Cell
-```{r saveToLoom}
+```{r saveToh5ad}
 adata$write_h5ad(filename = "PBMC_Scanpy.h5ad")
+```
+
+---
+## Cell
+```{r saveToLoom}
+adata$write_loom(filename = "PBMC_Scanpy.loom")
 ```
 
 ---
