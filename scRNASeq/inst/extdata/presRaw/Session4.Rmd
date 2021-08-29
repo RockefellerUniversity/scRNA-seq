@@ -87,12 +87,17 @@ conda_install(
 use_condaenv()
 py_config()
 
+```
 
+---
+## Load python library
+```{r}
+sc <- import("scanpy")
 ```
 
 ---
 ## Time for an exercise!
 
-Exercise on scRNAseq analysis with Bioconductor can be found [here](../../exercises/exercises/exercise2_exercise.html).
+Exercise on scRNAseq analysis with Bioconductor can be found [here](../../exercises/exercises/exercise4_exercise.html).
 
-Answers can be found [here](../../exercises/answers/exercise2_answers.html).
+Answers can be found [here](../../exercises/answers/exercise4_answers.html).
