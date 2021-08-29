@@ -148,7 +148,7 @@ legend("bottomleft", legend=c("Inflection", "Knee"),
 
 ---
 ## Identify non-empty droplets
-  The *emptydrops* function can be used to identify goog/bad droplets. 2 keys arguments are:
+  The *emptydrops* function can be used to identify good/bad droplets. 2 keys arguments are:
 - limit: lowest counts per cell
 - test.ambient: Could be used to estimate ambient RNA contamination
 
