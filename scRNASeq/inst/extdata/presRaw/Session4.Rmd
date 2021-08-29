@@ -87,7 +87,7 @@ py_config()
 ---
 ## Load python library
 ```{r importPython}
-sc <- import("scanpy")
+sc <- reticulate::import("scanpy")
 sc
 ```
 
