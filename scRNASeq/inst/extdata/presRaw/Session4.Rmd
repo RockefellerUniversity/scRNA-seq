@@ -104,9 +104,9 @@ if(!require(anndata)){
 ---
 ## Download PBMC
 ```{r downloadPBMC}
-pathToDownload <- "http://cf.10xgenomics.com/samples/cell-exp/1.1.0/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz"
-download.file(pathToDownload,"pbmc3k_filtered_gene_bc_matrices.tar.gz")
-utils::untar("pbmc3k_filtered_gene_bc_matrices.tar.gz")
+# pathToDownload <- "http://cf.10xgenomics.com/samples/cell-exp/1.1.0/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz"
+# download.file(pathToDownload,"pbmc3k_filtered_gene_bc_matrices.tar.gz")
+# utils::untar("pbmc3k_filtered_gene_bc_matrices.tar.gz")
 ```
 
 ---
@@ -191,7 +191,7 @@ adata$var[1:2,]
 ---
 ## Cell information - PBMC
 ```{r santize}
-sc$utils$sanitize_anndata(adata)
+# sc$utils$sanitize_anndata(adata)
 ```
 
 ---
@@ -225,14 +225,14 @@ sc$pl$highest_expr_genes(adata,gene_symbols = "gene_symbols")
 ---
 ## Cell information - PBMC
 ```{r plotQCpy2,eval=FALSE}
-sc.pl.violin(adata, ['n_genes_by_counts', 'total_counts', 'pct_counts_mito'],
-             jitter=0.4, multi_panel=True)
+sc$pl$violin(adata, list('n_genes_by_counts', 'total_counts', 'pct_counts_mito'),
+             jitter=0.4, multi_panel=TRUE)
 ```
 
 ---
 ## Cell information - PBMC
 ```{r plotQCpy3,eval=FALSE}
-sc.pl.scatter(adata, x='total_counts', y='n_genes_by_counts')
+sc$pl$scatter(adata, x='total_counts', y='n_genes_by_counts')
 
 ```
 
@@ -317,21 +317,22 @@ sc$tl$pca(adata, svd_solver='arpack')
 ---
 ## Cell information - PBMC
 ```{r neighbours}
-sc$pp$neighbors(adata, n_neighbors=15L, n_pcs=50L)
+sc$pp$neighbors(adata, n_neighbors=10L, n_pcs=40L)
 sc$tl$umap(adata)
 ```
 
 ---
 ## Cell information - PBMC
 ```{r louvain}
-sc$tl$louvain(adata,resolution=0.8)
+sc$tl$louvain(adata)
+sc$tl$leiden(adata)
 # 
 ```
 
 ---
 ## Cell
 ```{r plotumapCells,eval=FALSE}
-sc$pl$umap(adata, color=list('louvain'))
+sc$pl$umap(adata, color=list('leiden'))
 ```
 
 ---
