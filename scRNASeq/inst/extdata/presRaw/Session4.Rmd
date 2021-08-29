@@ -65,7 +65,7 @@ if(params$isSlides == "yes"){
 ```
 
 ## Install python libraries
-```{r installPython}
+```{r installPythonAndPkgs}
 
 if(!require(reticulate)){
   install.packages("reticulate")
@@ -83,7 +83,7 @@ conda_install(
 
 ---
 ## Use conda python
-```{r installPython}
+```{r usePython}
 use_condaenv()
 py_config()
 
@@ -91,7 +91,7 @@ py_config()
 
 ---
 ## Load python library
-```{r}
+```{r importPython}
 sc <- import("scanpy")
 ```
 
