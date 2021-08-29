@@ -106,28 +106,174 @@ py_config()
 
 ```r
 sc &lt;- import("scanpy")
-sc$settings
+sc
 ```
 
 ```
-## N_PCS = 50
-## autosave = False
-## autoshow = True
-## cache_compression = 'lzf'
-## cachedir = PosixPath('cache')
-## categories_to_ignore = ['N/A', 'dontknow', 'no_gate', '?']
-## datasetdir = PosixPath('/__w/scRNA-seq/scRNA-seq/extdata/data')
-## figdir = PosixPath('figures')
-## file_format_data = 'h5ad'
-## file_format_figs = 'pdf'
-## logfile = &lt;_io.TextIOWrapper name='&lt;stderr&gt;' mode='w' encoding='UTF-8'&gt;
-## logpath = None
-## max_memory = 15
-## n_jobs = 1
-## plot_suffix = ''
-## set_figure_params = &lt;bound method ScanpyConfig.set_figure_params of &lt;scanpy._settings.ScanpyConfig&gt;&gt;
-## verbosity = &lt;Verbosity.warn: 1&gt;
-## writedir = PosixPath('write')
+## Module(scanpy)
+```
+
+---
+## Install anndata package
+
+```r
+if (!require(anndata)) {
+    install.packages("anndata")
+    require(anndata)
+}
+```
+
+```
+## Loading required package: anndata
+```
+
+```
+## Warning in library(package, lib.loc = lib.loc, character.only = TRUE,
+## logical.return = TRUE, : there is no package called 'anndata'
+```
+
+```
+## Installing package into '/usr/local/lib/R/host-site-library'
+## (as 'lib' is unspecified)
+## Loading required package: anndata
+```
+
+---
+## Download PBMC
+
+```r
+pathToDownload &lt;- "http://cf.10xgenomics.com/samples/cell-exp/1.1.0/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz"
+download.file(pathToDownload, "pbmc3k_filtered_gene_bc_matrices.tar.gz")
+utils::untar("pbmc3k_filtered_gene_bc_matrices.tar.gz")
+```
+
+---
+## Read PBMC
+
+```r
+adata &lt;- sc$read_10x_mtx("filtered_gene_bc_matrices/hg19/", var_names = "gene_ids")
+
+adata
+```
+
+```
+## AnnData object with n_obs × n_vars = 2700 × 32738
+##     var: 'gene_symbols'
+```
+
+---
+## Dimensions PBMC
+
+```r
+dim(adata)
+```
+
+```
+## [1]  2700 32738
+```
+
+---
+## Dimnames - PBMC
+
+```r
+colnames(adata)[1:3]
+```
+
+```
+## [1] "ENSG00000243485" "ENSG00000237613" "ENSG00000186092"
+```
+
+```r
+rownames(adata)[1:3]
+```
+
+```
+## [1] "AAACATACAACCAC-1" "AAACATTGAGCTAC-1" "AAACATTGATCAGC-1"
+```
+
+---
+## Counts- PBMC
+
+```r
+countsMatrix &lt;- adata$X
+countsMatrix[1:2, 1:2]
+```
+
+```
+## 2 x 2 sparse Matrix of class "dgTMatrix"
+##                  ENSG00000243485 ENSG00000237613
+## AAACATACAACCAC-1               .               .
+## AAACATTGAGCTAC-1               .               .
+```
+
+---
+## Gene information - PBMC
+
+```r
+var_df &lt;- adata$var
+var_df[1:2, , drop = FALSE]
+```
+
+```
+##                 gene_symbols
+## ENSG00000243485   MIR1302-10
+## ENSG00000237613      FAM138A
+```
+
+---
+## Cell information - PBMC
+
+```r
+obs_df &lt;- adata$obs
+obs_df
+```
+
+```
+## data frame with 0 columns and 2700 rows
+```
+
+```r
+rownames(obs_df)[1:2]
+```
+
+```
+## [1] "AAACATACAACCAC-1" "AAACATTGAGCTAC-1"
+```
+
+---
+## Cell information - PBMC
+
+```r
+sc$pp$filter_cells(adata, min_genes = 0)
+sc$pp$filter_genes(adata, min_cells = 0)
+```
+
+---
+## Cell information - PBMC
+
+```r
+var_df &lt;- adata$var
+var_df[1:2, ]
+```
+
+```
+##                 gene_symbols n_cells
+## ENSG00000243485   MIR1302-10       0
+## ENSG00000237613      FAM138A       0
+```
+
+---
+## Cell information - PBMC
+
+```r
+obs_df &lt;- adata$obs
+obs_df[1:2, , drop = FALSE]
+```
+
+```
+##                  n_genes
+## AAACATACAACCAC-1     781
+## AAACATTGAGCTAC-1    1352
 ```
 
 ---
