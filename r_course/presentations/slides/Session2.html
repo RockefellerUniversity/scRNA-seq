@@ -1240,8 +1240,8 @@ obj@meta.data[1:2, ]
 ## CTRL_CACTCCATCTTATCTG-1       CTRL       7748         2372 CTRL   5.201342
 ## CTRL_CCTCTGACAGTAGAGC-1       CTRL       9301         2715 CTRL   5.053220
 ##                            S.Score G2M.Score Phase old.ident
-## CTRL_CACTCCATCTTATCTG-1 -0.2113050 0.2789689   G2M      CTRL
-## CTRL_CCTCTGACAGTAGAGC-1 -0.1269164 0.4687065   G2M      CTRL
+## CTRL_CACTCCATCTTATCTG-1 -0.2222360 0.2924512   G2M      CTRL
+## CTRL_CCTCTGACAGTAGAGC-1 -0.1435008 0.4806422   G2M      CTRL
 ```
 
 ---
@@ -1255,8 +1255,8 @@ head(yd_dat)
 ```
 ##   Var1 Var2 Freq
 ## 1 CTRL   G1  246
-## 2 CTRL  G2M  219
-## 3 CTRL    S  227
+## 2 CTRL  G2M  225
+## 3 CTRL    S  221
 ```
 
 ---
@@ -1347,10 +1347,10 @@ obj &lt;- FindClusters(obj, resolution = 0.5)
 ## Modularity Optimizer version 1.3.0 by Ludo Waltman and Nees Jan van Eck
 ## 
 ## Number of nodes: 692
-## Number of edges: 21742
+## Number of edges: 21274
 ## 
 ## Running Louvain algorithm...
-## Maximum modularity in 10 random starts: 0.7711
+## Maximum modularity in 10 random starts: 0.7747
 ## Number of communities: 7
 ## Elapsed time: 0 seconds
 ```
@@ -1369,19 +1369,19 @@ obj &lt;- RunUMAP(obj, reduction = "pca", dims = 1:maxPC)
 ```
 
 ```
-## 15:45:38 UMAP embedding parameters a = 0.9922 b = 1.112
+## 16:21:49 UMAP embedding parameters a = 0.9922 b = 1.112
 ```
 
 ```
-## 15:45:38 Read 692 rows and found 15 numeric columns
+## 16:21:49 Read 692 rows and found 15 numeric columns
 ```
 
 ```
-## 15:45:38 Using Annoy for neighbor search, n_neighbors = 30
+## 16:21:49 Using Annoy for neighbor search, n_neighbors = 30
 ```
 
 ```
-## 15:45:38 Building Annoy index with metric = cosine, n_trees = 50
+## 16:21:49 Building Annoy index with metric = cosine, n_trees = 50
 ```
 
 ```
@@ -1394,13 +1394,13 @@ obj &lt;- RunUMAP(obj, reduction = "pca", dims = 1:maxPC)
 
 ```
 ## **************************************************|
-## 15:45:38 Writing NN index file to temp file /tmp/Rtmpko1xFI/file176019cdaa9d
-## 15:45:38 Searching Annoy index using 1 thread, search_k = 3000
-## 15:45:38 Annoy recall = 100%
-## 15:45:39 Commencing smooth kNN distance calibration using 1 thread
-## 15:45:40 Initializing from normalized Laplacian + noise
-## 15:45:40 Commencing optimization for 500 epochs, with 25806 positive edges
-## 15:45:41 Optimization finished
+## 16:21:49 Writing NN index file to temp file /tmp/RtmpMsibtn/file176945121b8d
+## 16:21:49 Searching Annoy index using 1 thread, search_k = 3000
+## 16:21:49 Annoy recall = 100%
+## 16:21:50 Commencing smooth kNN distance calibration using 1 thread
+## 16:21:51 Initializing from normalized Laplacian + noise
+## 16:21:51 Commencing optimization for 500 epochs, with 25698 positive edges
+## 16:21:52 Optimization finished
 ```
 
 ```r
@@ -1476,12 +1476,12 @@ head(clust.markers)
 
 ```
 ##                  p_val avg_log2FC pct.1 pct.2    p_val_adj cluster      gene
-## Krt14     5.444657e-29  0.7559965 1.000 0.980 7.899109e-25       0     Krt14
-## Igfbp2    3.487151e-26  0.7712726 0.809 0.412 5.059159e-22       0    Igfbp2
-## H19       3.554222e-25  0.7669260 0.975 0.783 5.156466e-21       0       H19
-## Serpinb10 6.964852e-23  0.6298615 0.745 0.363 1.010461e-18       0 Serpinb10
-## Fth1      1.537887e-22  0.4776811 1.000 0.937 2.231167e-18       0      Fth1
-## Col17a1   5.369917e-22  0.6942549 0.848 0.510 7.790676e-18       0   Col17a1
+## Krt14     3.374000e-28  0.7427281 1.000 0.980 4.894999e-24       0     Krt14
+## Igfbp2    4.871443e-28  0.8042739 0.810 0.404 7.067489e-24       0    Igfbp2
+## Serpinb10 8.757815e-26  0.6780455 0.754 0.350 1.270584e-21       0 Serpinb10
+## H19       1.392904e-24  0.7646044 0.969 0.784 2.020825e-20       0       H19
+## Fth1      1.126329e-22  0.4766948 1.000 0.935 1.634079e-18       0      Fth1
+## Col17a1   8.362472e-22  0.6835676 0.844 0.506 1.213227e-17       0   Col17a1
 ```
 
 ---
@@ -1498,14 +1498,14 @@ head(topG)
 ```
 ## # A tibble: 6 × 7
 ## # Groups:   cluster [2]
-##      p_val avg_log2FC pct.1 pct.2 p_val_adj cluster gene   
-##      &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt; &lt;fct&gt;   &lt;chr&gt;  
-## 1 5.44e-29      0.756 1     0.98   7.90e-25 0       Krt14  
-## 2 3.49e-26      0.771 0.809 0.412  5.06e-22 0       Igfbp2 
-## 3 3.55e-25      0.767 0.975 0.783  5.16e-21 0       H19    
-## 4 5.37e-22      0.694 0.848 0.51   7.79e-18 0       Col17a1
-## 5 7.61e-21      0.674 1     0.949  1.10e-16 0       Krt15  
-## 6 2.02e-80      1.76  0.833 0.076  2.93e-76 1       Sox9
+##      p_val avg_log2FC pct.1 pct.2 p_val_adj cluster gene     
+##      &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt; &lt;fct&gt;   &lt;chr&gt;    
+## 1 3.37e-28      0.743 1     0.98   4.89e-24 0       Krt14    
+## 2 4.87e-28      0.804 0.81  0.404  7.07e-24 0       Igfbp2   
+## 3 8.76e-26      0.678 0.754 0.35   1.27e-21 0       Serpinb10
+## 4 1.39e-24      0.765 0.969 0.784  2.02e-20 0       H19      
+## 5 8.36e-22      0.684 0.844 0.506  1.21e-17 0       Col17a1  
+## 6 2.10e-81      1.77  0.841 0.076  3.04e-77 1       Sox9
 ```
 
 
@@ -1579,8 +1579,8 @@ tbl_dat[1:2, ]
 
 ```
 ##   Var1 Var2 Freq  to      prop
-## 1    0   G1  136 282 0.4822695
-## 2    1   G1   39 114 0.3421053
+## 1    0   G1  136 289 0.4705882
+## 2    1   G1   38 113 0.3362832
 ```
 
 ---
