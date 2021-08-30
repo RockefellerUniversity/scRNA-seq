@@ -35,12 +35,25 @@ knitr::opts_chunk$set(echo = TRUE, tidy = T)
 
 ## Overview
 
+So far we have used the Seurat and Bioconductor libraries to perform our single-cell RNA-seq analysis. 
+
+Python offers a range of libraries for the analysis of single-cell data.
+
+Two of the most popular libraries for the analysis of single-cell RNA-seq are the AnnData and scanpy packages.
+
+---
+## Python from R
+
+To make use of the AnnData and scanpy libraries we will need to work within a Python environment.
+
+The reticulate package offers a method to use Python from within a R session and provides methods for the *silent* conversion between python and R objects.
+
 ---
 ```{r, results='asis',include=TRUE,echo=FALSE}
 if(params$isSlides == "yes"){
   cat("class: inverse, center, middle
 
-# Loading data and empty droplets
+# Reticulate and python
 
 <html><div style='float:left'></div><hr color='#EB811B' size=1px width=720px></html> 
 
@@ -48,7 +61,7 @@ if(params$isSlides == "yes"){
 "    
   )
 }else{
-  cat("#  Loading data and empty drops
+  cat("#  Reticulate and python
 
 ---
 "    
@@ -58,13 +71,67 @@ if(params$isSlides == "yes"){
 
 ```
 
-## Install python libraries
-```{r installPythonAndPkgs}
+## Install reticulate
+
+Reticulate is maintained by Rstudio and is available from CRAN.
+
+To install we can just run the standard **install.packages()** function and then load the library.
+```{r installPythonAndPkgsA,include=FALSE}
 
 if(!require(reticulate)){
   install.packages("reticulate")
   require(reticulate)
 }
+
+
+
+```
+
+```{r installPythonAndPkgsB,eval=FALSE}
+install.packages("reticulate")
+library(reticulate)
+
+
+
+```
+
+---
+## Install Python from Conda
+
+Once we have installed reticulate, we can then install Python.
+
+To install python for reticulate we can make use of the install_miniconda() function. This will install conda into the default location as decided by reticulate.
+
+For more option on installing python into specific directories, **?install_miniconda**.
+
+```{r installPythonAndPkgsC,include=FALSE}
+
+if(!dir.exists(reticulate::miniconda_path())){
+  install_miniconda()
+}
+
+
+
+```
+
+```{r installPythonAndPkgsD,eval=FALSE}
+
+install_miniconda()
+
+
+```
+
+---
+## Install Python packages
+
+Just as with R libraries, we need to install the packages scanpy and AnnData into our Python library. 
+
+We can use the **conda_install()** function to install packages into our newly created conda environment. 
+
+Here we install the packages required for scRNA-seq analysis.
+
+```{r installPythonAndPkgsE,include=FALSE}
+
 if(!dir.exists(reticulate::miniconda_path())){
   install_miniconda()
 }
@@ -76,8 +143,22 @@ conda_install(
 
 ```
 
+```{r installPythonAndPkgsF,eval=FALSE}
+
+conda_install(
+  packages=c("python-igraph","scanpy","louvain","leidenalg","loompy")
+)
+
+
+
+```
+
+
 ---
 ## Use conda python
+
+Once we have installed Conda and the required python libraries into the conda enviroment, we can then set reticulate to use this python with the function **use_condaenv()**.
+
 ```{r usePython}
 use_condaenv()
 py_config()
@@ -85,15 +166,40 @@ py_config()
 ```
 
 ---
+## Conda python config
+
+We can then check the versions of python in use by running the **py_config()** command. 
+
+This lists the python path, C/C++ library path as well as additional information on the install.
+
+```{r configPython}
+use_condaenv()
+py_config()
+
+```
+
+---
 ## Load python library
+
+To load python libraries we will use reticulate's **import()** function. We just specify the python package to load and the object in R to load package to.
+
 ```{r importPython}
 sc <- reticulate::import("scanpy")
 sc
 ```
 
 ---
+## AnnData
+
+The AnnData Python package offers a similar data structure to R/Bioconductor's SingleCellExperiment.
+
+![](imgs/AnnData.png)
+---
 ## Install anndata package
-```{r installAnnData}
+
+The CRAN anndata R package offers additional functionality for interacting with AnnData python objects on top of that offered by reticulate.
+
+```{r installAnnData_1,include=FALSE}
 if(!require(anndata)){
   install.packages("anndata")
   require(anndata)
@@ -101,8 +207,26 @@ if(!require(anndata)){
 
 ```
 
+```{r installAnnData_2,eval=FALSE}
+install.packages("anndata")
+library(anndata)
+
+```
+
+---
+## anndata functionality
+
+The anndata package allows us to interact with the complex python AnnData object much as if it was an R object. 
+
+This includes sub-setting and replacement within the AnnData object.
+
+![](imgs/AnnDataR.png)
+
 ---
 ## Download PBMC
+
+Before we start any analysis we will download the PBMC3K dataset from 10xgenomics website.
+
 ```{r downloadPBMC}
 pathToDownload <- "http://cf.10xgenomics.com/samples/cell-exp/1.1.0/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz"
 download.file(pathToDownload,"pbmc3k_filtered_gene_bc_matrices.tar.gz")
@@ -111,6 +235,10 @@ utils::untar("pbmc3k_filtered_gene_bc_matrices.tar.gz")
 
 ---
 ## Read PBMC
+
+Now we have the data downloaded we can import into R/Python using the **read_10x_mtx()** function.
+
+The result is a Python AnnData object.
 ```{r readPBMC}
 adata <- sc$read_10x_mtx("filtered_gene_bc_matrices/hg19/",
                          var_names="gene_ids") 
@@ -120,12 +248,17 @@ adata
 
 ---
 ## Dimensions PBMC
+
+We can check the dimesions of our new Python AnnData object using the standard R **dim()** function.
 ```{r dimensions}
 dim(adata)
 ```
 
 ---
 ## Dimnames - PBMC
+
+We can also list the column and row names using standard R **colnames()** and **rownames()** functions.
+
 ```{r dimnames}
 colnames(adata)[1:3]
 rownames(adata)[1:3]
@@ -133,6 +266,9 @@ rownames(adata)[1:3]
 
 ---
 ## Counts- PBMC
+
+We can access the raw cell-gene count matrix using a **$** accessor and the **X** element of the AnnData object.
+
 ```{r countsMatrix}
 countsMatrix <- adata$X
 countsMatrix[1:2,1:2]
@@ -140,6 +276,8 @@ countsMatrix[1:2,1:2]
 
 ---
 ## Gene information - PBMC
+
+We can retrieve the gene information as a dataframe by accessing the **var** element.
 ```{r vardf}
 var_df <- adata$var
 var_df[1:2,,drop=FALSE]
@@ -147,6 +285,9 @@ var_df[1:2,,drop=FALSE]
 
 ---
 ## Cell information - PBMC
+
+Or the cell information as a dataframe by accessing the **obs** element.
+
 ```{r obsdf}
 obs_df <- adata$obs
 obs_df
@@ -155,6 +296,11 @@ rownames(obs_df)[1:2]
 
 ---
 ## Cell information - PBMC
+
+We can use the **filter_cells()** and **filter_genes()** to both add quality metrics to our AnnData object as well as to actually filter our cells. 
+
+Here we will set both min_genes to 0 and min_cells to 0 so we do no filtering but gain additional QC metrics.
+
 ```{r addsomeQC}
 sc$pp$filter_cells(adata, min_genes=0)
 sc$pp$filter_genes(adata, min_cells=0)
@@ -162,6 +308,8 @@ sc$pp$filter_genes(adata, min_cells=0)
 
 ---
 ## Cell information - PBMC
+If we look again at our data.frame of gene information we have additional QC information in our data.frame. Here we see the number of cells a gene has non-zero counts in.
+
 ```{r vardf2}
 var_df <- adata$var
 var_df[1:2,]
@@ -169,6 +317,9 @@ var_df[1:2,]
 
 ---
 ## Cell information - PBMC
+
+We also get more QC information on our cells. Here we see the number of genes which  non-zero counts across cells.
+
 ```{r obsdf2}
 obs_df <- adata$obs
 obs_df[1:2,,drop=FALSE]
@@ -176,6 +327,11 @@ obs_df[1:2,,drop=FALSE]
 
 ---
 ## Cell information - PBMC
+
+We can add some more QC information on the mitochondrial contamination in our scRNA data.
+
+First we can add a new logical column to our data.frame to make a gene as mitochonrial or not.
+
 ```{r vardfRe}
 var_df$mito <- grepl("MT-",var_df$gene_symbols)
 var_df[var_df$mito == TRUE,]
@@ -183,19 +339,20 @@ var_df[var_df$mito == TRUE,]
 
 ---
 ## Cell information - PBMC
+
+Once we have updated our gene information data.frame we can update the information in our AnnData *var* element
+
 ```{r vardfRe2}
 adata$var <- var_df
 adata$var[1:2,]
 ```
 
----
-## Cell information - PBMC
-```{r santize}
-# sc$utils$sanitize_anndata(adata)
-```
 
 ---
 ## Cell information - PBMC
+
+Now we have added additional information on which genes were mitochondrial, we can use the **calculate_qc_metrics()** function on our AnnData object and list the additional QC column we added, *mito*, to the **qc_vars** argument.
+
 ```{r mitoQC,tidy=FALSE}
 sc$pp$calculate_qc_metrics(adata,
                            qc_vars = list("mito"),
@@ -205,12 +362,18 @@ adata
 
 ---
 ## Cell information - PBMC
+
+The gene information stored in the *var* element now contains additional QC on dropouts for genes and total counts.
+
 ```{r moreQC,tidy=FALSE}
 adata$var[5:10,]
 ```
 
 ---
 ## Cell information - PBMC
+
+The cell information  in the *obs* element also now contains additional QC on total counts per cell as well as percentage of total counts which are mitochondrial counts.
+
 ```{r moreQC2,tidy=FALSE}
 adata$obs[1:2,]
 ```
@@ -218,28 +381,55 @@ adata$obs[1:2,]
 
 ---
 ## Cell information - PBMC
-```{r plotHiExpr}
-sc$pl$highest_expr_genes(adata,gene_symbols = "gene_symbols")
+
+We can use scanpy's plotting functions from within R to assess some features of our data.
+
+Here we plot the counts across samples of the highest expressed genes using the **highest_expr_genes()** function.
+
+```{r plotHiExpr_1,include=FALSE}
+sc$settings$figdir = getwd()
+sc$pl$highest_expr_genes(adata,gene_symbols = "gene_symbols",save=".png")
 ```
 
+```{r plotHiExpr_2,eval=FALSE}
+sc$pl$highest_expr_genes(adata,gene_symbols = "gene_symbols")
+```
+![](highest_expr_genes.png)
 ---
 ## Cell information - PBMC
-```{r plotQCpy2}
+
+We can also produce useful plots on the distribution of QC metrics across samples using the **violin()** function.
+
+```{r plotQCpy2_1,include=FALSE}
+sc$pl$violin(adata, list('n_genes_by_counts', 'total_counts', 'pct_counts_mito'),
+             jitter=0.4, multi_panel=TRUE,save=".png")
+```
+
+```{r plotQCpy2_2,eval=FALSE}
 sc$pl$violin(adata, list('n_genes_by_counts', 'total_counts', 'pct_counts_mito'),
              jitter=0.4, multi_panel=TRUE)
 ```
-
+![](violin.png)
 ---
 ## Cell information - PBMC
-```{r plotQCpy3}
-sc$pl$scatter(adata, x='total_counts', y='n_genes_by_counts')
+
+We can also make scatter plots of QC metrics across samples using the **scatter()** function.
+```{r plotQCpy3_1,include=FALSE}
+sc$pl$scatter(adata, x='total_counts', y='n_genes_by_counts',save=".png")
 
 ```
 
+```{r plotQCpy3_2,eval=FALSE}
+sc$pl$scatter(adata, x='total_counts', y='n_genes_by_counts')
 
+```
+![](scatter.png)
 
 ---
 ## Cell information - PBMC
+
+Once we have reviewed our QC plots and decided on our cut-offs for QC filtering we can apply this to the AnnData object directly using standard R subsetting.
+
 ```{r filtercells}
 adata = adata[adata$obs$n_genes < 2500]
 adata = adata[adata$obs$n_genes > 200]
@@ -249,6 +439,9 @@ adata
 
 ---
 ## Cell information - PBMC
+
+We can also use the **filter_cells()** and **filter_genes()** functions as earlier but this time setting some cut-offs for filtering.
+
 ```{r filtergenes}
 sc$pp$filter_genes(adata,
                    min_cells=3)
@@ -257,12 +450,20 @@ adata
 
 ---
 ## Cell information - PBMC
+
+We can then perform normalisation, transformation and scaling just as we would in Seurat.
+
+First we can normalise counts to 10000 counts per cell using the **normalize_per_cell()** function with the **counts_per_cell_after** argument set to 10000.
+
 ```{r normCells}
 sc$pp$normalize_per_cell(adata, counts_per_cell_after=10000)
 ```
 
 ---
 ## Cell information - PBMC
+
+We can log transform our data as we did in Seurat using the **log1p()** function.
+
 ```{r logCells}
 # log transform the data.
 sc$pp$log1p(adata)
@@ -271,6 +472,11 @@ sc$pp$log1p(adata)
 
 ---
 ## Cell information - PBMC
+
+We then identify the highly variable genes we will use for clustering with the **highly_variable_genes()** function.
+
+In contrast to Seurat, we specify not a total number of genes to retrieve but the parameters *min_mean*, *max_mean* and *min_disp* following the scanpy guide. 
+
 ```{r variableGenes}
 # identify highly variable genes.
 sc$pp$highly_variable_genes(adata, min_mean=0.0125, max_mean=3, min_disp=0.5)
@@ -280,7 +486,14 @@ sc$pp$highly_variable_genes(adata, min_mean=0.0125, max_mean=3, min_disp=0.5)
 
 ---
 ## Cell information - PBMC
-```{r filterToVariable}
+
+We can then use our standard subsetting to filter our AnnData object down to just the highly variable genes detected by the **highly_variable_genes()** function.
+```{r filterToVariable_2,eval=FALSE}
+adata = adata[,adata$var$highly_variable]
+
+```
+
+```{r filterToVariable_1,include=FALSE}
 # keep only highly variable genes:
 adata = adata$copy()
 adata = adata[,adata$var$highly_variable]
@@ -292,16 +505,21 @@ adata = adata$copy()
 
 ---
 ## Cell information - PBMC
+
+Now we have the AnnData object of just our most highly variable genes we can regress out any effects from our data arising from differences in total counts or percent of mitochondrial counts.
+
 ```{r regress}
 sc$pp$regress_out(adata, list('n_counts', 'pct_counts_mito'))
-
-# adata = adata2
-# scale each gene to unit variance, clip values exceeding SD 10.
 ```
 
 
 ---
 ## Cell information - PBMC
+
+Once we have regressed out these effects, we can then z-scale our data using the **scale()** function. 
+
+Here we additional set the max_value for scaling to 10.
+
 ```{r scale}
 sc$pp$scale(adata, max_value=10)
 ```
@@ -309,6 +527,9 @@ sc$pp$scale(adata, max_value=10)
 
 ---
 ## Cell information - PBMC
+
+Now we have the normalised, log transformed and scaled data for the most variable genes, we can apply the PCA dimension reduction to our data using the **pca** function.
+
 ```{r pca}
 sc$tl$pca(adata, svd_solver='arpack')
 ```
@@ -316,6 +537,8 @@ sc$tl$pca(adata, svd_solver='arpack')
 
 ---
 ## Cell information - PBMC
+
+Now we have the PCA for our data we can use this with the **neighbours()** and **umap()** function to produce our UMAP representation of the data.
 ```{r neighbours}
 sc$pp$neighbors(adata, n_neighbors=10L, n_pcs=40L)
 sc$tl$umap(adata)
@@ -323,34 +546,60 @@ sc$tl$umap(adata)
 
 ---
 ## Cell information - PBMC
+
+Finally now we have our UMAP and PCA dimension reductions, we can apply the standard louvain clustering as well as the python specific leiden clustering using the **louvain()** and **leiden()** functions.
 ```{r louvain}
 sc$tl$louvain(adata)
 sc$tl$leiden(adata)
-# 
 ```
 
 ---
-## Cell
-```{r plotumapCells}
+## UMAP with clustering
+
+Now we can finally overlay our clustering from Leiden on top of UMAP representation.
+
+
+
+```{r plotumapCells_1,include=FALSE}
+sc$pl$umap(adata, color=list('leiden'),save=".png")
+```
+
+```{r plotumapCells_2,eval=FALSE}
 sc$pl$umap(adata, color=list('leiden'))
 ```
-
+![](umap.png)
 
 ---
-## Cell
+## Save as h5ad
+
+Once we have finsihed processing in scanpy we can save our AnnData object for later use with the **write_h5ad()** function.
+
 ```{r saveToh5ad}
 adata$write_h5ad(filename = "PBMC_Scanpy.h5ad")
 ```
 
 ---
 ## Cell
+
+We could also save to a more widely used format, Loom.
+
 ```{r saveToLoom}
 adata$write_loom(filename = "PBMC_Scanpy.loom")
 ```
 
 ---
 ## Cell
-```{r readLoom}
+
+```{r readLoomb,eval=FALSE}
+
+BiocManager::install("LoomExperiment")
+require(LoomExperiment)
+
+loom <- LoomExperiment::import(con = "PBMC_Scanpy.loom")
+loom
+```
+
+```{r readLooma,include=FALSE}
 if(!require(LoomExperiment)){
   BiocManager::install("LoomExperiment")
   require(LoomExperiment)
