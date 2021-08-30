@@ -319,7 +319,7 @@ adata$write_loom(filename = "PBMC_Scanpy.loom")
 ## BiocManager::install("LoomExperiment")
 ## require(LoomExperiment)
 ## 
-## loom <- LoomExperiment::import(con = "PBMC_Scanpy.loom")
+## loom <- import(con = "PBMC_Scanpy.loom")
 ## loom
 
 
@@ -337,7 +337,13 @@ sce_loom <- as(loom,"SingleCellExperiment")
 sce_loom
 
 
-## ----replaceUMAP--------------------------------------------------------------
+## ----replaceUMAP_a,eval=FALSE-------------------------------------------------
+## library(scater)
+## reducedDim(sce_loom, "UMAP") <- adata$obsm[["X_umap"]]
+## reducedDim(sce_loom, "PCA") <- adata$obsm[["X_pca"]]
+
+
+## ----replaceUMAP_b,include=FALSE----------------------------------------------
 if(!require(scater)){
   BiocManager::install("scater")
   require(scater)
@@ -346,6 +352,6 @@ reducedDim(sce_loom, "UMAP") <- adata$obsm[["X_umap"]]
 reducedDim(sce_loom, "PCA") <- adata$obsm[["X_pca"]]
 
 
-## ----plotUMAP-----------------------------------------------------------------
+## ----plotUMAP,fig.width=5,fig.height=5----------------------------------------
 plotUMAP(sce_loom,colour_by="leiden")
 
