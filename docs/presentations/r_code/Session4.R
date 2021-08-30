@@ -17,7 +17,7 @@ knitr::opts_chunk$set(echo = TRUE, tidy = T)
 if(params$isSlides == "yes"){
   cat("class: inverse, center, middle
 
-# Loading data and empty droplets
+# Reticulate and python
 
 <html><div style='float:left'></div><hr color='#EB811B' size=1px width=720px></html> 
 
@@ -25,7 +25,7 @@ if(params$isSlides == "yes"){
 "    
   )
 }else{
-  cat("#  Loading data and empty drops
+  cat("#  Reticulate and python
 
 ---
 "    
@@ -35,12 +35,44 @@ if(params$isSlides == "yes"){
 
 
 
-## ----installPythonAndPkgs-----------------------------------------------------
+## ----installPythonAndPkgsA,include=FALSE--------------------------------------
 
 if(!require(reticulate)){
   install.packages("reticulate")
   require(reticulate)
 }
+
+
+
+
+
+## ----installPythonAndPkgsB,eval=FALSE-----------------------------------------
+## install.packages("reticulate")
+## library(reticulate)
+## 
+## 
+## 
+
+
+## ----installPythonAndPkgsC,include=FALSE--------------------------------------
+
+if(!dir.exists(reticulate::miniconda_path())){
+  install_miniconda()
+}
+
+
+
+
+
+## ----installPythonAndPkgsD,eval=FALSE-----------------------------------------
+## 
+## install_miniconda()
+## 
+## 
+
+
+## ----installPythonAndPkgsE,include=FALSE--------------------------------------
+
 if(!dir.exists(reticulate::miniconda_path())){
   install_miniconda()
 }
@@ -52,7 +84,23 @@ conda_install(
 
 
 
+## ----installPythonAndPkgsF,eval=FALSE-----------------------------------------
+## 
+## conda_install(
+##   packages=c("python-igraph","scanpy","louvain","leidenalg","loompy")
+## )
+## 
+## 
+## 
+
+
 ## ----usePython----------------------------------------------------------------
+use_condaenv()
+py_config()
+
+
+
+## ----configPython-------------------------------------------------------------
 use_condaenv()
 py_config()
 
@@ -63,12 +111,18 @@ sc <- reticulate::import("scanpy")
 sc
 
 
-## ----installAnnData-----------------------------------------------------------
+## ----installAnnData_1,include=FALSE-------------------------------------------
 if(!require(anndata)){
   install.packages("anndata")
   require(anndata)
 }
 
+
+
+## ----installAnnData_2,eval=FALSE----------------------------------------------
+## install.packages("anndata")
+## library(anndata)
+## 
 
 
 ## ----downloadPBMC-------------------------------------------------------------
@@ -134,10 +188,6 @@ adata$var <- var_df
 adata$var[1:2,]
 
 
-## ----santize------------------------------------------------------------------
-# sc$utils$sanitize_anndata(adata)
-
-
 ## ----mitoQC,tidy=FALSE--------------------------------------------------------
 sc$pp$calculate_qc_metrics(adata,
                            qc_vars = list("mito"),
@@ -153,18 +203,33 @@ adata$var[5:10,]
 adata$obs[1:2,]
 
 
-## ----plotHiExpr---------------------------------------------------------------
-sc$pl$highest_expr_genes(adata,gene_symbols = "gene_symbols")
+## ----plotHiExpr_1,include=FALSE-----------------------------------------------
+sc$settings$figdir = getwd()
+sc$pl$highest_expr_genes(adata,gene_symbols = "gene_symbols",save=".png")
 
 
-## ----plotQCpy2----------------------------------------------------------------
+## ----plotHiExpr_2,eval=FALSE--------------------------------------------------
+## sc$pl$highest_expr_genes(adata,gene_symbols = "gene_symbols")
+
+
+## ----plotQCpy2_1,include=FALSE------------------------------------------------
 sc$pl$violin(adata, list('n_genes_by_counts', 'total_counts', 'pct_counts_mito'),
-             jitter=0.4, multi_panel=TRUE)
+             jitter=0.4, multi_panel=TRUE,save=".png")
 
 
-## ----plotQCpy3----------------------------------------------------------------
-sc$pl$scatter(adata, x='total_counts', y='n_genes_by_counts')
+## ----plotQCpy2_2,eval=FALSE---------------------------------------------------
+## sc$pl$violin(adata, list('n_genes_by_counts', 'total_counts', 'pct_counts_mito'),
+##              jitter=0.4, multi_panel=TRUE)
 
+
+## ----plotQCpy3_1,include=FALSE------------------------------------------------
+sc$pl$scatter(adata, x='total_counts', y='n_genes_by_counts',save=".png")
+
+
+
+## ----plotQCpy3_2,eval=FALSE---------------------------------------------------
+## sc$pl$scatter(adata, x='total_counts', y='n_genes_by_counts')
+## 
 
 
 ## ----filtercells--------------------------------------------------------------
@@ -196,7 +261,12 @@ sc$pp$highly_variable_genes(adata, min_mean=0.0125, max_mean=3, min_disp=0.5)
 # sc$pl$highly_variable_genes(adata)
 
 
-## ----filterToVariable---------------------------------------------------------
+## ----filterToVariable_2,eval=FALSE--------------------------------------------
+## adata = adata[,adata$var$highly_variable]
+## 
+
+
+## ----filterToVariable_1,include=FALSE-----------------------------------------
 # keep only highly variable genes:
 adata = adata$copy()
 adata = adata[,adata$var$highly_variable]
@@ -208,9 +278,6 @@ adata = adata$copy()
 
 ## ----regress------------------------------------------------------------------
 sc$pp$regress_out(adata, list('n_counts', 'pct_counts_mito'))
-
-# adata = adata2
-# scale each gene to unit variance, clip values exceeding SD 10.
 
 
 ## ----scale--------------------------------------------------------------------
@@ -229,11 +296,14 @@ sc$tl$umap(adata)
 ## ----louvain------------------------------------------------------------------
 sc$tl$louvain(adata)
 sc$tl$leiden(adata)
-# 
 
 
-## ----plotumapCells------------------------------------------------------------
-sc$pl$umap(adata, color=list('leiden'))
+## ----plotumapCells_1,include=FALSE--------------------------------------------
+sc$pl$umap(adata, color=list('leiden'),save=".png")
+
+
+## ----plotumapCells_2,eval=FALSE-----------------------------------------------
+## sc$pl$umap(adata, color=list('leiden'))
 
 
 ## ----saveToh5ad---------------------------------------------------------------
@@ -244,7 +314,16 @@ adata$write_h5ad(filename = "PBMC_Scanpy.h5ad")
 adata$write_loom(filename = "PBMC_Scanpy.loom")
 
 
-## ----readLoom-----------------------------------------------------------------
+## ----readLoomb,eval=FALSE-----------------------------------------------------
+## 
+## BiocManager::install("LoomExperiment")
+## require(LoomExperiment)
+## 
+## loom <- LoomExperiment::import(con = "PBMC_Scanpy.loom")
+## loom
+
+
+## ----readLooma,include=FALSE--------------------------------------------------
 if(!require(LoomExperiment)){
   BiocManager::install("LoomExperiment")
   require(LoomExperiment)
