@@ -45,7 +45,7 @@ if(!dir.exists(reticulate::miniconda_path())){
   install_miniconda()
 }
 conda_install(
-  packages=c("python-igraph","scanpy","louvain","leidenalg")
+  packages=c("python-igraph","scanpy","louvain","leidenalg","loompy")
 )
 
 
@@ -59,7 +59,7 @@ py_config()
 
 
 ## ----importPython-------------------------------------------------------------
-sc <- import("scanpy")
+sc <- reticulate::import("scanpy")
 sc
 
 
@@ -153,18 +153,18 @@ adata$var[5:10,]
 adata$obs[1:2,]
 
 
-## ----plotHiExpr,eval=FALSE----------------------------------------------------
-## sc$pl$highest_expr_genes(adata,gene_symbols = "gene_symbols")
+## ----plotHiExpr---------------------------------------------------------------
+sc$pl$highest_expr_genes(adata,gene_symbols = "gene_symbols")
 
 
-## ----plotQCpy2,eval=FALSE-----------------------------------------------------
-## sc$pl$violin(adata, list('n_genes_by_counts', 'total_counts', 'pct_counts_mito'),
-##              jitter=0.4, multi_panel=TRUE)
+## ----plotQCpy2----------------------------------------------------------------
+sc$pl$violin(adata, list('n_genes_by_counts', 'total_counts', 'pct_counts_mito'),
+             jitter=0.4, multi_panel=TRUE)
 
 
-## ----plotQCpy3,eval=FALSE-----------------------------------------------------
-## sc$pl$scatter(adata, x='total_counts', y='n_genes_by_counts')
-## 
+## ----plotQCpy3----------------------------------------------------------------
+sc$pl$scatter(adata, x='total_counts', y='n_genes_by_counts')
+
 
 
 ## ----filtercells--------------------------------------------------------------
@@ -232,26 +232,41 @@ sc$tl$leiden(adata)
 # 
 
 
-## ----plotumapCells,eval=FALSE-------------------------------------------------
-## sc$pl$umap(adata, color=list('leiden'))
+## ----plotumapCells------------------------------------------------------------
+sc$pl$umap(adata, color=list('leiden'))
 
 
-## ----saveToLoom,eval=FALSE----------------------------------------------------
-## adata$write_h5ad(filename = "PBMC_Scanpy.h5ad")
+## ----saveToh5ad---------------------------------------------------------------
+adata$write_h5ad(filename = "PBMC_Scanpy.h5ad")
 
 
-## ----readLoom,eval=FALSE------------------------------------------------------
-## require(LoomExperiment)
-## loom <- LoomExperiment::import(con = "PBMC_Scanpy.loom")
-## loom
+## ----saveToLoom---------------------------------------------------------------
+adata$write_loom(filename = "PBMC_Scanpy.loom")
 
 
-## ----loomToSCE,eval=FALSE-----------------------------------------------------
-## sce_loom <- as(loom,"SingleCellExperiment")
-## sce_loom
+## ----readLoom-----------------------------------------------------------------
+if(!require(LoomExperiment)){
+  BiocManager::install("LoomExperiment")
+  require(LoomExperiment)
+}
+loom <- LoomExperiment::import(con = "PBMC_Scanpy.loom")
+loom
 
 
-## ----replaceUMAP,eval=FALSE---------------------------------------------------
-## 
-## reducedDim(sce_loom, "UMAP") <- adata$obsm[["X_umap"]]
+## ----loomToSCE----------------------------------------------------------------
+sce_loom <- as(loom,"SingleCellExperiment")
+sce_loom
+
+
+## ----replaceUMAP--------------------------------------------------------------
+if(!require(scater)){
+  BiocManager::install("scater")
+  require(scater)
+}
+reducedDim(sce_loom, "UMAP") <- adata$obsm[["X_umap"]]
+reducedDim(sce_loom, "PCA") <- adata$obsm[["X_pca"]]
+
+
+## ----plotUMAP-----------------------------------------------------------------
+plotUMAP(sce_loom,colour_by="leiden")
 
