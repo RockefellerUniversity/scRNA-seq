@@ -34,7 +34,12 @@ So far we have used the Seurat and Bioconductor libraries to perform our single-
 
 Python offers a range of libraries for the analysis of single-cell data.
 
-Two of the most popular libraries for the analysis of single-cell RNA-seq are the AnnData and scanpy packages.
+Two of the most popular libraries for the analysis of single-cell RNA-seq are the [AnnData](https://anndata.readthedocs.io/en/latest/) and [scanpy](https://scanpy.readthedocs.io/en/stable/) packages.
+
+---
+## Scanpy Tutorial
+
+In today's session we will follow the [scanpy tutorial](https://scanpy-tutorials.readthedocs.io/en/latest/pbmc3k.html) (which itself follows the [Seurat tutorial](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html)..) and will implement all of the steps up to clustering and visualisation of clusters in a UMAP plot.
 
 ---
 ## Python from R
@@ -160,7 +165,10 @@ sc
 
 The AnnData Python package offers a similar data structure to R/Bioconductor's SingleCellExperiment.
 
-![](imgs/AnnData.png)
+&lt;div align="center"&gt;
+&lt;img src="imgs/AnnData.png" alt="igv" height="500" width="700"&gt;
+&lt;/div&gt;
+
 ---
 ## Install anndata package
 
@@ -181,7 +189,10 @@ The anndata package allows us to interact with the complex python AnnData object
 
 This includes sub-setting and replacement within the AnnData object.
 
-![](imgs/AnnDataR.png)
+&lt;div align="center"&gt;
+&lt;img src="imgs/AnnDataR.png" alt="igv" height="400" width="600"&gt;
+&lt;/div&gt;
+
 
 ---
 ## Download PBMC
@@ -495,7 +506,10 @@ Here we plot the counts across samples of the highest expressed genes using the 
 ```r
 sc$pl$highest_expr_genes(adata, gene_symbols = "gene_symbols")
 ```
-&lt;!-- ![](highest_expr_genes.png) --&gt;
+&lt;div align="center"&gt;
+&lt;img src="imgs/highest_expr_genes.png" alt="igv" height="300" width="500"&gt;
+&lt;/div&gt;
+
 ---
 ## Cell information - PBMC
 
@@ -508,7 +522,11 @@ We can also produce useful plots on the distribution of QC metrics across sample
 sc$pl$violin(adata, list("n_genes_by_counts", "total_counts", "pct_counts_mito"),
     jitter = 0.4, multi_panel = TRUE)
 ```
-&lt;!-- ![](violin.png) --&gt;
+
+&lt;div align="center"&gt;
+&lt;img src="imgs/violin.png" alt="igv" height="400" width="800"&gt;
+&lt;/div&gt;
+
 ---
 ## Cell information - PBMC
 
@@ -519,8 +537,10 @@ We can also make scatter plots of QC metrics across samples using the **scatter(
 ```r
 sc$pl$scatter(adata, x = "total_counts", y = "n_genes_by_counts")
 ```
-&lt;!-- ![](scatter.png) --&gt;
 
+&lt;div align="center"&gt;
+&lt;img src="imgs/scatter.png" alt="igv" height="500" width="500"&gt;
+&lt;/div&gt;
 ---
 ## Cell information - PBMC
 
@@ -674,7 +694,10 @@ Now we can finally overlay our clustering from Leiden on top of UMAP representat
 ```r
 sc$pl$umap(adata, color = list("leiden"))
 ```
-&lt;!-- ![](umap.png) --&gt;
+
+&lt;div align="center"&gt;
+&lt;img src="imgs/umap.png" alt="igv" height="450" width="500"&gt;
+&lt;/div&gt;
 
 ---
 ## Save as h5ad
@@ -687,7 +710,7 @@ adata$write_h5ad(filename = "PBMC_Scanpy.h5ad")
 ```
 
 ---
-## Cell
+## Save as Loom
 
 We could also save to a more widely used format, Loom.
 
@@ -697,21 +720,25 @@ adata$write_loom(filename = "PBMC_Scanpy.loom")
 ```
 
 ---
-## Cell
+## Read Loom into R
 
+We can read Loom files into R using the **LoomExperiment** package's *import* function.
 
 ```r
 BiocManager::install("LoomExperiment")
 require(LoomExperiment)
 
-loom &lt;- LoomExperiment::import(con = "PBMC_Scanpy.loom")
+loom &lt;- import(con = "PBMC_Scanpy.loom")
 loom
 ```
 
 
 
 ---
-## Cell
+## LoomExperiment to SingleCellExperiment
+
+We can translate our LoomExperiment object into something we are more familiar with, the SingleCellExperiment object.
+
 
 ```r
 sce_loom &lt;- as(loom, "SingleCellExperiment")
@@ -735,19 +762,26 @@ sce_loom
 ```
 
 ---
-## Cell
+## Update the UMAP and PCA slots.
+
+We are missing the UMAP and PCA data from our AnnData object in our SingleCellExperiment object.
+
+We can add this directly to our SingleCellExperiment by using the **reducedDim** function and specifying the slot to include.
+
 
 ```r
-if (!require(scater)) {
-    BiocManager::install("scater")
-    require(scater)
-}
+library(scater)
 reducedDim(sce_loom, "UMAP") &lt;- adata$obsm[["X_umap"]]
 reducedDim(sce_loom, "PCA") &lt;- adata$obsm[["X_pca"]]
 ```
 
+
+
 ---
-## Cell
+## Plot the UMAP using Bioconductor.
+
+Now we have a SingleCellExperiment representing our data from the AnnData object, we can now use the standard Bioconductor libraries.
+
 
 ```r
 plotUMAP(sce_loom, colour_by = "leiden")
