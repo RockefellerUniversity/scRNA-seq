@@ -394,7 +394,7 @@ sc$pl$highest_expr_genes(adata,gene_symbols = "gene_symbols",save=".png")
 ```{r plotHiExpr_2,eval=FALSE}
 sc$pl$highest_expr_genes(adata,gene_symbols = "gene_symbols")
 ```
-![](highest_expr_genes.png)
+<!-- ![](highest_expr_genes.png) -->
 ---
 ## Cell information - PBMC
 
@@ -409,7 +409,7 @@ sc$pl$violin(adata, list('n_genes_by_counts', 'total_counts', 'pct_counts_mito')
 sc$pl$violin(adata, list('n_genes_by_counts', 'total_counts', 'pct_counts_mito'),
              jitter=0.4, multi_panel=TRUE)
 ```
-![](violin.png)
+<!-- ![](violin.png) -->
 ---
 ## Cell information - PBMC
 
@@ -423,7 +423,7 @@ sc$pl$scatter(adata, x='total_counts', y='n_genes_by_counts',save=".png")
 sc$pl$scatter(adata, x='total_counts', y='n_genes_by_counts')
 
 ```
-![](scatter.png)
+<!-- ![](scatter.png) -->
 
 ---
 ## Cell information - PBMC
@@ -567,7 +567,7 @@ sc$pl$umap(adata, color=list('leiden'),save=".png")
 ```{r plotumapCells_2,eval=FALSE}
 sc$pl$umap(adata, color=list('leiden'))
 ```
-![](umap.png)
+<!-- ![](umap.png) -->
 
 ---
 ## Save as h5ad
