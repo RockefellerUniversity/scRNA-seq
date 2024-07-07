@@ -445,6 +445,7 @@ assayNames(sce.NeuroD1_filtered_QCed)
 
 
 ```{r}
+library(scran)
 clust.sce.NeuroD1_filtered_QCed <- quickCluster(sce.NeuroD1_filtered_QCed) 
 sce.NeuroD1_filtered_trimmed <- computeSumFactors(sce.NeuroD1_filtered_QCed, cluster=clust.sce.NeuroD1_filtered_QCed)
 sce.NeuroD1_filtered_QCed <- logNormCounts(sce.NeuroD1_filtered_QCed)
@@ -457,7 +458,6 @@ assayNames(sce.NeuroD1_filtered_QCed)
 
 ```{r}
 ##
-library(scran)
 dec.NeuroD1_filtered_QCed <- modelGeneVar(sce.NeuroD1_filtered_QCed)
 ggplot(dec.NeuroD1_filtered_QCed,aes(x=mean,y=total))+geom_point()
 ```
