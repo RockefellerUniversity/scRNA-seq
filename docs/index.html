@@ -14,8 +14,8 @@
 
 <title>scRNAseq</title>
 
-<script src="site_libs/header-attrs-2.10/header-attrs.js"></script>
-<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<script src="site_libs/header-attrs-2.27/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
@@ -30,7 +30,7 @@
        h6 {font-size: 12px;}
        code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
        pre:not([class]) { background-color: white }</style>
-<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
@@ -65,6 +65,7 @@ if (window.hljs) {
 
 
 
+
 <style type = "text/css">
 .main-container {
   max-width: 940px;
@@ -85,6 +86,9 @@ button.code-folding-btn:focus {
 }
 summary {
   display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
 }
 pre code {
   padding: 0;
@@ -142,11 +146,15 @@ $(document).ready(function () {
     href = "index.html";
   var menuAnchor = $('a[href="' + href + '"]');
 
-  // mark it active
-  menuAnchor.tab('show');
-
-  // if it's got a parent navbar menu mark it active as well
-  menuAnchor.closest('li.dropdown').addClass('active');
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
 
   // Navbar adjustments
   var navHeight = $(".navbar").first().height() + 15;
@@ -175,8 +183,8 @@ $(document).ready(function () {
   border-radius: 4px;
 }
 
-.tabset-dropdown > .nav-tabs > li.active:before {
-  content: "";
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
   font-family: 'Glyphicons Halflings';
   display: inline-block;
   padding: 10px;
@@ -184,16 +192,9 @@ $(document).ready(function () {
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
-  content: "&#xe258;";
-  border: none;
-}
-
-.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
-  content: "";
+  content: "\e258";
   font-family: 'Glyphicons Halflings';
-  display: inline-block;
-  padding: 10px;
-  border-right: 1px solid #ddd;
+  border: none;
 }
 
 .tabset-dropdown > .nav-tabs > li.active {
@@ -310,7 +311,7 @@ div.tocify {
 <div class="navbar navbar-default  navbar-fixed-top" role="navigation">
   <div class="container">
     <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
@@ -323,14 +324,14 @@ div.tocify {
   <a href="index.html">Home</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Slides
      
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
     <li class="dropdown-submenu">
-      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Session1</a>
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Session1</a>
       <ul class="dropdown-menu" role="menu">
         <li>
           <a href="presentations/slides/Session1.html">Slide</a>
@@ -344,7 +345,7 @@ div.tocify {
       </ul>
     </li>
     <li class="dropdown-submenu">
-      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Session2</a>
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Session2</a>
       <ul class="dropdown-menu" role="menu">
         <li>
           <a href="presentations/slides/Session2.html">Slide</a>
@@ -358,7 +359,7 @@ div.tocify {
       </ul>
     </li>
     <li class="dropdown-submenu">
-      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Session3</a>
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Session3</a>
       <ul class="dropdown-menu" role="menu">
         <li>
           <a href="presentations/slides/Session3.html">Slide</a>
@@ -372,7 +373,7 @@ div.tocify {
       </ul>
     </li>
     <li class="dropdown-submenu">
-      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Session4</a>
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Session4</a>
       <ul class="dropdown-menu" role="menu">
         <li>
           <a href="presentations/slides/Session4.html">Slide</a>
@@ -388,14 +389,14 @@ div.tocify {
   </ul>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Exercises
      
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
     <li class="dropdown-submenu">
-      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">exercise1</a>
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">exercise1</a>
       <ul class="dropdown-menu" role="menu">
         <li>
           <a href="exercises/exercises/exercise1_exercise.html">Exercise</a>
@@ -406,7 +407,7 @@ div.tocify {
       </ul>
     </li>
     <li class="dropdown-submenu">
-      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">exercise2</a>
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">exercise2</a>
       <ul class="dropdown-menu" role="menu">
         <li>
           <a href="exercises/exercises/exercise2_exercise.html">Exercise</a>
@@ -417,7 +418,7 @@ div.tocify {
       </ul>
     </li>
     <li class="dropdown-submenu">
-      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">exercise3</a>
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">exercise3</a>
       <ul class="dropdown-menu" role="menu">
         <li>
           <a href="exercises/exercises/exercise3_exercise.html">Exercise</a>
@@ -451,7 +452,8 @@ div.tocify {
 
 <h1 class="title toc-ignore"><strong>scRNAseq</strong></h1>
 <h4 class="author">Bioinformatics Resource Center</h4>
-<h4 class="date"><a href="mailto:brc@rockefeller.edu" class="email">brc@rockefeller.edu</a></h4>
+<h4 class="date"><a href="mailto:brc@rockefeller.edu"
+class="email">brc@rockefeller.edu</a></h4>
 
 </div>
 
@@ -463,15 +465,31 @@ div.tocify {
 <p><br></p>
 <div id="course-integrity" class="section level3">
 <h3>Course Integrity</h3>
-<p><strong>This course is compiled automatically on <em>2021-08-30</em> </strong> <br> <a href="https://github.com/RockefellerUniversity/scRNA-seq/actions?query=workflow%3compilation-check"><img src="https://github.com/RockefellerUniversity/scRNA-seq/workflows/compilation-check/badge.svg"></a></p>
-<p><strong>The course is tested and available on MacOS, Windows and Ubuntu Linux for R version 4.1.0 (2021-05-18)</strong> <br> <a href="https://github.com/RockefellerUniversity/scRNA-seq/actions?query=workflow%3AOS-check"><img src="https://github.com/RockefellerUniversity/scRNA-seq/workflows/OS-check/badge.svg"></a></p>
+<p><strong>This course is compiled automatically on <em>2024-07-07</em>
+</strong> <br> <a
+href="https://github.com/RockefellerUniversity/scRNA-seq/actions?query=workflow%3compilation-check"><img src="https://github.com/RockefellerUniversity/scRNA-seq/workflows/compilation-check/badge.svg"></a></p>
+<p><strong>The course is tested and available on MacOS, Windows and
+Ubuntu Linux for R version 4.4.0 (2024-04-24)</strong> <br> <a
+href="https://github.com/RockefellerUniversity/scRNA-seq/actions?query=workflow%3AOS-check"><img src="https://github.com/RockefellerUniversity/scRNA-seq/workflows/OS-check/badge.svg"></a></p>
 <p><br> <br></p>
 </div>
 <div id="overview" class="section level3">
 <h3>Overview</h3>
-<p>In this course we are going to introduce basic analysis for single-cell RNAseq, with a specific focus on the 10X system. The course is divided into three sessions. In the first session, we will introduce how to interpret the Cell Ranger QC report and how to do analysis with the LOUPE Browser. We will also demonstrate the customized analysis we can support right know. In the Second session, we will demonstrate how to process scRNAseq data and make QC reports with Seurat. In the third session, we will discuss how to to do more advanced analysis and QC with Bioconductor packages.</p>
-<p>Exercises and answer sheets are included to help you practice techniques and provide examples.</p>
-<p>Course material and exercises are available to view as rendered HTML at <a href="https://rockefelleruniversity.github.io/scRNA-seq/" class="uri">https://rockefelleruniversity.github.io/scRNA-seq/</a>. All material is available to download under GPL v2 license.</p>
+<p>In this course we are going to introduce basic analysis for
+single-cell RNAseq, with a specific focus on the 10X system. The course
+is divided into three sessions. In the first session, we will introduce
+how to interpret the Cell Ranger QC report and how to do analysis with
+the LOUPE Browser. We will also demonstrate the customized analysis we
+can support right know. In the Second session, we will demonstrate how
+to process scRNAseq data and make QC reports with Seurat. In the third
+session, we will discuss how to to do more advanced analysis and QC with
+Bioconductor packages.</p>
+<p>Exercises and answer sheets are included to help you practice
+techniques and provide examples.</p>
+<p>Course material and exercises are available to view as rendered HTML
+at <a href="https://rockefelleruniversity.github.io/scRNA-seq/"
+class="uri">https://rockefelleruniversity.github.io/scRNA-seq/</a>. All
+material is available to download under GPL v2 license.</p>
 <p><br><br></p>
 </div>
 </div>
@@ -484,36 +502,45 @@ div.tocify {
 <div id="install-r" class="section level4">
 <h4>Install R</h4>
 <p>R can be installed from the R-project website.</p>
-<p>The R website can be found here <a href="http://www.r-project.org/" class="uri">http://www.r-project.org/</a>.</p>
-<p>The download links and associated installation instructions for multiple platforms can be found below provided by Revolution Analytics. <a href="https://cran.revolutionanalytics.com" class="uri">https://cran.revolutionanalytics.com</a></p>
-<p>We recommend installing R 4.1.0 as this is the version used to compile the course. Direct downloads for R 4.1.0 for the main platforms can be found below:</p>
+<p>The R website can be found here <a href="http://www.r-project.org/"
+class="uri">http://www.r-project.org/</a>. This website has all the
+latest information about R updates, conferences and installation</p>
+<p>You can use this direct links to the install for each major OS:</p>
 <ul>
-<li><a href="https://cran.revolutionanalytics.com/bin/macosx/R-4.1.0.pkg">Mac</a></li>
-<li><a href="https://cran.revolutionanalytics.com/bin/windows/base/old/4.1.0/R-4.1.0-win.exe">Windows</a></li>
-<li><a href="https://cran.revolutionanalytics.com">Linux platforms</a></li>
+<li><a href="https://cloud.r-project.org/bin/macosx/">Mac</a></li>
+<li><a
+href="https://cloud.r-project.org/bin/windows/base/release.html">Windows</a></li>
+<li><a href="https://cloud.r-project.org/bin/linux/">Linux
+platforms</a></li>
 </ul>
 <p><br></p>
 </div>
 <div id="install-rstudio" class="section level4">
 <h4>Install RStudio</h4>
 <p>RStudio can be installed from the RStudio website.</p>
-<p><a href="http://www.rstudio.com/" class="uri">http://www.rstudio.com/</a></p>
+<p><a href="http://www.rstudio.com/"
+class="uri">http://www.rstudio.com/</a></p>
 <p>RStudio can be downloaded for all platforms at the link below</p>
-<p><a href="https://rstudio.com/products/rstudio/download/" class="uri">https://rstudio.com/products/rstudio/download/</a></p>
+<p><a href="https://rstudio.com/products/rstudio/download/"
+class="uri">https://rstudio.com/products/rstudio/download/</a></p>
 <p><br></p>
 </div>
-<div id="install-required-packages" class="section level4">
-<h4><strong>Install required packages</strong></h4>
-</div>
-<div id="from-the-course-package" class="section level4">
-<h4>From the course package</h4>
-<pre class="{r}"><code>install.packages(&#39;BiocManager&#39;)
+<div id="install-required-r-packages" class="section level4">
+<h4><strong>Install required R packages</strong></h4>
+<p>R Packages can be installed from the course package <em>or</em> from
+CRAN/Bioconductor. These commands should be written into the R console.
+Once R and RStudio is installed, you can copy and paste these install
+commands into lower left pane of RStudio which should be labelled
+“Console”. If you run into any errors, do this one line at a time.</p>
+<div id="from-the-course-package" class="section level5">
+<h5>From the course package</h5>
+<pre><code>install.packages(&#39;BiocManager&#39;)
+install.packages(&#39;remotes&#39;)
 BiocManager::install(&#39;RockefellerUniversity/scRNA-seq&#39;,subdir=&#39;scRNASeq&#39;)</code></pre>
-<p><br></p>
 </div>
-<div id="from-cran-and-bioconductor" class="section level4">
-<h4>From CRAN and Bioconductor</h4>
-<pre class="{r}"><code>install.packages(&#39;BiocManager&#39;)
+<div id="from-cran-and-bioconductor" class="section level5">
+<h5>From CRAN and Bioconductor</h5>
+<pre><code>install.packages(&#39;BiocManager&#39;)
 BiocManager::install(&#39;DropletUtils&#39;)
 BiocManager::install(&#39;scDblFinder&#39;)
 BiocManager::install(&#39;SingleCellExperiment&#39;)
@@ -527,11 +554,13 @@ BiocManager::install(&#39;knitr&#39;)
 BiocManager::install(&#39;rmarkdown&#39;)
 BiocManager::install(&#39;testthat&#39;)
 BiocManager::install(&#39;yaml&#39;)</code></pre>
-<p><br></p>
+</div>
 </div>
 <div id="download-the-material" class="section level4">
 <h4><strong>Download the material</strong></h4>
-<p><a href="https://github.com/RockefellerUniversity/scRNA-seq/archive/master.zip">Download the material</a></p>
+<p><a
+href="https://github.com/RockefellerUniversity/scRNA-seq/archive/master.zip">Download
+the material</a></p>
 <p><br><br><br></p>
 </div>
 </div>
@@ -540,20 +569,26 @@ BiocManager::install(&#39;yaml&#39;)</code></pre>
 <p><br></p>
 <div id="single-cell-rna-sequencing-session-1" class="section level4">
 <h4><strong>Single-cell RNA sequencing , Session 1</strong></h4>
-<p>In this session we will cover the use of Cell Ranger and the LOUPE browser.</p>
+<p>In this session we will cover the use of Cell Ranger and the LOUPE
+browser.</p>
 <iframe src="presentations/slides/Session1.html" width="100%" height="400" title="Session1">
 </iframe>
 <div id="links-to-presentations" class="section level5">
 <h5><em>Links to presentations:</em></h5>
-<p>The html slide presentation can be found at this link <a href="presentations/slides/Session1.html"><strong>Slide</strong></a></p>
-<p>The single page html presentation can be found at this link <a href="presentations/singlepage/Session1.html"><strong>Single Page</strong></a></p>
-<p>The code use in the presentations can be found at <a href="presentations/r_code/Session1.R"><strong>R code</strong></a></p>
+<p>The html slide presentation can be found at this link <a
+href="presentations/slides/Session1.html"><strong>Slide</strong></a></p>
+<p>The single page html presentation can be found at this link <a
+href="presentations/singlepage/Session1.html"><strong>Single
+Page</strong></a></p>
+<p>The code use in the presentations can be found at <a
+href="presentations/r_code/Session1.R"><strong>R code</strong></a></p>
 <p><br></p>
 </div>
 </div>
 <div id="single-cell-rna-sequencing-session-2" class="section level4">
 <h4><strong>Single-cell RNA sequencing , Session 2</strong></h4>
-<p>In this session we will cover data processing with Seurat, including:</p>
+<p>In this session we will cover data processing with Seurat,
+including:</p>
 <ul>
 <li>Basic QC, including mitochondrial content and cell cycle</li>
 <li>Normalization and clustering</li>
@@ -563,15 +598,20 @@ BiocManager::install(&#39;yaml&#39;)</code></pre>
 </iframe>
 <div id="links-to-presentations-1" class="section level5">
 <h5><em>Links to presentations:</em></h5>
-<p>The html slide presentation can be found at this link <a href="presentations/slides/Session2.html"><strong>Slide</strong></a></p>
-<p>The single page html presentation can be found at this link <a href="presentations/singlepage/Session2.html"><strong>Single Page</strong></a></p>
-<p>The code use in the presentations can be found at <a href="presentations/r_code/Session2.R"><strong>R code</strong></a></p>
+<p>The html slide presentation can be found at this link <a
+href="presentations/slides/Session2.html"><strong>Slide</strong></a></p>
+<p>The single page html presentation can be found at this link <a
+href="presentations/singlepage/Session2.html"><strong>Single
+Page</strong></a></p>
+<p>The code use in the presentations can be found at <a
+href="presentations/r_code/Session2.R"><strong>R code</strong></a></p>
 <p><br></p>
 </div>
 </div>
 <div id="single-cell-rna-sequencing-session-3" class="section level4">
 <h4><strong>Single-cell RNA sequencing , Session 3</strong></h4>
-<p>In this session we will cover data processing with Bioconductor pacakges, including:</p>
+<p>In this session we will cover data processing with Bioconductor
+pacakges, including:</p>
 <ul>
 <li>Empty droplet removal</li>
 <li>Ambient RNA removal</li>
@@ -581,15 +621,21 @@ BiocManager::install(&#39;yaml&#39;)</code></pre>
 </iframe>
 <div id="links-to-presentations-2" class="section level5">
 <h5><em>Links to presentations:</em></h5>
-<p>The html slide presentation can be found at this link <a href="presentations/slides/Session3.html"><strong>Slide</strong></a></p>
-<p>The single page html presentation can be found at this link <a href="presentations/singlepage/Session3.html"><strong>Single Page</strong></a></p>
-<p>The code use in the presentations can be found at <a href="presentations/r_code/Session3.R"><strong>R code</strong></a></p>
+<p>The html slide presentation can be found at this link <a
+href="presentations/slides/Session3.html"><strong>Slide</strong></a></p>
+<p>The single page html presentation can be found at this link <a
+href="presentations/singlepage/Session3.html"><strong>Single
+Page</strong></a></p>
+<p>The code use in the presentations can be found at <a
+href="presentations/r_code/Session3.R"><strong>R code</strong></a></p>
 <p><br></p>
 </div>
 </div>
 <div id="single-cell-rna-sequencing-session-4" class="section level4">
 <h4><strong>Single-cell RNA sequencing , Session 4</strong></h4>
-<p>In this session we will cover scRNA processing in python from the R session using the R reticulate package and the python AnnData and Scanpy packages:</p>
+<p>In this session we will cover scRNA processing in python from the R
+session using the R reticulate package and the python AnnData and Scanpy
+packages:</p>
 <ul>
 <li>Introduction to reticulate package.</li>
 <li>Loading scRNA data to AnnData objects.</li>
@@ -601,9 +647,13 @@ BiocManager::install(&#39;yaml&#39;)</code></pre>
 </iframe>
 <div id="links-to-presentations-3" class="section level5">
 <h5><em>Links to presentations:</em></h5>
-<p>The html slide presentation can be found at this link <a href="presentations/slides/Session4.html"><strong>Slide</strong></a></p>
-<p>The single page html presentation can be found at this link <a href="presentations/singlepage/Session4.html"><strong>Single Page</strong></a></p>
-<p>The code use in the presentations can be found at <a href="presentations/r_code/Session4.R"><strong>R code</strong></a></p>
+<p>The html slide presentation can be found at this link <a
+href="presentations/slides/Session4.html"><strong>Slide</strong></a></p>
+<p>The single page html presentation can be found at this link <a
+href="presentations/singlepage/Session4.html"><strong>Single
+Page</strong></a></p>
+<p>The code use in the presentations can be found at <a
+href="presentations/r_code/Session4.R"><strong>R code</strong></a></p>
 <p><br><br></p>
 </div>
 </div>
@@ -613,13 +663,19 @@ BiocManager::install(&#39;yaml&#39;)</code></pre>
 <p><br></p>
 <div id="course-help" class="section level4">
 <h4><strong>Course help</strong></h4>
-<p><em>For advice, help and comments for the material covered in this course</em> please contact us at the issues page associated to this course.</p>
-<p>The link to the help pages can be found <a href="https://github.com/RockefellerUniversity/scRNA-seq/issues">here</a></p>
+<p><em>For advice, help and comments for the material covered in this
+course</em> please contact us at the issues page associated to this
+course.</p>
+<p>The link to the help pages can be found <a
+href="https://github.com/RockefellerUniversity/scRNA-seq/issues">here</a></p>
 <p><br></p>
 </div>
 <div id="general-bioinformatics-support" class="section level4">
 <h4><strong>General Bioinformatics support</strong></h4>
-<p><em>If you would like contact us about general bioinformatics advice, support or collaboration,</em> please contact us the Bioinformatics Resource Center at <strong><a href="mailto:brc@rockefeller.edu" class="email">brc@rockefeller.edu</a></strong>.</p>
+<p><em>If you would like contact us about general bioinformatics advice,
+support or collaboration,</em> please contact us the Bioinformatics
+Resource Center at <strong><a href="mailto:brc@rockefeller.edu"
+class="email">brc@rockefeller.edu</a></strong>.</p>
 </div>
 </div>
 

@@ -60,7 +60,7 @@ navbar:
         href: exercises/answers/exercise3_answers.html
   right:
   - text: Getting help!
-    href: []
+    href: https://github.com//RockefellerUniversity/scRNA-seq/issues
   - href: https://twitter.com/Rockefeller_BRC
     icon: ion-social-twitter
 output:
