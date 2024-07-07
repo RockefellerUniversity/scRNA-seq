@@ -445,6 +445,7 @@ assayNames(sce.NeuroD1_filtered_QCed)
 
 
 ```{r}
+library(scran)
 clust.sce.NeuroD1_filtered_QCed <- quickCluster(sce.NeuroD1_filtered_QCed) 
 sce.NeuroD1_filtered_trimmed <- computeSumFactors(sce.NeuroD1_filtered_QCed, cluster=clust.sce.NeuroD1_filtered_QCed)
 sce.NeuroD1_filtered_QCed <- logNormCounts(sce.NeuroD1_filtered_QCed)
@@ -457,7 +458,6 @@ assayNames(sce.NeuroD1_filtered_QCed)
 
 ```{r}
 ##
-library(scran)
 dec.NeuroD1_filtered_QCed <- modelGeneVar(sce.NeuroD1_filtered_QCed)
 ggplot(dec.NeuroD1_filtered_QCed,aes(x=mean,y=total))+geom_point()
 ```
@@ -482,6 +482,14 @@ reducedDimNames(sce.NeuroD1_filtered_QCed)
 ```
 
 ---
+## PCA
+
+```{r}
+plotReducedDim(sce.NeuroD1_filtered_QCed, dimred="PCA",colour_by = "subsets_Mito_percent")
+
+```
+
+---
 ## Select PCs from PCA
 
 ```{r}
@@ -490,6 +498,27 @@ plot(percent.var, log="y", xlab="PC", ylab="Variance explained (%)")
 # library(PCAtools)
 # chosen.elbow <- findElbowPoint(percent.var)
 ```
+
+
+---
+## Visualise in 2D with Tisne and UMAP
+
+```{r}
+
+sce.NeuroD1_filtered_QCed <- runTSNE(sce.NeuroD1_filtered_QCed,n_dimred=30)
+sce.NeuroD1_filtered_QCed <- runUMAP(sce.NeuroD1_filtered_QCed,n_dimred=30)
+reducedDimNames(sce.NeuroD1_filtered_QCed)
+```
+
+---
+## Visualise in 2D with Tisne and UMAP
+
+```{r}
+plotUMAP(sce.NeuroD1_filtered_QCed,colour_by="subsets_Mito_percent")
+plotTSNE(sce.NeuroD1_filtered_QCed,colour_by="subsets_Mito_percent")
+```
+
+## Clustering
 
 
 <!-- --- -->
