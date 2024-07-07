@@ -1,0 +1,507 @@
+---
+title: "Single-cell RNA sequencing ~ Session 2<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>"
+author: "Rockefeller University, Bioinformatics Resource Centre"
+date: "http://rockefelleruniversity.github.io/scRNA-seq/"
+output: 
+  xaringan::moon_reader:
+    css: ["default", "metropolisCustom.css", "metropolis-fontsCustom.css"]
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+  html_document:
+    toc: true # table of content true
+    toc_float: yes
+    depth: 3  # upto three depths of headings (specified by #, ## and ###)
+    number_sections: false  ## if you want number sections at each table header
+    theme: united  # many options for theme, this one is my favorite.
+    highlight: tango  # specifies the syntax highlighting style
+params:
+  isSlides: "no"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r,include=FALSE}
+suppressPackageStartupMessages(require(knitr))
+knitr::opts_chunk$set(echo = TRUE, tidy = T)
+```
+
+## Overview
+
+In this course we are going to introduce basic analysis for single-cell RNAseq, with a specific focus on the *10X system*. The course is divided into multiple sessions. 
+
+In this second session, we will introduce Seurat and Bioconductor methodologies for basic scRNA-seq QC, filtering and initial analysis of single samples.
+---
+## The data
+
+For these sessions we are going to make use of two datasets.
+
+The first set will be from the recent paper [**Enteroendocrine cell lineages that differentially control feeding and gut motility**](https://elifesciences.org/articles/78512).  
+This contains scRNA data from either Neurod1 and Neurog3 expressing enteroendocrine cells.
+
+The second dataset is the classic example from PBMC cells.
+
+---
+## Seurat and Bioconductor
+
+The Seurat R package and associated packages offer an R based and well established methodology for the analysis of single cell RNA-seq, ATAC-seq and many other single-cell sequencing methodologies.
+
+Bioconductor has a set of interrelated and highly connected software packages for single cell RNAseq as well as integrating with the rest of the Bioconductor software ecosystem.
+
+In this session we will run through basic analyses using both of the methodologies to show both their equvalence in some parts of the analysis as well as their distinct functionalities in others.
+
+In practice, you may select methods from either softwares and convert between the two as required.
+
+---
+# The Example Data
+
+For this session we will need the filtered and raw expression data for the Neurod1 datasets.
+
+The filtered matrix can be found [here](https://rubioinformatics.s3.amazonaws.com/scRNA_graduate/SRR_NeuroD1/outs/NeuroD1_filtered_feature_bc_matrix.h5)
+
+The raw matrix can be found here [here](https://rubioinformatics.s3.amazonaws.com/scRNA_graduate/SRR_NeuroD1/outs/filtered_feature_bc_matrix.h5)
+
+
+```{r, results='asis',include=TRUE,echo=FALSE}
+if(params$isSlides == "yes"){
+  cat("class: inverse, center, middle
+
+# Cell Ranger -  Output files
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=720px></html> 
+
+---
+"    
+  )
+}else{
+  cat("# Cell Ranger - Output files
+
+---
+"    
+  )
+  
+}
+
+```
+
+---
+# Data import (Bioconductor) 
+
+First we need to load the DropletUtils package to read and handle our Droplet 10X data.
+
+```{r}
+
+library(DropletUtils)
+
+```
+
+---
+# Read10x
+
+We can then read in the filtered matrix containing data on droplets marked as cells by CellRanger.
+
+```{r}
+
+h5file <- "https://rubioinformatics.s3.amazonaws.com/scRNA_graduate/SRR_NeuroD1/outs/NeuroD1_filtered_feature_bc_matrix.h5"
+local_h5file <- basename(h5file)
+download.file(h5file,local_h5file)
+
+sce.NeuroD1_filtered <- read10xCounts(local_h5file, col.names=TRUE)
+
+class(sce.NeuroD1_filtered)
+
+```
+
+```{r,include=FALSE}
+unlink(h5file)
+```
+
+---
+
+## SingleCellExperiment Object
+The created SingleCellExperiment Object is much like our SummarizedExperiment object
+
+```{r}
+sce.NeuroD1_filtered
+```
+
+---
+
+## SingleCellExperiment Object
+The *colnames()* and *rownames()* functions can be used to access column names (cell-barcodes) and row names (gene identifiers)
+
+```{r loadSCE_pres222,include=TRUE,echo=TRUE,eval=TRUE}
+# cell information
+colnames(sce.NeuroD1_filtered)[1:2]
+# gene information
+rownames(sce.NeuroD1_filtered)[1:2]
+```
+
+## SingleCellExperiment Object
+The *colData()* and *rowData()* functions can be used to access experiment metadata. 
+
+```{r loadSCE_pres12,include=TRUE,echo=TRUE,eval=TRUE}
+# cell information
+colData(sce.NeuroD1_filtered)[1:2,]
+# gene information
+rowData(sce.NeuroD1_filtered)[1:2,]
+```
+
+## SingleCellExperiment Object
+
+A reducedDim and reducedDimNames slots at present remains unfilled.
+
+The metadata slot contains the Sample names. Here all these cells came from single sample
+
+```{r loadSCE_pres2,include=TRUE,echo=TRUE,eval=TRUE}
+# cell information
+reducedDimNames(sce.NeuroD1_filtered)
+# gene information
+metadata(sce.NeuroD1_filtered)
+```
+
+
+---
+## The knee plot
+
+One of the first plots we may want to recreate from the QC is the knee plot.
+
+To do this we will need the unfiltered matrix too. 
+
+The unfiltered SingleCellExperiment contains over a million droplets.
+
+
+```{r loadSCE_pres3,include=TRUE,echo=TRUE,eval=TRUE}
+h5file <- "https://rubioinformatics.s3.amazonaws.com/scRNA_graduate/SRR_NeuroD1/outs/raw_feature_bc_matrix.h5"
+local_h5file <-"NeuroD1_raw_feature_bc_matrix.h5"
+download.file(h5file,local_h5file)
+sce.NeuroD1_unfiltered <- read10xCounts(local_h5file, col.names=TRUE)
+sce.NeuroD1_unfiltered
+```
+
+```{r,include=FALSE,eval=FALSE}
+unlink(local_h5file)
+```
+
+---
+## Barcode ranks
+
+
+
+```{r}
+bcrank <- barcodeRanks(counts(sce.NeuroD1_unfiltered))
+bcrank
+```
+
+---
+## Retrieve filtered barcodes
+
+```{r}
+bcrank$filtered <- rownames(bcrank) %in% colnames(sce.NeuroD1_filtered)
+bc_plot <- as.data.frame(bcrank)
+bc_plot <- bc_plot[order(bc_plot$filtered,decreasing=TRUE),]
+bc_plot <- bc_plot[!duplicated(bc_plot$rank),]
+```
+
+---
+## Plotting barcode rank
+
+```{r}
+require(ggplot2)
+  ggplot(bc_plot,aes(x=rank,y=total,colour=filtered,alpha=0.001))+
+  geom_point()+
+  scale_y_log10()+
+  scale_x_log10()+
+  theme_minimal()+
+  geom_hline(yintercept = metadata(bcrank)$inflection,colour="darkgreen",linetype=2)+
+  geom_hline(yintercept = metadata(bcrank)$knee,colour="dodgerblue",linetype=2)
+
+```
+
+---
+## Filtering droplets using Droplet utils
+
+Although CellRanger provides a filtered Droplet matrix, you may wish to provide your own cut-off based on knee plots generated and/or use the emptyDrops method in Droplet utils to identify cell containing droplets.
+
+```{r,eval=FALSE,echo=TRUE}
+e.out <- emptyDrops(counts(sce.NeuroD1_unfiltered))
+table(e.out)
+head(e.out)
+```
+
+```{r,eval=FALSE,echo=FALSE}
+e.out <- readRDS(system.file("extdata/data/e.out.RData", mustWork = TRUE, package = "scRNASeq"))
+)
+table(e.out)
+head(e.out)
+```
+
+```{r,include=FALSE,eval=FALSE}
+unlink(local_h5file)
+```
+
+
+```{r, results='asis',include=TRUE,echo=FALSE}
+if(params$isSlides == "yes"){
+  cat("class: inverse, center, middle
+
+# Bioconductor  -  QC
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=720px></html> 
+
+---
+"    
+  )
+}else{
+  cat("# Bioconductor  -  QC
+
+---
+"    
+  )
+  
+}
+
+```
+
+## Working with CellRanger filtered matrix
+
+From this point we will use the Droplets filtered using Cellranger
+
+```{r}
+sce.NeuroD1_filtered
+```
+  
+---
+## Add QC metrics
+
+To assess QC we first want to identify mitochondrial and ribosomal genes.
+
+High mitochondrial gene expression within a cell is often used as a marker of dying cells.
+
+```{r}
+is.mito <- grepl("^mt",rowData(sce.NeuroD1_filtered)$Symbol)
+is.ribo <- grepl("^Rps",rowData(sce.NeuroD1_filtered)$Symbol)
+
+table(is.mito)
+table(is.ribo)
+
+```
+  
+---
+## Add QC metrics
+
+The scuttle package has functions for normalisation, transformation and QC.
+
+Here we us the addPerCellQCMetrics function to update our SingleCellExperiment object with QC information.
+
+```{r}
+library(scuttle)
+sce.NeuroD1_filtered <- addPerCellQCMetrics(sce.NeuroD1_filtered, 
+                                            subsets=list(Mito=is.mito,Ribosomal=is.ribo))
+sce.NeuroD1_filtered
+```
+
+---
+## QC in colData
+
+The QC data per Droplet has been added to additional columns in the colData slot of our SingleCellExperiment.
+
+```{r}
+qc_df <- colData(sce.NeuroD1_filtered)
+head(qc_df,n=2)
+```
+
+
+---
+## Plotting QC data
+
+We can then plot this using the plotColData function from the Scater package.
+
+First we plot the distritbution of total reads per cell.
+
+```{r}
+library(scater)
+plotColData(sce.NeuroD1_filtered,x="Sample", y="sum")
+```
+
+---
+## Plotting QC data
+
+Then we plot the distritbution of total detected genes per cell.
+
+```{r}
+library(scater)
+plotColData(sce.NeuroD1_filtered,x="Sample",y="detected")
+
+```
+
+---
+## Plotting QC data
+
+Then we plot the distritbution of percent of mitochondrial and ribosomal reads per cell.
+
+```{r}
+library(scater)
+p1 <- plotColData(sce.NeuroD1_filtered,x="Sample",y="subsets_Mito_percent")
+p2 <- plotColData(sce.NeuroD1_filtered,x="Sample",y="subsets_Ribosomal_percent")
+gridExtra::grid.arrange(p1,p2,ncol=2)
+```
+
+---
+## Plotting QC data
+
+It also can be useful to capture the QC columns against each other as scatterplots
+
+```{r}
+library(scater)
+p1 <- plotColData(sce.NeuroD1_filtered,x="sum",y="detected")
+p2 <- plotColData(sce.NeuroD1_filtered,x="sum",y="subsets_Mito_percent")
+p3 <- plotColData(sce.NeuroD1_filtered,x="detected",y="subsets_Mito_percent")
+gridExtra::grid.arrange(p1,p2,p3,ncol=3)
+```
+
+---
+## Removing low quality data
+
+At this point we may want to remove low quality data.
+
+Typically droplet filters on mitochondrial read content, total detect genes and total read counts are applied.
+
+```{r}
+qc.high_lib_size <- colData(sce.NeuroD1_filtered)$sum > 125000
+qc.min_detected <- colData(sce.NeuroD1_filtered)$detected < 200
+qc.mito <- colData(sce.NeuroD1_filtered)$subsets_Mito_percent > 25
+discard <- qc.high_lib_size | qc.mito | qc.min_detected
+DataFrame(LibSize=sum(qc.high_lib_size), Detected=sum(qc.min_detected),MitoProp=sum(qc.mito), Total=sum(discard))
+```
+
+---
+## Removing low quality data
+
+We will add this back in the colData slot to perform some final QC plots before filtering
+
+```{r}
+colData(sce.NeuroD1_filtered) <- cbind(colData(sce.NeuroD1_filtered),DataFrame(toDiscard=discard))
+p1 <- plotColData(sce.NeuroD1_filtered,x="sum",y="detected",colour_by = "toDiscard")
+p2 <- plotColData(sce.NeuroD1_filtered,x="sum",y="subsets_Mito_percent",colour_by = "toDiscard")
+p3 <- plotColData(sce.NeuroD1_filtered,x="detected",y="subsets_Mito_percent",colour_by = "toDiscard")
+gridExtra::grid.arrange(p1,p2,p3,ncol=3)
+```
+
+---
+## Removing low quality data
+
+```{r}
+sce.NeuroD1_filtered_QCed <- sce.NeuroD1_filtered[,sce.NeuroD1_filtered$toDiscard %in% "FALSE"]
+sce.NeuroD1_filtered_QCed
+```
+
+---
+
+```{r, results='asis',include=TRUE,echo=FALSE}
+if(params$isSlides == "yes"){
+  cat("class: inverse, center, middle
+
+# Bioconductor  -  Normalisation and Clustering
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=720px></html> 
+
+---
+"    
+  )
+}else{
+  cat("# Bioconductor  -  Normalisation and Clustering
+
+---
+"    
+  )
+  
+}
+
+```
+
+---
+# Log Normalisation
+
+
+```{r}
+sce.NeuroD1_filtered_QCed <- logNormCounts(sce.NeuroD1_filtered_QCed)
+assayNames(sce.NeuroD1_filtered_QCed)
+```
+
+---
+## Log Normalisation
+
+
+```{r}
+sce.NeuroD1_filtered_QCed <- logNormCounts(sce.NeuroD1_filtered_QCed)
+assayNames(sce.NeuroD1_filtered_QCed)
+```
+
+---
+## Log Normalisation accounting for differing cell populations
+
+
+```{r}
+clust.sce.NeuroD1_filtered_QCed <- quickCluster(sce.NeuroD1_filtered_QCed) 
+sce.NeuroD1_filtered_trimmed <- computeSumFactors(sce.NeuroD1_filtered_QCed, cluster=clust.sce.NeuroD1_filtered_QCed)
+sce.NeuroD1_filtered_QCed <- logNormCounts(sce.NeuroD1_filtered_QCed)
+assayNames(sce.NeuroD1_filtered_QCed)
+
+```
+
+---
+## Modeling the mean-variance relationship
+
+```{r}
+##
+library(scran)
+dec.NeuroD1_filtered_QCed <- modelGeneVar(sce.NeuroD1_filtered_QCed)
+ggplot(dec.NeuroD1_filtered_QCed,aes(x=mean,y=total))+geom_point()
+```
+
+---
+## Identifying top variable genes for PCA
+
+```{r}
+top.NeuroD1_filtered_QCed <- getTopHVGs(dec.NeuroD1_filtered_QCed, n=3000)
+
+```
+
+---
+## PCA
+
+```{r}
+set.seed(100) # See below.
+sce.NeuroD1_filtered_QCed <- fixedPCA(sce.NeuroD1_filtered_QCed,
+                                      subset.row=top.NeuroD1_filtered_QCed) 
+reducedDimNames(sce.NeuroD1_filtered_QCed)
+
+```
+
+---
+## Select PCs from PCA
+
+```{r}
+percent.var <- attr(reducedDim(sce.NeuroD1_filtered_QCed), "percentVar")
+plot(percent.var, log="y", xlab="PC", ylab="Variance explained (%)")
+# library(PCAtools)
+# chosen.elbow <- findElbowPoint(percent.var)
+```
+
+
+<!-- --- -->
+<!-- ## Select PCs from PCA -->
+
+<!-- ```{r} -->
+<!-- # set.seed(1000) -->
+<!-- # # Evaluate PCs -->
+<!-- # sce.NeuroD1_filtered_QCed <- denoisePCA(sce.NeuroD1_filtered_QCed, subset.row = top.NeuroD1_filtered_QCed, technical = dec.NeuroD1_filtered_QCed) -->
+<!-- # ncol(reducedDim(sce.NeuroD1_filtered_QCed)) -->
+
+<!-- ``` -->
+
+
+
