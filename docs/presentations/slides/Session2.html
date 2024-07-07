@@ -874,9 +874,73 @@ plotTSNE(sce.NeuroD1_filtered_QCed, colour_by = "subsets_Mito_percent")
 
 ![](Session2_files/figure-html/unnamed-chunk-36-2.png)&lt;!-- --&gt;
 
+---
 ## Clustering
 
 
+
+``` r
+require(bluster)
+```
+
+```
+## Loading required package: bluster
+```
+
+```
+## Warning: package 'bluster' was built under R version 4.4.1
+```
+
+``` r
+clust.leiden &lt;- clusterCells(sce.NeuroD1_filtered_QCed, use.dimred = "PCA", BLUSPARAM = NNGraphParam(cluster.fun = "leiden",
+    cluster.args = list(resolution = 0.1)))
+clust.default &lt;- clusterCells(sce.NeuroD1_filtered_QCed, use.dimred = "PCA")
+```
+
+---
+## Clustering
+
+
+
+``` r
+colLabels(sce.NeuroD1_filtered_QCed) &lt;- clust.leiden
+colData(sce.NeuroD1_filtered_QCed)$DefaultLabel &lt;- clust.default
+plotUMAP(sce.NeuroD1_filtered_QCed, colour_by = "label")
+```
+
+![](Session2_files/figure-html/unnamed-chunk-38-1.png)&lt;!-- --&gt;
+
+``` r
+plotUMAP(sce.NeuroD1_filtered_QCed, colour_by = "DefaultLabel")
+```
+
+![](Session2_files/figure-html/unnamed-chunk-38-2.png)&lt;!-- --&gt;
+
+
+
+``` r
+eec_paper_meta &lt;- read.delim("~/Downloads/GSE224223_EEC_metadata.csv", sep = ";")
+nrd1_cells &lt;- as.data.frame(eec_paper_meta[eec_paper_meta$Library == "Nd1", ])
+
+nrd1_cells$X &lt;- gsub("_2$", "", nrd1_cells$X)
+
+newMeta &lt;- merge(colData(sce.NeuroD1_filtered_QCed), nrd1_cells, by.x = "Barcode",
+    by.y = "X", all.x = TRUE, all.y = FALSE, order = FALSE)
+rownames(newMeta) &lt;- newMeta$Barcode
+newMeta$All_Cell_Types[is.na(newMeta$All_Cell_Types)] &lt;- "Filtered"
+colData(sce.NeuroD1_filtered_QCed) &lt;- newMeta
+plotTSNE(sce.NeuroD1_filtered_QCed, colour_by = "All_Cell_Types") + facet_grid(~colour_by)
+```
+
+
+``` r
+tab &lt;- table(Walktrap = clust.walktrap, Louvain = clust.louvain)
+rownames(tab) &lt;- paste("Walktrap", rownames(tab))
+colnames(tab) &lt;- paste("Louvain", colnames(tab))
+
+library(pheatmap)
+pheatmap(log10(tab + 10), color = viridis::viridis(100), cluster_cols = FALSE, cluster_rows = FALSE)
+```
 &lt;!-- --- --&gt;
 &lt;!-- ## Select PCs from PCA --&gt;
 
