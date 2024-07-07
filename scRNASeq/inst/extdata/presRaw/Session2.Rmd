@@ -518,9 +518,53 @@ plotUMAP(sce.NeuroD1_filtered_QCed,colour_by="subsets_Mito_percent")
 plotTSNE(sce.NeuroD1_filtered_QCed,colour_by="subsets_Mito_percent")
 ```
 
+---
 ## Clustering
 
 
+```{r}
+require(bluster)
+clust.leiden <- clusterCells(sce.NeuroD1_filtered_QCed, use.dimred="PCA", 
+                                BLUSPARAM=NNGraphParam(cluster.fun="leiden",cluster.args = list(resolution=0.1)))
+clust.default <- clusterCells(sce.NeuroD1_filtered_QCed, use.dimred="PCA")
+
+```
+
+---
+## Clustering
+
+
+```{r}
+colLabels(sce.NeuroD1_filtered_QCed) <- clust.leiden
+colData(sce.NeuroD1_filtered_QCed)$DefaultLabel <- clust.default
+plotUMAP(sce.NeuroD1_filtered_QCed,colour_by="label")
+plotUMAP(sce.NeuroD1_filtered_QCed,colour_by="DefaultLabel")
+
+```
+
+
+```{r,eval=FALSE}
+eec_paper_meta <- read.delim("~/Downloads/GSE224223_EEC_metadata.csv",sep=";")
+nrd1_cells <- as.data.frame(eec_paper_meta[eec_paper_meta$Library == "Nd1",])
+   
+nrd1_cells$X <- gsub("_2$","",nrd1_cells$X)
+
+newMeta <- merge(colData(sce.NeuroD1_filtered_QCed),nrd1_cells,by.x="Barcode",by.y="X",all.x=TRUE,all.y=FALSE,order=FALSE)
+rownames(newMeta) <- newMeta$Barcode
+newMeta$All_Cell_Types[is.na(newMeta$All_Cell_Types)] <- "Filtered"
+colData(sce.NeuroD1_filtered_QCed) <- newMeta
+plotTSNE(sce.NeuroD1_filtered_QCed,colour_by="All_Cell_Types")+facet_grid(~colour_by)
+
+```
+
+```{r,eval=FALSE}
+tab <- table(Walktrap=clust.walktrap, Louvain=clust.louvain)
+rownames(tab) <- paste("Walktrap", rownames(tab))
+colnames(tab) <- paste("Louvain", colnames(tab))
+
+library(pheatmap)
+pheatmap(log10(tab+10), color=viridis::viridis(100), cluster_cols=FALSE, cluster_rows=FALSE)
+```
 <!-- --- -->
 <!-- ## Select PCs from PCA -->
 
