@@ -445,6 +445,7 @@ assayNames(sce.NeuroD1_filtered_QCed)
 
 
 ```{r}
+library(scran)
 clust.sce.NeuroD1_filtered_QCed <- quickCluster(sce.NeuroD1_filtered_QCed) 
 sce.NeuroD1_filtered_trimmed <- computeSumFactors(sce.NeuroD1_filtered_QCed, cluster=clust.sce.NeuroD1_filtered_QCed)
 sce.NeuroD1_filtered_QCed <- logNormCounts(sce.NeuroD1_filtered_QCed)
@@ -457,7 +458,6 @@ assayNames(sce.NeuroD1_filtered_QCed)
 
 ```{r}
 ##
-library(scran)
 dec.NeuroD1_filtered_QCed <- modelGeneVar(sce.NeuroD1_filtered_QCed)
 ggplot(dec.NeuroD1_filtered_QCed,aes(x=mean,y=total))+geom_point()
 ```
@@ -482,6 +482,14 @@ reducedDimNames(sce.NeuroD1_filtered_QCed)
 ```
 
 ---
+## PCA
+
+```{r}
+plotReducedDim(sce.NeuroD1_filtered_QCed, dimred="PCA",colour_by = "subsets_Mito_percent")
+
+```
+
+---
 ## Select PCs from PCA
 
 ```{r}
@@ -492,6 +500,320 @@ plot(percent.var, log="y", xlab="PC", ylab="Variance explained (%)")
 ```
 
 
+---
+## Visualise in 2D with Tisne and UMAP
+
+```{r}
+
+sce.NeuroD1_filtered_QCed <- runTSNE(sce.NeuroD1_filtered_QCed,n_dimred=30)
+sce.NeuroD1_filtered_QCed <- runUMAP(sce.NeuroD1_filtered_QCed,n_dimred=30)
+reducedDimNames(sce.NeuroD1_filtered_QCed)
+```
+
+---
+## Visualise in 2D with Tisne and UMAP
+
+```{r}
+plotUMAP(sce.NeuroD1_filtered_QCed,colour_by="subsets_Mito_percent")
+plotTSNE(sce.NeuroD1_filtered_QCed,colour_by="subsets_Mito_percent")
+```
+
+---
+## Clustering
+
+
+```{r}
+require(bluster)
+clust.leiden <- clusterCells(sce.NeuroD1_filtered_QCed, use.dimred="PCA", 
+                                BLUSPARAM=NNGraphParam(cluster.fun="leiden",cluster.args = list(resolution=0.15)),full=TRUE)
+clust.default <- clusterCells(sce.NeuroD1_filtered_QCed, use.dimred="PCA")
+
+```
+
+
+
+
+---
+## Clustering
+
+
+```{r}
+colLabels(sce.NeuroD1_filtered_QCed) <- clust.leiden
+colData(sce.NeuroD1_filtered_QCed)$DefaultLabel <- clust.default
+plotUMAP(sce.NeuroD1_filtered_QCed,colour_by="label")
+plotUMAP(sce.NeuroD1_filtered_QCed,colour_by="DefaultLabel")
+
+```
+
+---
+## Clustering
+
+
+```{r}
+tab <- table(Walktrap=clust.default, Louvain=clust.leiden$clusters)
+rownames(tab) <- paste("Walktrap", rownames(tab))
+colnames(tab) <- paste("Leiden", colnames(tab))
+library(pheatmap)
+pheatmap(log10(tab+10), color=viridis::viridis(100), cluster_cols=FALSE, cluster_rows=FALSE)
+```
+
+---
+
+```{r,eval=FALSE}
+eec_paper_meta <- read.delim("~/Downloads/GSE224223_EEC_metadata.csv",sep=";")
+nrd1_cells <- as.data.frame(eec_paper_meta[eec_paper_meta$Library == "Nd1",])
+   
+nrd1_cells$X <- gsub("_2$","",nrd1_cells$X)
+
+newMeta <- merge(colData(sce.NeuroD1_filtered_QCed),nrd1_cells,by.x="Barcode",by.y="X",all.x=TRUE,all.y=FALSE,order=FALSE)
+rownames(newMeta) <- newMeta$Barcode
+newMeta$All_Cell_Types[is.na(newMeta$All_Cell_Types)] <- "Filtered"
+colData(sce.NeuroD1_filtered_QCed) <- newMeta
+plotTSNE(sce.NeuroD1_filtered_QCed,colour_by="All_Cell_Types")+facet_grid(~colour_by)
+
+```
+
+```{r}
+tab <- table(Walktrap=sce.NeuroD1_filtered_QCed$All_Cell_Types, Louvain=clust.leiden$clusters)
+rownames(tab) <- paste("CellType", rownames(tab))
+colnames(tab) <- paste("Leiden", colnames(tab))
+library(pheatmap)
+pheatmap(log10(tab+10), color=viridis::viridis(100), cluster_cols=FALSE, cluster_rows=FALSE)
+```
+
+
+```{r}
+markers.sce.NeuroD1 <- scoreMarkers(sce.NeuroD1_filtered_QCed,sce.NeuroD1_filtered_QCed$label)
+chosen <- markers.sce.NeuroD1[["1"]]
+ordered <- chosen[order(chosen$mean.AUC, decreasing=TRUE),]
+head(ordered[,1:4]) # showing basic stats only, for brevity.
+```
+
+```{r}
+plotExpression(sce.NeuroD1_filtered_QCed, features=head(rownames(ordered)), 
+    x="label", colour_by="label")
+```
+
+```{r, results='asis',include=TRUE,echo=FALSE}
+if(params$isSlides == "yes"){
+  cat("class: inverse, center, middle
+
+# Seurat
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=720px></html> 
+
+---
+"    
+  )
+}else{
+  cat("# Seurat
+
+---
+"    
+  )
+  
+}
+
+```
+
+## Working with CellRanger filtered matrix
+
+From this point we will use the Droplets filtered using Cellranger
+
+```{r}
+library(Seurat)
+h5file <- "https://rubioinformatics.s3.amazonaws.com/scRNA_graduate/SRR_NeuroD1/outs/NeuroD1_filtered_feature_bc_matrix.h5"
+local_h5file <- basename(h5file)
+download.file(h5file,local_h5file)
+Nd1T.mat <- Read10X_h5(filename = local_h5file)
+Nd1T.obj <- CreateSeuratObject(Nd1T.mat, project = "Nd1")
+
+```
+  
+  
+---   
+## The Seurat object
+
+From this point we will use the Droplets filtered using Cellranger
+
+```{r}
+Nd1T.obj
+```
+    
+   
+---   
+## The Seurat object
+
+From this point we will use the Droplets filtered using Cellranger
+
+```{r}
+rownames(Nd1T.obj)
+colnames(Nd1T.obj)
+```
+    
+---   
+## The Seurat object
+
+From this point we will use the Droplets filtered using Cellranger
+
+```{r}
+Nd1T.obj@meta.data[1:2,]
+```
+    
+---   
+## The Seurat object
+
+From this point we will use the Droplets filtered using Cellranger
+
+```{r}
+Nd1T.obj@active.assay
+Nd1T.obj@active.ident[1:2]
+```
+ 
+---   
+## The Seurat object
+
+From this point we will use the Droplets filtered using Cellranger
+
+```{r}
+Nd1T.obj@assays$RNA$counts
+```
+    
+ 
+---   
+## The Seurat object
+
+From this point we will use the Droplets filtered using Cellranger
+
+```{r}
+mito.genes <- grep("^mt", rownames(Nd1T.obj), value = T)
+mito.genes[1:10]
+```
+
+---   
+## The Seurat object
+
+From this point we will use the Droplets filtered using Cellranger
+
+```{r}
+percent.mt <- PercentageFeatureSet(Nd1T.obj, features = mito.genes)
+Nd1T.obj <- AddMetaData(Nd1T.obj,metadata = percent.mt,col.name = "percent.mt")
+head(Nd1T.obj@meta.data)
+```
+
+---   
+## The Seurat object
+
+From this point we will use the Droplets filtered using Cellranger
+
+```{r}
+VlnPlot(Nd1T.obj, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+```
+
+---   
+## The Seurat object
+
+From this point we will use the Droplets filtered using Cellranger
+
+```{r}
+plot1 <- FeatureScatter(Nd1T.obj, feature1 = "nCount_RNA", feature2 = "percent.mt")
+plot2 <- FeatureScatter(Nd1T.obj, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+plot3 <- FeatureScatter(Nd1T.obj, feature1 = "nFeature_RNA", feature2 = "percent.mt")
+plot1+plot2+plot3
+```
+
+
+```{r}
+
+Nd1T.obj.filt <- subset(Nd1T.obj, subset = `nCount_RNA` < 125000 & percent.mt < 25 & nFeature_RNA > 200) 
+Nd1T.obj.filt
+```
+
+```{r}
+Nd1T.obj.filt <- NormalizeData(Nd1T.obj.filt)
+```
+
+```{r}
+Nd1T.obj.filt <- FindVariableFeatures(Nd1T.obj.filt, selection.method = "vst", nfeatures = 3000)
+top10 <- head(VariableFeatures(Nd1T.obj.filt), 10)
+top10
+```
+
+```{r}
+plot1 <- VariableFeaturePlot(Nd1T.obj.filt)
+plot2 <- LabelPoints(plot = plot1, points = top10, repel = TRUE)
+plot2
+```
+
+
+```{r}
+all.genes <- rownames(Nd1T.obj.filt)
+Nd1T.obj.filt <- ScaleData(Nd1T.obj.filt, features = all.genes)
+Nd1T.obj.filt@assays
+```
+
+
+```{r}
+Nd1T.obj.filt <- RunPCA(Nd1T.obj.filt, features = VariableFeatures(object = Nd1T.obj))
+ElbowPlot(Nd1T.obj.filt,ndims = 50)
+```
+
+
+```{r}
+Nd1T.obj.filt <- RunPCA(Nd1T.obj.filt, features = VariableFeatures(object = Nd1T.obj))
+ElbowPlot(Nd1T.obj.filt,ndims = 50)
+```
+
+
+```{r}
+Nd1T.obj.filt <- RunUMAP(Nd1T.obj.filt, dims = 1:30)
+```
+
+```{r}
+FeaturePlot(Nd1T.obj.filt, reduction = "umap",features = "percent.mt")
+```
+
+```{r}
+Nd1T.obj.filt <- FindNeighbors(Nd1T.obj.filt, dims = 1:30)
+Nd1T.obj.filt <- FindClusters(Nd1T.obj.filt, resolution = 0.8)
+Nd1T.obj.filt@active.ident
+```
+
+```{r}
+DimPlot(Nd1T.obj.filt, reduction = "umap")
+```
+
+
+```{r}
+Nd1T.markers <- FindAllMarkers(Nd1T.obj.filt, only.pos = TRUE)
+Nd1T.markers[Nd1T.markers$cluster == 9,]
+```
+
+```{r}
+bioc.clusters <- data.frame(Bioc=sce.NeuroD1_filtered_QCed$label,row.names = sce.NeuroD1_filtered_QCed$Barcode)
+seurat.clusters <- as.data.frame(Nd1T.obj.filt@active.ident)
+colnames(seurat.clusters) <- "Seurat"
+clustersAll <- merge(bioc.clusters,seurat.clusters,by=0,all=FALSE)
+
+```
+
+```{r}
+tab <- table(Bioc=clustersAll$Bioc, Seurat=clustersAll$Seurat)
+rownames(tab) <- paste("Bioc", rownames(tab))
+colnames(tab) <- paste("Seurat", colnames(tab))
+library(pheatmap)
+pheatmap(log10(tab+10), color=viridis::viridis(100), cluster_cols=FALSE, cluster_rows=FALSE)
+
+```
+
+
+```{r}
+
+
+```
+ 
+  
+  
 <!-- --- -->
 <!-- ## Select PCs from PCA -->
 
