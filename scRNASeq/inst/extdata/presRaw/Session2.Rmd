@@ -156,6 +156,7 @@ colData(sce.NeuroD1_filtered)[1:2,]
 # gene information
 rowData(sce.NeuroD1_filtered)[1:2,]
 ```
+---
 
 ## SingleCellExperiment Object
 

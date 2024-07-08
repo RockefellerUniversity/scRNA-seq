@@ -48,7 +48,11 @@ The second dataset is the classic example from PBMC cells.
 
 The Seurat R package and associated packages offer an R based and well established methodology for the analysis of single cell RNA-seq, ATAC-seq and many other single-cell sequencing methodologies.
 
+[Seurat page](https://satijalab.org/seurat/)
+
 Bioconductor has a set of interrelated and highly connected software packages for single cell RNAseq as well as integrating with the rest of the Bioconductor software ecosystem.
+[OSCA book](https://bioconductor.org/books/3.18/OSCA/)
+
 
 In this session we will run through basic analyses using both of the methodologies to show both their equvalence in some parts of the analysis as well as their distinct functionalities in others.
 
@@ -61,14 +65,15 @@ For this session we will need the filtered and raw expression data for the Neuro
 
 The filtered matrix can be found [here](https://rubioinformatics.s3.amazonaws.com/scRNA_graduate/SRR_NeuroD1/outs/NeuroD1_filtered_feature_bc_matrix.h5)
 
-The raw matrix can be found here [here](https://rubioinformatics.s3.amazonaws.com/scRNA_graduate/SRR_NeuroD1/outs/filtered_feature_bc_matrix.h5)
+The raw matrix can be found here [here](https://rubioinformatics.s3.amazonaws.com/scRNA_graduate/SRR_NeuroD1/outs/raw_feature_bc_matrix.h5)
 
+---
 
 ```{r, results='asis',include=TRUE,echo=FALSE}
 if(params$isSlides == "yes"){
   cat("class: inverse, center, middle
 
-# Cell Ranger -  Output files
+# Bioconductor methods
 
 <html><div style='float:left'></div><hr color='#EB811B' size=1px width=720px></html> 
 
@@ -76,7 +81,7 @@ if(params$isSlides == "yes"){
 "    
   )
 }else{
-  cat("# Cell Ranger - Output files
+  cat("# Bioconductor methods
 
 ---
 "    
@@ -91,7 +96,7 @@ if(params$isSlides == "yes"){
 
 First we need to load the DropletUtils package to read and handle our Droplet 10X data.
 
-```{r}
+```{r,fig.width=7,fig.height=4}
 
 library(DropletUtils)
 
@@ -102,7 +107,9 @@ library(DropletUtils)
 
 We can then read in the filtered matrix containing data on droplets marked as cells by CellRanger.
 
-```{r}
+We set the row.names argument for easier interpretation.
+
+```{r,fig.width=7,fig.height=4}
 
 h5file <- "https://rubioinformatics.s3.amazonaws.com/scRNA_graduate/SRR_NeuroD1/outs/NeuroD1_filtered_feature_bc_matrix.h5"
 local_h5file <- basename(h5file)
@@ -123,7 +130,7 @@ unlink(h5file)
 ## SingleCellExperiment Object
 The created SingleCellExperiment Object is much like our SummarizedExperiment object
 
-```{r}
+```{r,fig.width=7,fig.height=4}
 sce.NeuroD1_filtered
 ```
 
@@ -139,6 +146,7 @@ colnames(sce.NeuroD1_filtered)[1:2]
 rownames(sce.NeuroD1_filtered)[1:2]
 ```
 
+---
 ## SingleCellExperiment Object
 The *colData()* and *rowData()* functions can be used to access experiment metadata. 
 
@@ -148,6 +156,7 @@ colData(sce.NeuroD1_filtered)[1:2,]
 # gene information
 rowData(sce.NeuroD1_filtered)[1:2,]
 ```
+---
 
 ## SingleCellExperiment Object
 
@@ -188,9 +197,10 @@ unlink(local_h5file)
 ---
 ## Barcode ranks
 
+We can use the *barcodeRanks* function to create a table of barcode ranks and total reads per droplet.
 
 
-```{r}
+```{r,fig.width=7,fig.height=4}
 bcrank <- barcodeRanks(counts(sce.NeuroD1_unfiltered))
 bcrank
 ```
@@ -198,7 +208,9 @@ bcrank
 ---
 ## Retrieve filtered barcodes
 
-```{r}
+We then filter for droplets with the same rank for visualisation purposes.
+
+```{r,fig.width=7,fig.height=4}
 bcrank$filtered <- rownames(bcrank) %in% colnames(sce.NeuroD1_filtered)
 bc_plot <- as.data.frame(bcrank)
 bc_plot <- bc_plot[order(bc_plot$filtered,decreasing=TRUE),]
@@ -208,7 +220,9 @@ bc_plot <- bc_plot[!duplicated(bc_plot$rank),]
 ---
 ## Plotting barcode rank
 
-```{r}
+We can now recreate the knee plot from CellRanger.
+
+```{r,fig.width=7,fig.height=4}
 require(ggplot2)
   ggplot(bc_plot,aes(x=rank,y=total,colour=filtered,alpha=0.001))+
   geom_point()+
@@ -231,10 +245,8 @@ table(e.out)
 head(e.out)
 ```
 
-```{r,eval=FALSE,echo=FALSE}
+```{r,eval=TRUE,echo=FALSE}
 e.out <- readRDS(system.file("extdata/data/e.out.RData", mustWork = TRUE, package = "scRNASeq"))
-)
-table(e.out)
 head(e.out)
 ```
 
@@ -242,6 +254,7 @@ head(e.out)
 unlink(local_h5file)
 ```
 
+---
 
 ```{r, results='asis',include=TRUE,echo=FALSE}
 if(params$isSlides == "yes"){
@@ -269,7 +282,7 @@ if(params$isSlides == "yes"){
 
 From this point we will use the Droplets filtered using Cellranger
 
-```{r}
+```{r,fig.width=7,fig.height=4}
 sce.NeuroD1_filtered
 ```
   
@@ -280,7 +293,7 @@ To assess QC we first want to identify mitochondrial and ribosomal genes.
 
 High mitochondrial gene expression within a cell is often used as a marker of dying cells.
 
-```{r}
+```{r,fig.width=7,fig.height=4}
 is.mito <- grepl("^mt",rowData(sce.NeuroD1_filtered)$Symbol)
 is.ribo <- grepl("^Rps",rowData(sce.NeuroD1_filtered)$Symbol)
 
@@ -296,7 +309,7 @@ The scuttle package has functions for normalisation, transformation and QC.
 
 Here we us the addPerCellQCMetrics function to update our SingleCellExperiment object with QC information.
 
-```{r}
+```{r,fig.width=7,fig.height=4}
 library(scuttle)
 sce.NeuroD1_filtered <- addPerCellQCMetrics(sce.NeuroD1_filtered, 
                                             subsets=list(Mito=is.mito,Ribosomal=is.ribo))
@@ -308,7 +321,7 @@ sce.NeuroD1_filtered
 
 The QC data per Droplet has been added to additional columns in the colData slot of our SingleCellExperiment.
 
-```{r}
+```{r,fig.width=7,fig.height=4}
 qc_df <- colData(sce.NeuroD1_filtered)
 head(qc_df,n=2)
 ```
@@ -321,7 +334,7 @@ We can then plot this using the plotColData function from the Scater package.
 
 First we plot the distritbution of total reads per cell.
 
-```{r}
+```{r,fig.width=7,fig.height=4}
 library(scater)
 plotColData(sce.NeuroD1_filtered,x="Sample", y="sum")
 ```
@@ -331,7 +344,7 @@ plotColData(sce.NeuroD1_filtered,x="Sample", y="sum")
 
 Then we plot the distritbution of total detected genes per cell.
 
-```{r}
+```{r,fig.width=7,fig.height=4}
 library(scater)
 plotColData(sce.NeuroD1_filtered,x="Sample",y="detected")
 
@@ -342,7 +355,7 @@ plotColData(sce.NeuroD1_filtered,x="Sample",y="detected")
 
 Then we plot the distritbution of percent of mitochondrial and ribosomal reads per cell.
 
-```{r}
+```{r,fig.width=7,fig.height=4}
 library(scater)
 p1 <- plotColData(sce.NeuroD1_filtered,x="Sample",y="subsets_Mito_percent")
 p2 <- plotColData(sce.NeuroD1_filtered,x="Sample",y="subsets_Ribosomal_percent")
@@ -354,7 +367,7 @@ gridExtra::grid.arrange(p1,p2,ncol=2)
 
 It also can be useful to capture the QC columns against each other as scatterplots
 
-```{r}
+```{r,fig.width=7,fig.height=4}
 library(scater)
 p1 <- plotColData(sce.NeuroD1_filtered,x="sum",y="detected")
 p2 <- plotColData(sce.NeuroD1_filtered,x="sum",y="subsets_Mito_percent")
@@ -369,7 +382,7 @@ At this point we may want to remove low quality data.
 
 Typically droplet filters on mitochondrial read content, total detect genes and total read counts are applied.
 
-```{r}
+```{r,fig.width=7,fig.height=4}
 qc.high_lib_size <- colData(sce.NeuroD1_filtered)$sum > 125000
 qc.min_detected <- colData(sce.NeuroD1_filtered)$detected < 200
 qc.mito <- colData(sce.NeuroD1_filtered)$subsets_Mito_percent > 25
@@ -382,7 +395,7 @@ DataFrame(LibSize=sum(qc.high_lib_size), Detected=sum(qc.min_detected),MitoProp=
 
 We will add this back in the colData slot to perform some final QC plots before filtering
 
-```{r}
+```{r,fig.width=7,fig.height=4}
 colData(sce.NeuroD1_filtered) <- cbind(colData(sce.NeuroD1_filtered),DataFrame(toDiscard=discard))
 p1 <- plotColData(sce.NeuroD1_filtered,x="sum",y="detected",colour_by = "toDiscard")
 p2 <- plotColData(sce.NeuroD1_filtered,x="sum",y="subsets_Mito_percent",colour_by = "toDiscard")
@@ -392,59 +405,33 @@ gridExtra::grid.arrange(p1,p2,p3,ncol=3)
 
 ---
 ## Removing low quality data
+At this point we may want to remove the low quality cells from further analysis
 
-```{r}
+```{r,fig.width=7,fig.height=4}
 sce.NeuroD1_filtered_QCed <- sce.NeuroD1_filtered[,sce.NeuroD1_filtered$toDiscard %in% "FALSE"]
 sce.NeuroD1_filtered_QCed
 ```
 
----
-
-```{r, results='asis',include=TRUE,echo=FALSE}
-if(params$isSlides == "yes"){
-  cat("class: inverse, center, middle
-
-# Bioconductor  -  Normalisation and Clustering
-
-<html><div style='float:left'></div><hr color='#EB811B' size=1px width=720px></html> 
-
----
-"    
-  )
-}else{
-  cat("# Bioconductor  -  Normalisation and Clustering
-
----
-"    
-  )
-  
-}
-
-```
 
 ---
 # Log Normalisation
 
+As with our RNA-seq and genomics data we want to normalise for total library size and perfrom a log2 transformation.
 
-```{r}
+```{r,fig.width=7,fig.height=4}
 sce.NeuroD1_filtered_QCed <- logNormCounts(sce.NeuroD1_filtered_QCed)
 assayNames(sce.NeuroD1_filtered_QCed)
 ```
 
----
-## Log Normalisation
-
-
-```{r}
-sce.NeuroD1_filtered_QCed <- logNormCounts(sce.NeuroD1_filtered_QCed)
-assayNames(sce.NeuroD1_filtered_QCed)
-```
 
 ---
-## Log Normalisation accounting for differing cell populations
+## Log Normalisation 2
 
+An alternative approach for scRNA is to normalise accounting for potentially different cell-populations.
 
-```{r}
+As we dont know cell populations yet, a quick clustering of data followed by this normalisation using clusters is performed.
+
+```{r,fig.width=7,fig.height=4}
 library(scran)
 clust.sce.NeuroD1_filtered_QCed <- quickCluster(sce.NeuroD1_filtered_QCed) 
 sce.NeuroD1_filtered_trimmed <- computeSumFactors(sce.NeuroD1_filtered_QCed, cluster=clust.sce.NeuroD1_filtered_QCed)
@@ -456,7 +443,11 @@ assayNames(sce.NeuroD1_filtered_QCed)
 ---
 ## Modeling the mean-variance relationship
 
-```{r}
+As with RNA-seq we want to account for mean-dispersion relationship. 
+
+In Bioconductor we can use the *modelGeneVar* function to perform this for us.
+
+```{r,fig.width=7,fig.height=4}
 ##
 dec.NeuroD1_filtered_QCed <- modelGeneVar(sce.NeuroD1_filtered_QCed)
 ggplot(dec.NeuroD1_filtered_QCed,aes(x=mean,y=total))+geom_point()
@@ -465,7 +456,9 @@ ggplot(dec.NeuroD1_filtered_QCed,aes(x=mean,y=total))+geom_point()
 ---
 ## Identifying top variable genes for PCA
 
-```{r}
+Having fit the mean-dispersion relationship we can extract the most variable genes for use in PCA dimension reduction.
+
+```{r,fig.width=7,fig.height=4}
 top.NeuroD1_filtered_QCed <- getTopHVGs(dec.NeuroD1_filtered_QCed, n=3000)
 
 ```
@@ -473,7 +466,10 @@ top.NeuroD1_filtered_QCed <- getTopHVGs(dec.NeuroD1_filtered_QCed, n=3000)
 ---
 ## PCA
 
-```{r}
+We can now perform a PCA on our data. 
+
+The PCs will be used for clustering and 2D-representation of our data.
+```{r,fig.width=7,fig.height=4}
 set.seed(100) # See below.
 sce.NeuroD1_filtered_QCed <- fixedPCA(sce.NeuroD1_filtered_QCed,
                                       subset.row=top.NeuroD1_filtered_QCed) 
@@ -484,7 +480,9 @@ reducedDimNames(sce.NeuroD1_filtered_QCed)
 ---
 ## PCA
 
-```{r}
+We can produce a quick plot of the PCs to see if there are any biases immediately evident in the PCs.
+
+```{r,fig.width=7,fig.height=4}
 plotReducedDim(sce.NeuroD1_filtered_QCed, dimred="PCA",colour_by = "subsets_Mito_percent")
 
 ```
@@ -492,7 +490,10 @@ plotReducedDim(sce.NeuroD1_filtered_QCed, dimred="PCA",colour_by = "subsets_Mito
 ---
 ## Select PCs from PCA
 
-```{r}
+For further analysis we want to select the PCs which explain most of the data.
+
+To do this we can plot the variance explained by each PC and identify an elbow point.
+```{r,fig.width=7,fig.height=4}
 percent.var <- attr(reducedDim(sce.NeuroD1_filtered_QCed), "percentVar")
 plot(percent.var, log="y", xlab="PC", ylab="Variance explained (%)")
 # library(PCAtools)
@@ -503,7 +504,9 @@ plot(percent.var, log="y", xlab="PC", ylab="Variance explained (%)")
 ---
 ## Visualise in 2D with Tisne and UMAP
 
-```{r}
+With our PCs now calculated we can project these onto a 2D representation of the data. Here we will use two popular methods of TSNE and UMAP.
+
+```{r,fig.width=7,fig.height=4}
 
 sce.NeuroD1_filtered_QCed <- runTSNE(sce.NeuroD1_filtered_QCed,n_dimred=30)
 sce.NeuroD1_filtered_QCed <- runUMAP(sce.NeuroD1_filtered_QCed,n_dimred=30)
@@ -513,7 +516,9 @@ reducedDimNames(sce.NeuroD1_filtered_QCed)
 ---
 ## Visualise in 2D with Tisne and UMAP
 
-```{r}
+Witht the TSNE and UMAP we may first want to overlay some features of QC to see if this affects the data still.
+
+```{r,fig.width=7,fig.height=4}
 plotUMAP(sce.NeuroD1_filtered_QCed,colour_by="subsets_Mito_percent")
 plotTSNE(sce.NeuroD1_filtered_QCed,colour_by="subsets_Mito_percent")
 ```
@@ -521,8 +526,11 @@ plotTSNE(sce.NeuroD1_filtered_QCed,colour_by="subsets_Mito_percent")
 ---
 ## Clustering
 
+For clustering we can use the set of tools available in the [bluster](https://www.bioconductor.org/packages/release/bioc/html/bluster.html) package.
 
-```{r}
+Here we run the default graph based methods walktrap and louvain from the igraph package.
+
+```{r,fig.width=7,fig.height=4}
 require(bluster)
 clust.louvain <- clusterCells(sce.NeuroD1_filtered_QCed, use.dimred="PCA", 
                                 BLUSPARAM=NNGraphParam(cluster.fun="louvain",cluster.args = list(resolution=0.8)))
@@ -536,8 +544,9 @@ clust.default <- clusterCells(sce.NeuroD1_filtered_QCed, use.dimred="PCA")
 ---
 ## Clustering
 
+Once we have the clustering we will add them to the colData for the object and replot the UMAP
 
-```{r}
+```{r,fig.width=7,fig.height=4}
 colLabels(sce.NeuroD1_filtered_QCed) <- clust.louvain
 colData(sce.NeuroD1_filtered_QCed)$DefaultLabel <- clust.default
 plotUMAP(sce.NeuroD1_filtered_QCed,colour_by="label")
@@ -545,16 +554,21 @@ plotUMAP(sce.NeuroD1_filtered_QCed,colour_by="label")
 ```
 
 ---
+## Clustering 
 
-```{r}
+We can now plot the mito percent against clusters to see if any clusters are driven by the mito percent of droplets.
+
+```{r,fig.width=7,fig.height=4}
 plotColData(sce.NeuroD1_filtered_QCed,x="label",y="subsets_Mito_percent",colour_by = "label")
 ```
 ---
+
 ## Clustering
 
+We can then compare our overlaps between our clusterings in a simple heatmap.
 
-```{r}
-tab <- table(Walktrap=clust.default, Louvain=clust.leiden$clusters)
+```{r,fig.width=7,fig.height=4}
+tab <- table(Walktrap=clust.default, Louvain=clust.louvain)
 rownames(tab) <- paste("Walktrap", rownames(tab))
 colnames(tab) <- paste("louvain", colnames(tab))
 library(pheatmap)
@@ -564,8 +578,10 @@ pheatmap(log10(tab+10), color=viridis::viridis(100), cluster_cols=FALSE, cluster
 ---
 ## Some ground truth
 
+The paper also provides their annotation of cells. We can read this in and overlay with our umap.
+
 ```{r,eval=TRUE}
-eec_paper_meta <- read.delim("~/Downloads/GSE224223_EEC_metadata.csv",sep=";")
+eec_paper_meta <- read.delim("https://rubioinformatics.s3.amazonaws.com/scRNA_graduate/GSE224223_EEC_metadata.csv",sep=";")
 nrd1_cells <- as.data.frame(eec_paper_meta[eec_paper_meta$Library == "Nd1",])
    
 nrd1_cells$X <- gsub("_2$","",nrd1_cells$X)
@@ -578,7 +594,12 @@ plotUMAP(sce.NeuroD1_filtered_QCed,colour_by="All_Cell_Types")
 
 ```
 
-```{r}
+---
+## Some ground truth
+
+We can also see how the annotation overlaps with our clusters.
+
+```{r,fig.width=7,fig.height=4}
 tab <- table(Walktrap=sce.NeuroD1_filtered_QCed$All_Cell_Types, Louvain=sce.NeuroD1_filtered_QCed$label)
 rownames(tab) <- paste("CellType", rownames(tab))
 colnames(tab) <- paste("Leiden", colnames(tab))
@@ -586,15 +607,24 @@ library(pheatmap)
 pheatmap(log10(tab+10), color=viridis::viridis(100), cluster_cols=FALSE, cluster_rows=FALSE)
 ```
 
+---
+## Identify markers
 
-```{r}
+Now we have clusters defined we can identify genes which are differentially expressed within a cluster compared to other clusters.
+
+```{r,fig.width=7,fig.height=4}
 markers.sce.NeuroD1 <- scoreMarkers(sce.NeuroD1_filtered_QCed,sce.NeuroD1_filtered_QCed$label)
 chosen <- markers.sce.NeuroD1[["4"]]
 ordered <- chosen[order(chosen$mean.AUC, decreasing=TRUE),]
 head(ordered[,1:4]) # showing basic stats only, for brevity.
 ```
 
-```{r}
+---
+## Plot markers
+
+We can then use the *plotExpression* function to visualise a gene's expression across clusters.
+
+```{r,fig.width=7,fig.height=4}
 plotExpression(sce.NeuroD1_filtered_QCed, features=head(rownames(ordered),n=1), 
     x="label", colour_by="label")
 ```
@@ -623,9 +653,9 @@ if(params$isSlides == "yes"){
 
 ## Working with CellRanger filtered matrix
 
-From this point we will use the Droplets filtered using Cellranger
+We can use Seurat to import our data as before for Bioconductor.
 
-```{r}
+```{r,fig.width=7,fig.height=4}
 library(Seurat)
 h5file <- "https://rubioinformatics.s3.amazonaws.com/scRNA_graduate/SRR_NeuroD1/outs/NeuroD1_filtered_feature_bc_matrix.h5"
 local_h5file <- basename(h5file)
@@ -639,9 +669,10 @@ Nd1T.obj <- CreateSeuratObject(Nd1T.mat, project = "Nd1")
 ---   
 ## The Seurat object
 
-From this point we will use the Droplets filtered using Cellranger
+The Seurat object contains now our information on Neurod1 droplets.
 
-```{r}
+
+```{r,fig.width=7,fig.height=4}
 Nd1T.obj
 ```
     
@@ -649,9 +680,9 @@ Nd1T.obj
 ---   
 ## The Seurat object
 
-From this point we will use the Droplets filtered using Cellranger
+We can access rownames and column names in a similar manner as before.
 
-```{r}
+```{r,fig.width=7,fig.height=4}
 rownames(Nd1T.obj)
 colnames(Nd1T.obj)
 ```
@@ -659,18 +690,18 @@ colnames(Nd1T.obj)
 ---   
 ## The Seurat object
 
-From this point we will use the Droplets filtered using Cellranger
+To access metadata we need to directly access the slot
 
-```{r}
+```{r,fig.width=7,fig.height=4}
 Nd1T.obj@meta.data[1:2,]
 ```
     
 ---   
 ## The Seurat object
 
-From this point we will use the Droplets filtered using Cellranger
+We can also review the active assay and active cell-barcode identifiers.
 
-```{r}
+```{r,fig.width=7,fig.height=4}
 Nd1T.obj@active.assay
 Nd1T.obj@active.ident[1:2]
 ```
@@ -678,124 +709,159 @@ Nd1T.obj@active.ident[1:2]
 ---   
 ## The Seurat object
 
-From this point we will use the Droplets filtered using Cellranger
+The get access to the assays we can pull directly from the relevent slots.
 
-```{r}
+```{r,fig.width=7,fig.height=4}
 Nd1T.obj@assays$RNA$counts
 ```
     
  
 ---   
-## The Seurat object
+## Gather QC
 
-From this point we will use the Droplets filtered using Cellranger
+As with Biocondcutor we must again identify mitochondrial genes. 
 
-```{r}
+```{r,fig.width=7,fig.height=4}
 mito.genes <- grep("^mt", rownames(Nd1T.obj), value = T)
 mito.genes[1:10]
 ```
 
 ---   
-## The Seurat object
+## Gather QC
 
-From this point we will use the Droplets filtered using Cellranger
+We can the use *PercentageFeatureSet* function to identify percent of mito reads in each cell and the *AddMetaData* function to add this to the Seurat object.
 
-```{r}
+```{r,fig.width=7,fig.height=4}
 percent.mt <- PercentageFeatureSet(Nd1T.obj, features = mito.genes)
 Nd1T.obj <- AddMetaData(Nd1T.obj,metadata = percent.mt,col.name = "percent.mt")
 head(Nd1T.obj@meta.data)
 ```
 
 ---   
-## The Seurat object
+## Plot QC
 
-From this point we will use the Droplets filtered using Cellranger
+We can then review QC metrics across our droplets.
 
-```{r}
+```{r,fig.width=7,fig.height=4}
 VlnPlot(Nd1T.obj, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
 ```
 
 ---   
-## The Seurat object
+## Plot QC
 
-From this point we will use the Droplets filtered using Cellranger
+As well as plot QC metrics against each other.
 
-```{r}
+```{r,fig.width=7,fig.height=4}
 plot1 <- FeatureScatter(Nd1T.obj, feature1 = "nCount_RNA", feature2 = "percent.mt")
 plot2 <- FeatureScatter(Nd1T.obj, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
 plot3 <- FeatureScatter(Nd1T.obj, feature1 = "nFeature_RNA", feature2 = "percent.mt")
 plot1+plot2+plot3
 ```
 ---
+## Subset by QC
 
-```{r}
+We use the subset function to remove low quality cells from our object.
+
+```{r,fig.width=7,fig.height=4}
 
 Nd1T.obj.filt <- subset(Nd1T.obj, subset = `nCount_RNA` < 125000 & percent.mt < 25 & nFeature_RNA > 200) 
 Nd1T.obj.filt
 ```
 ---
+## Normalise data
 
-```{r}
+We will now normalise our data by scaling to library size and applying a log2 transformation.
+
+```{r,fig.width=7,fig.height=4}
 Nd1T.obj.filt <- NormalizeData(Nd1T.obj.filt)
 ```
 ---
+## Variable features
 
-```{r}
+As with Bioc we will now identify variable features. 
+
+Here the mean-variance relationship is accounted for by applying a VST transformation.
+
+```{r,fig.width=7,fig.height=4}
 Nd1T.obj.filt <- FindVariableFeatures(Nd1T.obj.filt, selection.method = "vst", nfeatures = 3000)
 top10 <- head(VariableFeatures(Nd1T.obj.filt), 10)
 top10
 ```
 ---
+## Variable features
 
-```{r}
+We can then plot these features using the **VariableFeaturePlot** function.
+
+```{r,fig.width=7,fig.height=4}
 plot1 <- VariableFeaturePlot(Nd1T.obj.filt)
 plot2 <- LabelPoints(plot = plot1, points = top10, repel = TRUE)
 plot2
 ```
 ---
+## Scaling data
 
-```{r}
+In Bioconductor the scaling of data was done inside the PCA functions.
+
+Here we apply the scaling using the **ScaleData** function.
+
+```{r,fig.width=7,fig.height=4}
 all.genes <- rownames(Nd1T.obj.filt)
 Nd1T.obj.filt <- ScaleData(Nd1T.obj.filt, features = all.genes)
 Nd1T.obj.filt@assays
 ```
 ---
+## PCA 
 
-```{r}
+Now we have our scaled data we can apply PCA and identify how many PCs to use in downstream analysis.
+
+```{r,fig.width=7,fig.height=4}
 Nd1T.obj.filt <- RunPCA(Nd1T.obj.filt, features = VariableFeatures(object = Nd1T.obj))
 ElbowPlot(Nd1T.obj.filt,ndims = 50)
 ```
 ---
+## UMAP 
 
-```{r}
-Nd1T.obj.filt <- RunPCA(Nd1T.obj.filt, features = VariableFeatures(object = Nd1T.obj))
-ElbowPlot(Nd1T.obj.filt,ndims = 50)
-```
----
+We can then create a 2D representation of our data using a UMAP .
 
-```{r}
+
+```{r,fig.width=7,fig.height=4}
 Nd1T.obj.filt <- RunUMAP(Nd1T.obj.filt, dims = 1:30)
 ```
 ---
+## UMAP 
 
-```{r}
+And we plot this using the *FeaturePlot* function overlaying the percent.mt.
+
+```{r,fig.width=7,fig.height=4}
 FeaturePlot(Nd1T.obj.filt, reduction = "umap",features = "percent.mt")
 ```
 ---
+## Clustering 
 
-```{r}
+We can then perform a louvain clustering using the *FindNeighbours* and *FindClusters* functions.
+
+The cluster labels will be stored in active.idents slots.
+
+```{r,fig.width=7,fig.height=4}
 Nd1T.obj.filt <- FindNeighbors(Nd1T.obj.filt, dims = 1:30)
 Nd1T.obj.filt <- FindClusters(Nd1T.obj.filt, resolution = 0.8)
 Nd1T.obj.filt@active.ident
 ```
 ---
+## Clustering 
 
-```{r}
+We then visualise the clustering using the Dimplot fucntion which will use the active.ident slot by default.
+
+
+```{r,fig.width=7,fig.height=4}
 DimPlot(Nd1T.obj.filt, reduction = "umap")
 ```
 ---
+# Compare clustering
 
-```{r}
+We can quickly compare the clusters from Bioconductor and Seurat.
+
+```{r,fig.width=7,fig.height=4}
 bioc.clusters <- data.frame(Bioc=sce.NeuroD1_filtered_QCed$label,row.names = sce.NeuroD1_filtered_QCed$Barcode)
 seurat.clusters <- as.data.frame(Nd1T.obj.filt@active.ident)
 colnames(seurat.clusters) <- "Seurat"
@@ -803,8 +869,9 @@ clustersAll <- merge(bioc.clusters,seurat.clusters,by=0,all=FALSE)
 
 ```
 ---
+# Compare clustering
 
-```{r}
+```{r,fig.width=7,fig.height=4}
 tab <- table(Bioc=clustersAll$Bioc, Seurat=clustersAll$Seurat)
 rownames(tab) <- paste("Bioc", rownames(tab))
 colnames(tab) <- paste("Seurat", colnames(tab))
@@ -813,31 +880,23 @@ pheatmap(log10(tab+10), color=viridis::viridis(100), cluster_cols=FALSE, cluster
 
 ```
 ---
+# Find Markers
 
-```{r}
+The *FindAllMarkers* function allows us to identify markers across all clusters.
+
+```{r,fig.width=7,fig.height=4}
 Nd1T.markers <- FindAllMarkers(Nd1T.obj.filt, only.pos = TRUE)
 Nd1T.markers[Nd1T.markers$cluster == 0,]
 ```
 
 ---
+# Find Markers
 
-```{r}
+And we can then visualise this using the VlnPlot function.
+
+```{r,fig.width=7,fig.height=4}
 VlnPlot(Nd1T.obj.filt, features = head(Nd1T.markers[Nd1T.markers$cluster == 0,"gene"],n=1))
 
 ```
  
-  
-  
-<!-- --- -->
-<!-- ## Select PCs from PCA -->
-
-<!-- ```{r} -->
-<!-- # set.seed(1000) -->
-<!-- # # Evaluate PCs -->
-<!-- # sce.NeuroD1_filtered_QCed <- denoisePCA(sce.NeuroD1_filtered_QCed, subset.row = top.NeuroD1_filtered_QCed, technical = dec.NeuroD1_filtered_QCed) -->
-<!-- # ncol(reducedDim(sce.NeuroD1_filtered_QCed)) -->
-
-<!-- ``` -->
-
-
-
+ 
