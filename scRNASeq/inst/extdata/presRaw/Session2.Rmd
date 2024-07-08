@@ -629,6 +629,8 @@ plotExpression(sce.NeuroD1_filtered_QCed, features=head(rownames(ordered),n=1),
     x="label", colour_by="label")
 ```
 
+---
+
 ```{r, results='asis',include=TRUE,echo=FALSE}
 if(params$isSlides == "yes"){
   cat("class: inverse, center, middle
@@ -651,6 +653,9 @@ if(params$isSlides == "yes"){
 
 ```
 
+
+---
+
 ## Working with CellRanger filtered matrix
 
 We can use Seurat to import our data as before for Bioconductor.
@@ -666,7 +671,8 @@ Nd1T.obj <- CreateSeuratObject(Nd1T.mat, project = "Nd1")
 ```
   
   
----   
+---  
+
 ## The Seurat object
 
 The Seurat object contains now our information on Neurod1 droplets.
@@ -677,7 +683,8 @@ Nd1T.obj
 ```
     
    
----   
+--- 
+
 ## The Seurat object
 
 We can access rownames and column names in a similar manner as before.
