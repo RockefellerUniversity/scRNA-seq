@@ -1,7 +1,7 @@
 Package: scRNASeq
 Type: Package
 Title: scRNAseq training
-Version: 0.1.17
+Version: 0.1.20
 Author: Ji-Dung Luo and Thomas Carroll.
 Maintainer: Thomas Carroll <tc.infomatics@gmail>
 Description: This pacakge shows an example framework to build a teaching course. 

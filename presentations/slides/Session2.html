@@ -1,0 +1,2537 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Single-cell RNA sequencing ~ Session 2    </title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Rockefeller University, Bioinformatics Resource Centre" />
+    <script src="libs/header-attrs-2.27/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link rel="stylesheet" href="metropolisCustom.css" type="text/css" />
+    <link rel="stylesheet" href="metropolis-fontsCustom.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Single-cell RNA sequencing ~ Session 2<br />
+<html><br />
+<br />
+<hr color='#EB811B' size=1px width=796px><br />
+</html>
+]
+.author[
+### Rockefeller University, Bioinformatics Resource Centre
+]
+.date[
+### <a href="http://rockefelleruniversity.github.io/scRNA-seq/" class="uri">http://rockefelleruniversity.github.io/scRNA-seq/</a>
+]
+
+---
+
+
+
+
+## Overview
+
+In this course we are going to introduce basic analysis for single-cell RNAseq, with a specific focus on the *10X system*. The course is divided into multiple sessions. 
+
+In this second session, we will introduce Seurat and Bioconductor methodologies for basic scRNA-seq QC, filtering and initial analysis of single samples.
+---
+## The data
+
+For these sessions we are going to make use of two datasets.
+
+The first set will be from the recent paper [**Enteroendocrine cell lineages that differentially control feeding and gut motility**](https://elifesciences.org/articles/78512).  
+This contains scRNA data from either Neurod1 and Neurog3 expressing enteroendocrine cells.
+
+The second dataset is the classic example from PBMC cells.
+
+---
+## Seurat and Bioconductor
+
+The Seurat R package and associated packages offer an R based and well established methodology for the analysis of single cell RNA-seq, ATAC-seq and many other single-cell sequencing methodologies.
+
+Bioconductor has a set of interrelated and highly connected software packages for single cell RNAseq as well as integrating with the rest of the Bioconductor software ecosystem.
+
+In this session we will run through basic analyses using both of the methodologies to show both their equvalence in some parts of the analysis as well as their distinct functionalities in others.
+
+In practice, you may select methods from either softwares and convert between the two as required.
+
+---
+# The Example Data
+
+For this session we will need the filtered and raw expression data for the Neurod1 datasets.
+
+The filtered matrix can be found [here](https://rubioinformatics.s3.amazonaws.com/scRNA_graduate/SRR_NeuroD1/outs/NeuroD1_filtered_feature_bc_matrix.h5)
+
+The raw matrix can be found here [here](https://rubioinformatics.s3.amazonaws.com/scRNA_graduate/SRR_NeuroD1/outs/filtered_feature_bc_matrix.h5)
+
+
+class: inverse, center, middle
+
+# Cell Ranger -  Output files
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=720px&gt;&lt;/html&gt; 
+
+---
+
+---
+# Data import (Bioconductor) 
+
+First we need to load the DropletUtils package to read and handle our Droplet 10X data.
+
+
+``` r
+library(DropletUtils)
+```
+
+---
+# Read10x
+
+We can then read in the filtered matrix containing data on droplets marked as cells by CellRanger.
+
+
+``` r
+h5file &lt;- "https://rubioinformatics.s3.amazonaws.com/scRNA_graduate/SRR_NeuroD1/outs/NeuroD1_filtered_feature_bc_matrix.h5"
+local_h5file &lt;- basename(h5file)
+download.file(h5file, local_h5file)
+
+sce.NeuroD1_filtered &lt;- read10xCounts(local_h5file, col.names = TRUE, row.names = "symbol")
+
+class(sce.NeuroD1_filtered)
+```
+
+```
+## [1] "SingleCellExperiment"
+## attr(,"package")
+## [1] "SingleCellExperiment"
+```
+
+
+
+---
+
+## SingleCellExperiment Object
+The created SingleCellExperiment Object is much like our SummarizedExperiment object
+
+
+``` r
+sce.NeuroD1_filtered
+```
+
+```
+## class: SingleCellExperiment 
+## dim: 55417 3265 
+## metadata(1): Samples
+## assays(1): counts
+## rownames(55417): Gm37671 Gm19087 ... ENSMUSG00000095742 TMT
+## rowData names(3): ID Symbol Type
+## colnames(3265): AAACCCACACAATGTC-1 AAACCCACACCACTGG-1 ... TTTGTTGTCTCTTAAC-1 TTTGTTGTCTGGACCG-1
+## colData names(2): Sample Barcode
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+```
+
+---
+
+## SingleCellExperiment Object
+The *colnames()* and *rownames()* functions can be used to access column names (cell-barcodes) and row names (gene identifiers)
+
+
+``` r
+# cell information
+colnames(sce.NeuroD1_filtered)[1:2]
+```
+
+```
+## [1] "AAACCCACACAATGTC-1" "AAACCCACACCACTGG-1"
+```
+
+``` r
+# gene information
+rownames(sce.NeuroD1_filtered)[1:2]
+```
+
+```
+## [1] "Gm37671" "Gm19087"
+```
+
+## SingleCellExperiment Object
+The *colData()* and *rowData()* functions can be used to access experiment metadata. 
+
+
+``` r
+# cell information
+colData(sce.NeuroD1_filtered)[1:2, ]
+```
+
+```
+## DataFrame with 2 rows and 2 columns
+##                                    Sample            Barcode
+##                               &lt;character&gt;        &lt;character&gt;
+## AAACCCACACAATGTC-1 NeuroD1_filtered_fea.. AAACCCACACAATGTC-1
+## AAACCCACACCACTGG-1 NeuroD1_filtered_fea.. AAACCCACACCACTGG-1
+```
+
+``` r
+# gene information
+rowData(sce.NeuroD1_filtered)[1:2, ]
+```
+
+```
+## DataFrame with 2 rows and 3 columns
+##                         ID      Symbol            Type
+##                &lt;character&gt; &lt;character&gt;     &lt;character&gt;
+## Gm37671 ENSMUSG00000102628     Gm37671 Gene Expression
+## Gm19087 ENSMUSG00000100595     Gm19087 Gene Expression
+```
+
+## SingleCellExperiment Object
+
+A reducedDim and reducedDimNames slots at present remains unfilled.
+
+The metadata slot contains the Sample names. Here all these cells came from single sample
+
+
+``` r
+# cell information
+reducedDimNames(sce.NeuroD1_filtered)
+```
+
+```
+## character(0)
+```
+
+``` r
+# gene information
+metadata(sce.NeuroD1_filtered)
+```
+
+```
+## $Samples
+## [1] "NeuroD1_filtered_feature_bc_matrix.h5"
+```
+
+
+---
+## The knee plot
+
+One of the first plots we may want to recreate from the QC is the knee plot.
+
+To do this we will need the unfiltered matrix too. 
+
+The unfiltered SingleCellExperiment contains over a million droplets.
+
+
+
+``` r
+h5file &lt;- "https://rubioinformatics.s3.amazonaws.com/scRNA_graduate/SRR_NeuroD1/outs/raw_feature_bc_matrix.h5"
+local_h5file &lt;- "NeuroD1_raw_feature_bc_matrix.h5"
+download.file(h5file, local_h5file)
+sce.NeuroD1_unfiltered &lt;- read10xCounts(local_h5file, col.names = TRUE)
+sce.NeuroD1_unfiltered
+```
+
+```
+## class: SingleCellExperiment 
+## dim: 39457 1244317 
+## metadata(1): Samples
+## assays(1): counts
+## rownames(39457): Gm26206 Xkr4 ... LOC118568478 LOC118568479
+## rowData names(3): ID Symbol Type
+## colnames(1244317): AAACCCAAGAAACACT-1 AAACCCAAGAAACCAT-1 ... TTTGTTGTCTTTGCTA-1 TTTGTTGTCTTTGTCG-1
+## colData names(2): Sample Barcode
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+```
+
+
+
+---
+## Barcode ranks
+
+
+
+
+``` r
+bcrank &lt;- barcodeRanks(counts(sce.NeuroD1_unfiltered))
+bcrank
+```
+
+```
+## DataFrame with 1244317 rows and 3 columns
+##                         rank     total    fitted
+##                    &lt;numeric&gt; &lt;integer&gt; &lt;numeric&gt;
+## AAACCCAAGAAACACT-1     55172       118        NA
+## AAACCCAAGAAACCAT-1    167382         2        NA
+## AAACCCAAGAAACCCG-1    993508         0        NA
+## AAACCCAAGAAACCTG-1    993508         0        NA
+## AAACCCAAGAAAGAAC-1    993508         0        NA
+## ...                      ...       ...       ...
+## TTTGTTGTCTTTGATC-1   31532.5       146        NA
+## TTTGTTGTCTTTGCAT-1  480107.0         1        NA
+## TTTGTTGTCTTTGCGC-1  480107.0         1        NA
+## TTTGTTGTCTTTGCTA-1  480107.0         1        NA
+## TTTGTTGTCTTTGTCG-1  480107.0         1        NA
+```
+
+---
+## Retrieve filtered barcodes
+
+
+``` r
+bcrank$filtered &lt;- rownames(bcrank) %in% colnames(sce.NeuroD1_filtered)
+bc_plot &lt;- as.data.frame(bcrank)
+bc_plot &lt;- bc_plot[order(bc_plot$filtered, decreasing = TRUE), ]
+bc_plot &lt;- bc_plot[!duplicated(bc_plot$rank), ]
+```
+
+---
+## Plotting barcode rank
+
+
+``` r
+require(ggplot2)
+ggplot(bc_plot, aes(x = rank, y = total, colour = filtered, alpha = 0.001)) + geom_point() + scale_y_log10() + scale_x_log10() +
+    theme_minimal() + geom_hline(yintercept = metadata(bcrank)$inflection, colour = "darkgreen", linetype = 2) +
+    geom_hline(yintercept = metadata(bcrank)$knee, colour = "dodgerblue", linetype = 2)
+```
+
+```
+## Warning in scale_y_log10(): log-10 transformation introduced infinite values.
+```
+
+![](Session2_files/figure-html/unnamed-chunk-10-1.png)&lt;!-- --&gt;
+
+---
+## Filtering droplets using Droplet utils
+
+Although CellRanger provides a filtered Droplet matrix, you may wish to provide your own cut-off based on knee plots generated and/or use the emptyDrops method in Droplet utils to identify cell containing droplets.
+
+
+``` r
+e.out &lt;- emptyDrops(counts(sce.NeuroD1_unfiltered))
+table(e.out)
+head(e.out)
+```
+
+
+
+
+
+
+class: inverse, center, middle
+
+# Bioconductor  -  QC
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=720px&gt;&lt;/html&gt; 
+
+---
+
+## Working with CellRanger filtered matrix
+
+From this point we will use the Droplets filtered using Cellranger
+
+
+``` r
+sce.NeuroD1_filtered
+```
+
+```
+## class: SingleCellExperiment 
+## dim: 55417 3265 
+## metadata(1): Samples
+## assays(1): counts
+## rownames(55417): Gm37671 Gm19087 ... ENSMUSG00000095742 TMT
+## rowData names(3): ID Symbol Type
+## colnames(3265): AAACCCACACAATGTC-1 AAACCCACACCACTGG-1 ... TTTGTTGTCTCTTAAC-1 TTTGTTGTCTGGACCG-1
+## colData names(2): Sample Barcode
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+```
+  
+---
+## Add QC metrics
+
+To assess QC we first want to identify mitochondrial and ribosomal genes.
+
+High mitochondrial gene expression within a cell is often used as a marker of dying cells.
+
+
+``` r
+is.mito &lt;- grepl("^mt", rowData(sce.NeuroD1_filtered)$Symbol)
+is.ribo &lt;- grepl("^Rps", rowData(sce.NeuroD1_filtered)$Symbol)
+
+table(is.mito)
+```
+
+```
+## is.mito
+## FALSE  TRUE 
+## 55380    37
+```
+
+``` r
+table(is.ribo)
+```
+
+```
+## is.ribo
+## FALSE  TRUE 
+## 55246   171
+```
+  
+---
+## Add QC metrics
+
+The scuttle package has functions for normalisation, transformation and QC.
+
+Here we us the addPerCellQCMetrics function to update our SingleCellExperiment object with QC information.
+
+
+``` r
+library(scuttle)
+sce.NeuroD1_filtered &lt;- addPerCellQCMetrics(sce.NeuroD1_filtered, subsets = list(Mito = is.mito, Ribosomal = is.ribo))
+sce.NeuroD1_filtered
+```
+
+```
+## class: SingleCellExperiment 
+## dim: 55417 3265 
+## metadata(1): Samples
+## assays(1): counts
+## rownames(55417): Gm37671 Gm19087 ... ENSMUSG00000095742 TMT
+## rowData names(3): ID Symbol Type
+## colnames(3265): AAACCCACACAATGTC-1 AAACCCACACCACTGG-1 ... TTTGTTGTCTCTTAAC-1 TTTGTTGTCTGGACCG-1
+## colData names(11): Sample Barcode ... subsets_Ribosomal_percent total
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+```
+
+---
+## QC in colData
+
+The QC data per Droplet has been added to additional columns in the colData slot of our SingleCellExperiment.
+
+
+``` r
+qc_df &lt;- colData(sce.NeuroD1_filtered)
+head(qc_df, n = 2)
+```
+
+```
+## DataFrame with 2 rows and 11 columns
+##                                    Sample            Barcode       sum  detected subsets_Mito_sum
+##                               &lt;character&gt;        &lt;character&gt; &lt;numeric&gt; &lt;integer&gt;        &lt;numeric&gt;
+## AAACCCACACAATGTC-1 NeuroD1_filtered_fea.. AAACCCACACAATGTC-1     28295      5892             1862
+## AAACCCACACCACTGG-1 NeuroD1_filtered_fea.. AAACCCACACCACTGG-1      1498       245             1011
+##                    subsets_Mito_detected subsets_Mito_percent subsets_Ribosomal_sum subsets_Ribosomal_detected
+##                                &lt;integer&gt;            &lt;numeric&gt;             &lt;numeric&gt;                  &lt;integer&gt;
+## AAACCCACACAATGTC-1                    16              6.58067                   256                         39
+## AAACCCACACCACTGG-1                    13             67.48999                     4                          4
+##                    subsets_Ribosomal_percent     total
+##                                    &lt;numeric&gt; &lt;numeric&gt;
+## AAACCCACACAATGTC-1                  0.904753     28295
+## AAACCCACACCACTGG-1                  0.267023      1498
+```
+
+
+---
+## Plotting QC data
+
+We can then plot this using the plotColData function from the Scater package.
+
+First we plot the distritbution of total reads per cell.
+
+
+``` r
+library(scater)
+plotColData(sce.NeuroD1_filtered, x = "Sample", y = "sum")
+```
+
+![](Session2_files/figure-html/unnamed-chunk-19-1.png)&lt;!-- --&gt;
+
+---
+## Plotting QC data
+
+Then we plot the distritbution of total detected genes per cell.
+
+
+``` r
+library(scater)
+plotColData(sce.NeuroD1_filtered, x = "Sample", y = "detected")
+```
+
+![](Session2_files/figure-html/unnamed-chunk-20-1.png)&lt;!-- --&gt;
+
+---
+## Plotting QC data
+
+Then we plot the distritbution of percent of mitochondrial and ribosomal reads per cell.
+
+
+``` r
+library(scater)
+p1 &lt;- plotColData(sce.NeuroD1_filtered, x = "Sample", y = "subsets_Mito_percent")
+p2 &lt;- plotColData(sce.NeuroD1_filtered, x = "Sample", y = "subsets_Ribosomal_percent")
+gridExtra::grid.arrange(p1, p2, ncol = 2)
+```
+
+![](Session2_files/figure-html/unnamed-chunk-21-1.png)&lt;!-- --&gt;
+
+---
+## Plotting QC data
+
+It also can be useful to capture the QC columns against each other as scatterplots
+
+
+``` r
+library(scater)
+p1 &lt;- plotColData(sce.NeuroD1_filtered, x = "sum", y = "detected")
+p2 &lt;- plotColData(sce.NeuroD1_filtered, x = "sum", y = "subsets_Mito_percent")
+p3 &lt;- plotColData(sce.NeuroD1_filtered, x = "detected", y = "subsets_Mito_percent")
+gridExtra::grid.arrange(p1, p2, p3, ncol = 3)
+```
+
+![](Session2_files/figure-html/unnamed-chunk-22-1.png)&lt;!-- --&gt;
+
+---
+## Removing low quality data
+
+At this point we may want to remove low quality data.
+
+Typically droplet filters on mitochondrial read content, total detect genes and total read counts are applied.
+
+
+``` r
+qc.high_lib_size &lt;- colData(sce.NeuroD1_filtered)$sum &gt; 125000
+qc.min_detected &lt;- colData(sce.NeuroD1_filtered)$detected &lt; 200
+qc.mito &lt;- colData(sce.NeuroD1_filtered)$subsets_Mito_percent &gt; 25
+discard &lt;- qc.high_lib_size | qc.mito | qc.min_detected
+DataFrame(LibSize = sum(qc.high_lib_size), Detected = sum(qc.min_detected), MitoProp = sum(qc.mito), Total = sum(discard))
+```
+
+```
+## DataFrame with 1 row and 4 columns
+##     LibSize  Detected  MitoProp     Total
+##   &lt;integer&gt; &lt;integer&gt; &lt;integer&gt; &lt;integer&gt;
+## 1        17       243      1076      1104
+```
+
+---
+## Removing low quality data
+
+We will add this back in the colData slot to perform some final QC plots before filtering
+
+
+``` r
+colData(sce.NeuroD1_filtered) &lt;- cbind(colData(sce.NeuroD1_filtered), DataFrame(toDiscard = discard))
+p1 &lt;- plotColData(sce.NeuroD1_filtered, x = "sum", y = "detected", colour_by = "toDiscard")
+p2 &lt;- plotColData(sce.NeuroD1_filtered, x = "sum", y = "subsets_Mito_percent", colour_by = "toDiscard")
+p3 &lt;- plotColData(sce.NeuroD1_filtered, x = "detected", y = "subsets_Mito_percent", colour_by = "toDiscard")
+gridExtra::grid.arrange(p1, p2, p3, ncol = 3)
+```
+
+![](Session2_files/figure-html/unnamed-chunk-24-1.png)&lt;!-- --&gt;
+
+---
+## Removing low quality data
+
+
+``` r
+sce.NeuroD1_filtered_QCed &lt;- sce.NeuroD1_filtered[, sce.NeuroD1_filtered$toDiscard %in% "FALSE"]
+sce.NeuroD1_filtered_QCed
+```
+
+```
+## class: SingleCellExperiment 
+## dim: 55417 2161 
+## metadata(1): Samples
+## assays(1): counts
+## rownames(55417): Gm37671 Gm19087 ... ENSMUSG00000095742 TMT
+## rowData names(3): ID Symbol Type
+## colnames(2161): AAACCCACACAATGTC-1 AAACCCACACGAGAAC-1 ... TTTGGAGTCCGTAGGC-1 TTTGTTGGTCTAACTG-1
+## colData names(12): Sample Barcode ... total toDiscard
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+```
+
+---
+
+class: inverse, center, middle
+
+# Bioconductor  -  Normalisation and Clustering
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=720px&gt;&lt;/html&gt; 
+
+---
+
+---
+# Log Normalisation
+
+
+
+``` r
+sce.NeuroD1_filtered_QCed &lt;- logNormCounts(sce.NeuroD1_filtered_QCed)
+assayNames(sce.NeuroD1_filtered_QCed)
+```
+
+```
+## [1] "counts"    "logcounts"
+```
+
+---
+## Log Normalisation
+
+
+
+``` r
+sce.NeuroD1_filtered_QCed &lt;- logNormCounts(sce.NeuroD1_filtered_QCed)
+assayNames(sce.NeuroD1_filtered_QCed)
+```
+
+```
+## [1] "counts"    "logcounts"
+```
+
+---
+## Log Normalisation accounting for differing cell populations
+
+
+
+``` r
+library(scran)
+clust.sce.NeuroD1_filtered_QCed &lt;- quickCluster(sce.NeuroD1_filtered_QCed)
+sce.NeuroD1_filtered_trimmed &lt;- computeSumFactors(sce.NeuroD1_filtered_QCed, cluster = clust.sce.NeuroD1_filtered_QCed)
+sce.NeuroD1_filtered_QCed &lt;- logNormCounts(sce.NeuroD1_filtered_QCed)
+assayNames(sce.NeuroD1_filtered_QCed)
+```
+
+```
+## [1] "counts"    "logcounts"
+```
+
+---
+## Modeling the mean-variance relationship
+
+
+``` r
+##
+dec.NeuroD1_filtered_QCed &lt;- modelGeneVar(sce.NeuroD1_filtered_QCed)
+ggplot(dec.NeuroD1_filtered_QCed, aes(x = mean, y = total)) + geom_point()
+```
+
+![](Session2_files/figure-html/unnamed-chunk-30-1.png)&lt;!-- --&gt;
+
+---
+## Identifying top variable genes for PCA
+
+
+``` r
+top.NeuroD1_filtered_QCed &lt;- getTopHVGs(dec.NeuroD1_filtered_QCed, n = 3000)
+```
+
+---
+## PCA
+
+
+``` r
+set.seed(100)  # See below.
+sce.NeuroD1_filtered_QCed &lt;- fixedPCA(sce.NeuroD1_filtered_QCed, subset.row = top.NeuroD1_filtered_QCed)
+reducedDimNames(sce.NeuroD1_filtered_QCed)
+```
+
+```
+## [1] "PCA"
+```
+
+---
+## PCA
+
+
+``` r
+plotReducedDim(sce.NeuroD1_filtered_QCed, dimred = "PCA", colour_by = "subsets_Mito_percent")
+```
+
+![](Session2_files/figure-html/unnamed-chunk-33-1.png)&lt;!-- --&gt;
+
+---
+## Select PCs from PCA
+
+
+``` r
+percent.var &lt;- attr(reducedDim(sce.NeuroD1_filtered_QCed), "percentVar")
+plot(percent.var, log = "y", xlab = "PC", ylab = "Variance explained (%)")
+```
+
+![](Session2_files/figure-html/unnamed-chunk-34-1.png)&lt;!-- --&gt;
+
+``` r
+# library(PCAtools) chosen.elbow &lt;- findElbowPoint(percent.var)
+```
+
+
+---
+## Visualise in 2D with Tisne and UMAP
+
+
+``` r
+sce.NeuroD1_filtered_QCed &lt;- runTSNE(sce.NeuroD1_filtered_QCed, n_dimred = 30)
+sce.NeuroD1_filtered_QCed &lt;- runUMAP(sce.NeuroD1_filtered_QCed, n_dimred = 30)
+reducedDimNames(sce.NeuroD1_filtered_QCed)
+```
+
+```
+## [1] "PCA"  "TSNE" "UMAP"
+```
+
+---
+## Visualise in 2D with Tisne and UMAP
+
+
+``` r
+plotUMAP(sce.NeuroD1_filtered_QCed, colour_by = "subsets_Mito_percent")
+```
+
+![](Session2_files/figure-html/unnamed-chunk-36-1.png)&lt;!-- --&gt;
+
+``` r
+plotTSNE(sce.NeuroD1_filtered_QCed, colour_by = "subsets_Mito_percent")
+```
+
+![](Session2_files/figure-html/unnamed-chunk-36-2.png)&lt;!-- --&gt;
+
+---
+## Clustering
+
+
+
+``` r
+require(bluster)
+clust.louvain &lt;- clusterCells(sce.NeuroD1_filtered_QCed, use.dimred = "PCA", BLUSPARAM = NNGraphParam(cluster.fun = "louvain",
+    cluster.args = list(resolution = 0.8)))
+clust.default &lt;- clusterCells(sce.NeuroD1_filtered_QCed, use.dimred = "PCA")
+```
+
+
+
+
+---
+## Clustering
+
+
+
+``` r
+colLabels(sce.NeuroD1_filtered_QCed) &lt;- clust.louvain
+colData(sce.NeuroD1_filtered_QCed)$DefaultLabel &lt;- clust.default
+plotUMAP(sce.NeuroD1_filtered_QCed, colour_by = "label")
+```
+
+![](Session2_files/figure-html/unnamed-chunk-38-1.png)&lt;!-- --&gt;
+
+---
+
+
+``` r
+plotColData(sce.NeuroD1_filtered_QCed, x = "label", y = "subsets_Mito_percent", colour_by = "label")
+```
+
+![](Session2_files/figure-html/unnamed-chunk-39-1.png)&lt;!-- --&gt;
+---
+## Clustering
+
+
+
+``` r
+tab &lt;- table(Walktrap = clust.default, Louvain = clust.leiden$clusters)
+rownames(tab) &lt;- paste("Walktrap", rownames(tab))
+colnames(tab) &lt;- paste("louvain", colnames(tab))
+library(pheatmap)
+pheatmap(log10(tab + 10), color = viridis::viridis(100), cluster_cols = FALSE, cluster_rows = FALSE)
+```
+
+---
+## Some ground truth
+
+
+``` r
+eec_paper_meta &lt;- read.delim("~/Downloads/GSE224223_EEC_metadata.csv", sep = ";")
+nrd1_cells &lt;- as.data.frame(eec_paper_meta[eec_paper_meta$Library == "Nd1", ])
+
+nrd1_cells$X &lt;- gsub("_2$", "", nrd1_cells$X)
+
+newMeta &lt;- merge(colData(sce.NeuroD1_filtered_QCed), nrd1_cells, by.x = "Barcode", by.y = "X", all.x = TRUE, all.y = FALSE,
+    order = FALSE)
+rownames(newMeta) &lt;- newMeta$Barcode
+newMeta$All_Cell_Types[is.na(newMeta$All_Cell_Types)] &lt;- "Filtered"
+colData(sce.NeuroD1_filtered_QCed) &lt;- newMeta
+plotUMAP(sce.NeuroD1_filtered_QCed, colour_by = "All_Cell_Types")
+```
+
+![](Session2_files/figure-html/unnamed-chunk-41-1.png)&lt;!-- --&gt;
+
+
+``` r
+tab &lt;- table(Walktrap = sce.NeuroD1_filtered_QCed$All_Cell_Types, Louvain = sce.NeuroD1_filtered_QCed$label)
+rownames(tab) &lt;- paste("CellType", rownames(tab))
+colnames(tab) &lt;- paste("Leiden", colnames(tab))
+library(pheatmap)
+pheatmap(log10(tab + 10), color = viridis::viridis(100), cluster_cols = FALSE, cluster_rows = FALSE)
+```
+
+
+
+``` r
+markers.sce.NeuroD1 &lt;- scoreMarkers(sce.NeuroD1_filtered_QCed, sce.NeuroD1_filtered_QCed$label)
+chosen &lt;- markers.sce.NeuroD1[["4"]]
+ordered &lt;- chosen[order(chosen$mean.AUC, decreasing = TRUE), ]
+head(ordered[, 1:4])  # showing basic stats only, for brevity.
+```
+
+```
+## DataFrame with 6 rows and 4 columns
+##       self.average other.average self.detected other.detected
+##          &lt;numeric&gt;     &lt;numeric&gt;     &lt;numeric&gt;      &lt;numeric&gt;
+## Pzp        3.50241      0.133775         0.968      0.0697187
+## Agr2       6.65997      1.651901         1.000      0.5406126
+## Cck       11.15815      5.024982         1.000      0.9893715
+## Agr3       4.21240      1.098644         1.000      0.4357372
+## Scg2       6.46328      2.029552         1.000      0.5924581
+## Habp2      2.62718      0.154119         0.964      0.0779772
+```
+
+
+``` r
+plotExpression(sce.NeuroD1_filtered_QCed, features = head(rownames(ordered), n = 1), x = "label", colour_by = "label")
+```
+
+![](Session2_files/figure-html/unnamed-chunk-44-1.png)&lt;!-- --&gt;
+
+class: inverse, center, middle
+
+# Seurat
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=720px&gt;&lt;/html&gt; 
+
+---
+
+## Working with CellRanger filtered matrix
+
+From this point we will use the Droplets filtered using Cellranger
+
+
+``` r
+library(Seurat)
+h5file &lt;- "https://rubioinformatics.s3.amazonaws.com/scRNA_graduate/SRR_NeuroD1/outs/NeuroD1_filtered_feature_bc_matrix.h5"
+local_h5file &lt;- basename(h5file)
+download.file(h5file, local_h5file)
+Nd1T.mat &lt;- Read10X_h5(filename = local_h5file)
+Nd1T.obj &lt;- CreateSeuratObject(Nd1T.mat, project = "Nd1")
+```
+
+```
+## Warning: Feature names cannot have underscores ('_'), replacing with dashes ('-')
+```
+  
+  
+---   
+## The Seurat object
+
+From this point we will use the Droplets filtered using Cellranger
+
+
+``` r
+Nd1T.obj
+```
+
+```
+## An object of class Seurat 
+## 55417 features across 3265 samples within 1 assay 
+## Active assay: RNA (55417 features, 0 variable features)
+##  1 layer present: counts
+```
+    
+   
+---   
+## The Seurat object
+
+From this point we will use the Droplets filtered using Cellranger
+
+
+``` r
+rownames(Nd1T.obj)
+```
+
+```
+##    [1] "Gm37671"            "Gm19087"            "Gm8941"             "Gm38212"            "Gm7449"            
+##    [6] "Gm15178"            "Gm28283"            "Gm37108"            "Gm37275"            "Gm6679"            
+##   [11] "Gm29155"            "C730036E19Rik"      "Gm37225"            "Gm17847"            "Gm28281"           
+##   [16] "Gm29157"            "Gm37489"            "Gm29156"            "Gm47985"            "Gm22159"           
+##   [21] "Gm5694"             "Gm8947"             "7SK"                "Gm8141"             "Gm47995"           
+##   [26] "3110040M04Rik"      "Gm47996"            "U2"                 "Gm10138"            "Pcmtd1"            
+##   [31] "Gm26983"            "Gm38372"            "Gm9826"             "Nras-ps2"           "Gm23274"           
+##   [36] "Gm19002"            "Gm26901"            "Gm18984"            "Gm30414"            "Gm37791"           
+##   [41] "Gm7470"             "Rps2-ps2"           "Gm38216"            "Cdh7"               "Gm18552"           
+##   [46] "Gm3332"             "Gm6693"             "Exo1"               "U6"                 "Gm38100"           
+##   [51] "Gm37668"            "Uxs1"               "Cdh19"              "Gm38255"            "Gm36944"           
+##   [56] "Gm29088"            "Gm19927"            "Gm16103"            "Gm19587"            "Gm8173"            
+##   [61] "Gm8241"             "Gm37934"            "Gm26352"            "ENSMUSG00002075225" "Dsel"              
+##   [66] "Gm6028"             "Gm17752"            "Gm6717"             "Gm19086"            "Gm18406"           
+##   [71] "Gm22331"            "Gm8204"             "Gm28190"            "Gm28189"            "Gm17946"           
+##   [76] "Gm18181"            "ENSMUSG00002075119" "9330185C12Rik"      "Gm4854"             "Gm17916"           
+##   [81] "Gmppa"              "Pld5"               "Rbm8a2"             "Gm38081"            "Gm37916"           
+##   [86] "Gm38101"            "Gm17965"            "Gm38152"            "Gm36536"            "Gm17966"           
+##   [91] "Gm26104"            "Asic4"              "Gm37264"            "Cntnap5a"           "Sntg1"             
+##   [96] "ENSMUSG00002076179" "Gm28263"            "Gm38024"            "Gm16284"            "Gm38259"           
+##  [101] "ENSMUSG00002074990" "Gm19965"            "Gm17777"            "Gm37005"            "Gm24030"           
+##  [106] "Gm15452"            "ENSMUSG00002076328" "Gm36964"            "Gm28361"            "ENSMUSG00002075967"
+##  [111] "Gm6152"             "Zfp813-ps"          "Zfp813-ps.1"        "Gm7445"             "Gm28362"           
+##  [116] "Gm7493"             "Gm37629"            "Gm28363"            "Gm38008"            "Gm28359"           
+##  [121] "Gm37143"            "Gm18182"            "Gm6187"             "Gm18299"            "B020011L13Rik"     
+##  [126] "Gm7512"             "Gm28360"            "Gm24765"            "Gm28169"            "Gm18300"           
+##  [131] "Gm7195"             "Gm28168"            "Rrs1"               "Gm7145"             "Gm28358"           
+##  [136] "Gm29489"            "Gm29490"            "Gm29104"            "Gm29106"            "Gm7200"            
+##  [141] "Ivns1abp"           "Tsn"                "Nifk"               "Gm28867"            "Adhfe1"            
+##  [146] "Swt1"               "2610203C22Rik"      "Gm6161"             "Vxn"                "Gm29520"           
+##  [151] "Cep170"             "3110062G12Rik"      "Gm38104"            "Gm36992"            "Mir350"            
+##  [156] "7SK.1"              "Trmt1l"             "Mir7682"            "Gm37893"            "Rnf2"              
+##  [161] "Gm36527"            "Gm29072"            "Gm19503"            "Gm28181"            "Mybl1"             
+##  [166] "Vcpip1"             "Tpp2"               "1700034P13Rik"      "Sdccag8"            "Gm38158"           
+##  [171] "Gm38053"            "ENSMUSG00002076339" "Gm37246"            "Mettl21c"           "Gm37490"           
+##  [176] "Gm15423"            "Gm15838"            "Gm37519"            "Gm8251"             "Niban1"            
+##  [181] "2810414N06Rik"      "Gm15182"            "Gm5257"             "Gm29065"            "Gm29068"           
+##  [186] "Gm29069"            "Gm17751"            "Mir6343"            "Gm816"              "Gm38265"           
+##  [191] "5S-rRNA"            "Akt3"               "Gm37960"            "Gm37106"            "Gm37598"           
+##  [196] "Gm38146"            "Gm37706"            "Gm37463"            "Gm38328"            "Gm26801"           
+##  [201] "Zbtb18"             "Gm29856"            "Gm37306"            "Gm37280"            "Tex30"             
+##  [206] "Gm37858"            "2310043L19Rik"      "Edem3"              "Gm29247"            "1700016C15Rik"     
+##  [211] "1700025G04Rik"      "Gm25279"            "Gm28610"            "Gm8964"             "Gm38238"           
+##  [216] "Adss"               "Gm16585"            "Catspere1"          "Tsen15"             "Epha4"             
+##  [221] "Mir6352"            "Colgalt2"           "Gm28386"            "Gm28385"            "Gm26263"           
+##  [226] "Gm28387"            "Poglut2"            "Btf3-ps14"          "Catspere2"          "Gm37313"           
+##  [231] "U6.1"               "Gm8010"             "Pax3"               "Gm2102"             "Bivm"              
+##  [236] "Sgpp2"              "Gm28410"            "Gm37884"            "Desi2"              "Gm8023"            
+##  [241] "4930527J03Rik"      "Gm37486"            "B230369F24Rik"      "Cox20"              "Ercc5"             
+##  [246] "Mettl21e"           "Gm15833"            "Gm5700"             "Gm28893"            "Txn-ps1"           
+##  [251] "Farsb"              "Gm28995"            "4833412K13Rik"      "BC035947"           "Rgl1"              
+##  [256] "Gm15479"            "Gm7278"             "Gm28792"            "Apobec4"            "Mogat1"            
+##  [261] "Arpc5"              "5730419F03Rik"      "Gm29611"            "Gulp1"              "Gm37626"           
+##  [266] "Gm16102"            "4930521E06Rik"      "Gm38110"            "Gm3489"             "Gm19480"           
+##  [271] "Gm3496"             "Gm5268"             "Hnrnpu"             "Gm38300"            "ENSMUSG00002075531"
+##  [276] "Gm24919"            "Efcab2"             "Acsl3"              "Ncf2"               "Kif26b"            
+##  [281] "Gm24405"            "Gm34176"            "Sgk3"               "Gm16564"            "Utp14b"            
+##  [286] "Gm6159"             "Gm29536"            "Kcne4"              "Gm29187"            "Gm5830"            
+##  [291] "Gm6195"             "U6.2"               "Scg2"               "Gm19027"            "Gm24160"           
+##  [296] "Smyd3"              "Ap1s3"              "Gm5561"             "Gm37886"            "Tfb2m"             
+##  [301] "Gm15480"            "Cnst"               "Col3a1"             "Mcmdc2"             "ENSMUSG00002074901"
+##  [306] "Snhg6"              "Snord87"            "Tcf24"              "E330040D14Rik"      "Sccpdh"            
+##  [311] "Smg7"               "Gm28791"            "1700040K01Rik"      "Kif28"              "Gm8976"            
+##  [316] "Col5a2"             "Gm38211"            "Gm8296"             "Wdfy1"              "Gm7063"            
+##  [321] "Gm10555"            "Gm8304"             "U6.3"               "Gm23974"            "Gm8307"            
+##  [326] "Ppp1r42"            "Gm23984"            "Gm15818"            "Mrpl44"             "U6.4"              
+##  [331] "Serpine2"           "Nmnat2"             "Gm5529"             "Gm28960"            "Gm28071"           
+##  [336] "Gm28058"            "U6.5"               "Gm38339"            "9830004L10Rik"      "Fam124b"           
+##  [341] "2310015K22Rik"      "Gm37932"            "Ahctf1"             "Gm10518"            "Cops5"             
+##  [346] "Gm37070"            "Wdr75"              "Lamc2"              "Gm28906"            "Gm5526"            
+##  [351] "Cul3"               "Gm37902"            "Gm37262"            "Gm29125"            "Gm6189"            
+##  [356] "Lamc1"              "1700016L21Rik"      "Gm45261"            "Gm38009"            "Gm8818"            
+##  [361] "E330020D12Rik"      "Shcbp1l"            "Gm25588"            "Gm37669"            "Gm18849"           
+##  [366] "Dnah7b"             "5S-rRNA.1"          "Dhx9"               "Gm8326"             "Npl"               
+##  [371] "Gm6652"             "Dnah7c"             "Slc39a10"           "Gm28151"            "Gm37393"           
+##  [376] "Gm28527"            "Gm28825"            "Gm28826"            "Gm4852"             "Gm38090"           
+##  [381] "Mir6350"            "Gm18117"            "Gm37196"            "Gm8337"             "ENSMUSG00002075213"
+##  [386] "7SK.2"              "Gm19206"            "Gm5974"             "Gm23240"            "Gm28830"           
+##  [391] "Gm8354"             "Gm19124"            "Gm8357"             "ENSMUSG00002076043" "Gm28740"           
+##  [396] "Cspp1"              "Gm8367"             "C230029F24Rik"      "Gm6757"             "Gm3605"            
+##  [401] "Gm28388"            "Gm8384"             "1700047N06Rik"      "4933411E06Rik"      "Gm8391"            
+##  [406] "ENSMUSG00002075839" "Gm29665"            "Gm20118"            "7SK.3"              "Gm28321"           
+##  [411] "Rgs8"               "Gm29529"            "5530400K19Rik"      "C230024C17Rik"      "Tmeff2"            
+##  [416] "Rgs16"              "Gm28513"            "Gm28322"            "ENSMUSG00002075527" "Gm28319"           
+##  [421] "Gm28320"            "Gm29325"            "9330175M20Rik"      "Cavin2"             "Gm5253"            
+##  [426] "1700072G22Rik"      "Rnasel"             "Gm28512"            "Arfgef1"            "7SK.4"             
+##  [431] "Gm37569"            "Dock10"             "Cpa6"               "Gm38005"            "Gm15604"           
+##  [436] "U6.6"               "Rgsl1"              "Gm15603"            "Gm37133"            "Gm37645"           
+##  [441] "Gm38062"            "Gm5522"             "A630081D01Rik"      "Gm28659"            "SNORA66"           
+##  [446] "Gm29124"            "Gm28066"            "Teddm2"             "Teddm1b"            "Gm38352"           
+##  [451] "Teddm1a"            "Mir8114"            "Nabp1"              "Gm17767"            "Gm37535"           
+##  [456] "Gm28055"            "Nyap2"              "Gm37210"            "Gm6198"             "Gm5530"            
+##  [461] "Gm7516"             "Gm37114"            "Mir6344"            "Glul"               "Gm29290"           
+##  [466] "Gm29291"            "Irs1"               "Gm28286"            "Gm9747"             "A830008E24Rik"     
+##  [471] "Gm25336"            "Zfp648"             "Prex2"              "4930452N14Rik"      "4930532M18Rik"     
+##  [476] "5S-rRNA.2"          "Gm18727"            "Gm24173"            "Gm28686"            "Gm37410"           
+##  [481] "Rhbdd1"             "Gm19552"            "Gm28940"            "ENSMUSG00002075724" "Col4a4"            
+##  [486] "Col4a3"             "5S-rRNA.3"          "Cacna1e"            "C430014B12Rik"      "Gm29282"           
+##  [491] "Gm29441"            "Gm9530"             "Ier5"               "Mr1"                "A830018L16Rik"     
+##  [496] "Stx6"               "Gm38178"            "Gm29273"            "Gm38069"            "Gm7560"            
+##  [501] "Gm8850"             "U6.7"               "Mir6341"            "Gm2383"             "Gm6216"            
+##  [506] "Gm17644"            "Gm29663"            "BC034090"           "Gm37622"            "Mff"               
+##  [511] "Gm28941"            "Tm4sf20"            "Gm47791"            "Gm19257"            "Gm36999"           
+##  [516] "Gm28942"            "Gm17764"            "ENSMUSG00002074851" "Xpr1"               "ENSMUSG00002076398"
+##  [521] "Gm5532"             "Myo1b"              "Gm29453"            "Gm28323"            "Gm8419"            
+##  [526] "ENSMUSG00002075355" "Gm8420"             "Cdc42bpa"           "Acbd6"              "Gm38169"           
+##  [531] "Gm38331"            "Lhx4"               "Gm37089"            "Stat4"              "Gm28177"           
+##  [536] "Gm3940"             "Gm31812"            "Qsox1"              "Gm37539"            "Gm37571"           
+##  [541] "Sulf1"              "Cep350"             "Gm38038"            "Gm36934"            "Gm37383"           
+##  [546] "Gm23744"            "Gm9694"             "Coq8a"              "Gm37336"            "Slco5a1"           
+##  [551] "Agfg1"              "Gm37162"            "Gm5250"             "Gm29283"            "A030005L19Rik"     
+##  [556] "A030014E15Rik"      "Gm6217"             "A030003K21Rik"      "Prdm14"             "Gm7544"            
+##  [561] "Gm47955"            "Gm47959"            "Gm7553"             "Slc19a3"            "Gm7539"            
+##  [566] "Krtap28-10"         "Gm47969"            "A030005K14Rik"      "Krtap28-13"         "Gm29518"           
+##  [571] "Ccl20"              "Gm29519"            "Clasp1"             "Gm26080"            "2900060B14Rik"     
+##  [576] "Rnu4atac"           "Gm28466"            "Daw1"               "Gm6244"             "5S-rRNA.4"         
+##  [581] "Tor1aip1"           "9430034N14Rik"      "Tfcp2l1"            "5S-rRNA.5"          "Gm28882"           
+##  [586] "Gm23497"            "Gm28467"            "Psen2"              "Gm31728"            "Gm5069"            
+##  [591] "Sphkap"             "Gm6374"             "Gm37517"            "Gm37989"            "4933436I20Rik"     
+##  [596] "Itpkb"              "ENSMUSG00002076780" "Gm37033"            "Gm24555"            "Gm37390"           
+##  [601] "Gm36933"            "Stum"               "Gm37984"            "Gm37267"            "Pid1"              
+##  [606] "Tor1aip2"           "Gm37058"            "Gm18304"            "Mir6353"            "Fam163a"           
+##  [611] "Gm38113"            "Gli2"               "Mir6346"            "Gm26831"            "Gm8321"            
+##  [616] "Gm3508"             "Gm29456"            "Gm29455"            "Inhbb"              "Dner"              
+##  [621] "Gm37959"            "Gm37925"            "Ncoa2"              "Mir5126"            "Ralb"              
+##  [626] "Gm29454"            "Gm38376"            "Gm27184"            "Gm37409"            "ENSMUSG00002076346"
+##  [631] "Gm38223"            "Tmem185b"           "Gm37702"            "Gm23169"            "3830432H09Rik"     
+##  [636] "Gm38120"            "Gm25322"            "Gm38380"            "Gm29570"            "Gm7593"            
+##  [641] "Tdrd5"              "A430050A11Rik"      "4930518J20Rik"      "Nphs2"              "Parp1"             
+##  [646] "Tram1"              "Mir6904"            "Lactb2"             "Gm38319"            "Xkr9"              
+##  [651] "Gm26273"            "Gm5523"             "Gm36947"            "7SK.5"              "Gm37400"           
+##  [656] "Axdnd1"             "Gm2000"             "Soat1"              "Gm37648"            "Csnk2a1-ps3"       
+##  [661] "Lin9"               "Mixl1"              "Gm8101"             "Acbd3"              "Gm37768"           
+##  [666] "Gm38293"            "Abl2"               "Gm38043"            "Trip12"             "Gm38374"           
+##  [671] "Gm37738"            "Fbxo36"             "Slc16a14"           "Gm15433"            "Gm29284"           
+##  [676] "Stat1"              "Epb41l5"            "Gm18301"            "Gm37219"            "Tor3a"             
+##  [681] "H3f3a"              "H3f3aos"            "Gm24836"            "Sde2"               "C130026I21Rik"     
+##  [686] "Gm20305"            "Rpl19-ps1"          "ENSMUSG00002076475" "Gm7582"             "Gm18036"           
+##  [691] "Gm53056"            "Gm2389"             "Fam20b"             "Gm19918"            "Gm15428"           
+##  [696] "Gm18342"            "Lefty2"             "Eya1"               "ENSMUSG00002075819" "Gm37444"           
+##  [701] "Gm9947"             "A530032D15Rik"      "Gm10553"            "Pycr2"              "Msc"               
+##  [706] "Gm37412"            "Smt3h2-ps4"         "Lefty1"             "Rpl5-ps1"           "A530040E14Rik"     
+##  [711] "Gm16038"            "Gm52951"            "Gm6264"             "Gm7609"             "Gm52950"           
+##  [716] "Gm16028"            "Ptpn4"              "Gm3851"             "Gm37745"            "Gm16026"           
+##  [721] "Gm29657"            "Gm2619"             "Gm8338"             "Gm29658"            "Gm16025"           
+##  [726] "Gm3551"             "Gm7281"             "Gm28209"            "Gm52955"            "Tmem177"           
+##  [731] "Gm2427"             "Gm16092"            "Gm7592"             "ENSMUSG00000118632" "G530012D18Rik"     
+##  [736] "Trpa1"              "Gm26345"            "Gm10566"            "Kcnb2"              "Gm38116"           
+##  [741] "Gm37138"            "Gm25227"            "Gm25168"            "Tmem63a"            "Gm6060"            
+##  [746] "Gm28669"            "2210411M09Rik"      "Gm36961"            "Cfap221"            "Gm17973"           
+##  [751] "Sp110"              "Gm16094"            "Terf1"              "Gm37509"            "Sctr"              
+##  [756] "Ephx1"              "Tmem37"             "Gm37431"            "Gm37086"            "Sbspon"            
+##  [761] "7SK.6"              "Gm7634"             "9130409I23Rik"      "Gm17967"            "Gm37406"           
+##  [766] "Gm6606"             "Sp140"              "4930444P10Rik"      "Gm10552"            "Gm17017"           
+##  [771] "Rpl7"               "Nvl"                "Fgfr3-ps"           "Rdh10"              "Gm38249"           
+##  [776] "Gm28095"            "Cnih4"              "Gls"                "Gm5975"             "Gm23460"           
+##  [781] "Nab1"               "Gm5976"             "Rps27a-ps1"         "Gm53065"            "Gm28178"           
+##  [786] "Gm5527"             "En1"                "2610027F03Rik"      "Gm29346"            "Gm29345"           
+##  [791] "Gm29344"            "Gm29348"            "Gm29347"            "Gm37043"            "Celrr"             
+##  [796] "Gm29359"            "Gm38283"            "Nemp2"              "Gm37242"            "Wdr26"             
+##  [801] "Insig2"             "Gm37174"            "A430110L20Rik"      "2210011K15Rik"      "Rpl35a-ps2"        
+##  [806] "Gm8146"             "Mfsd6"              "Gm29670"            "Gm28650"            "Cnih3"             
+##  [811] "2900069G24Rik"      "Gm16547"            "Gm16539"            "Inpp1"              "Ccdc121"           
+##  [816] "Hibch"              "Gm16107"            "Ccdc93"             "Gm15392"            "Gm15393"           
+##  [821] "Htr5b"              "Gm8217"             "1700019D03Rik"      "Mstn"               "Gm24349"           
+##  [826] "Dnah14"             "Ddx18"              "Gm37664"            "Gm23690"            "Gm28591"           
+##  [831] "Gm37920"            "Gm15394"            "1700019A02Rik"      "Gm8392"             "ENSMUSG00002076253"
+##  [836] "Gm28590"            "Gm24547"            "Gm36982"            "Gm25771"            "Gm29192"           
+##  [841] "Gm37970"            "Gm8403"             "Sp100"              "Gm28911"            "Gm20058"           
+##  [846] "Gm28912"            "5S-rRNA.6"          "Lbr"                "5S-rRNA.7"          "Gm5533"            
+##  [851] "A630001G21Rik"      "Mir8096"            "ENSMUSG00002076791" "9930111H07Rik"      "Metazoa-SRP"       
+##  [856] "Pms1"               "Gm28777"            "Ormdl1"             "Gm28778"            "Cab39"             
+##  [861] "Itm2c"              "4933407L21Rik"      "Gm28884"            "Gpr55"              "Gm28100"           
+##  [866] "Gm18180"            "Osgepl1"            "Gm28551"            "Gm18800"            "Dpp10"             
+##  [871] "Gm37478"            "Gm37221"            "Gm24791"            "Gm37066"            "Gm37781"           
+##  [876] "Gm37396"            "Gm38263"            "Gm28929"            "Gm18875"            "Gm37551"           
+##  [881] "Gm38073"            "Gm25578"            "Gm28299"            "Gm37717"            "1700121L03Rik"     
+##  [886] "Asnsd1"             "Gm50478"            "Gm28779"            "Gm6799"             "Gm6801"            
+##  [891] "Spata3"             "Stau2"              "2810459M11Rik"      "Gm7568"             "Ube2w"             
+##  [896] "Gm38342"            "Dnah7a"             "Psmd1"              "Gm22786"            "ENSMUSG00002076105"
+##  [901] "Htr2b"              "Gm37914"            "Gm21972"            "Stk17b"             "Gm37863"           
+##  [906] "Actr3"              "Gm28706"            "Eloc"               "D030040B21Rik"      "Idi1-ps5"          
+##  [911] "Slc35f5"            "Tmem70"             "Gm18444"            "Gpr39"              "Ly96"              
+##  [916] "Gm29649"            "Gm5828"             "Lypd1"              "Gm28376"            "4921511E07Rik"     
+##  [921] "Jph1"               "Gm28783"            "Gdap1"              "Gm28784"            "Gm28785"           
+##  [926] "Gm5251"             "Rbm6-ps1"           "Gm6075"             "Gm25166"            "Hecw2"             
+##  [931] "Pi15"               "Gm28154"            "Mir7681"            "Gm24251"            "Gm37633"           
+##  [936] "U6.8"               "Gm16070"            "Crispld1"           "Gm28153"            "Gm7690"            
+##  [941] "Gm18775"            "Gm17969"            "Gm28756"            "Gm28755"            "Gm45784"           
+##  [946] "Ccdc150"            "Crisp4"             "Defb44-ps"          "Defb18"             "Gtf3c3"            
+##  [951] "Gm34066"            "Nckap5"             "Defb41"             "Gm17837"            "Gm5252"            
+##  [956] "Gm37161"            "Gm24075"            "Gm37936"            "Gm28343"            "Gm38177"           
+##  [961] "Gm28344"            "4930599A14Rik"      "Gm15825"            "Enah"               "Gm5261"            
+##  [966] "2700078F05Rik"      "Gm38359"            "Gm37018"            "Tfap2d"             "Gm37258"           
+##  [971] "Gm10075"            "Pgap1"              "Gm37177"            "Gm36955"            "Gm19637"           
+##  [976] "Srp9"               "Gm17968"            "Vmn1r1"             "Mgat5"              "Gm37772"           
+##  [981] "Degs1"              "Gm37510"            "Gm8451"             "Gm23370"            "1700047M11Rik"     
+##  [986] "ENSMUSG00002075922" "Gm23734"            "Gm38301"            "Ralgps2"            "Tfap2b"            
+##  [991] "Gm28340"            "Gm28341"            "Gm4849"             "SNORD29"            "Gm38382"           
+##  [996] "Gm28693"            "Fbxo28"             "Gm5706"             "Gm10517"            "Angptl1"           
+##  [ reached getOption("max.print") -- omitted 54417 entries ]
+```
+
+``` r
+colnames(Nd1T.obj)
+```
+
+```
+##    [1] "AAACCCACACAATGTC-1" "AAACCCACACCACTGG-1" "AAACCCACACGAGAAC-1" "AAACCCAGTGTCCGGT-1" "AAACGAAAGCCTCGTG-1"
+##    [6] "AAACGAAAGCCTTGAT-1" "AAACGAACAGCTTTGA-1" "AAACGAACATGTCAGT-1" "AAACGAAGTAGACGTG-1" "AAACGAAGTAGCTGTT-1"
+##   [11] "AAACGAAGTGTATACC-1" "AAACGAAGTTTGACAC-1" "AAACGAATCCCTGTTG-1" "AAACGAATCTCCGCAT-1" "AAACGCTAGAGTTGAT-1"
+##   [16] "AAACGCTCACGAGGAT-1" "AAACGCTCATAGGTAA-1" "AAACGCTCATCGCTCT-1" "AAACGCTGTTCAATCG-1" "AAAGAACCAATAGTAG-1"
+##   [21] "AAAGAACCAGACTCTA-1" "AAAGAACCATATCGGT-1" "AAAGAACCATCCTCAC-1" "AAAGAACGTACCTAAC-1" "AAAGAACGTTGGACCC-1"
+##   [26] "AAAGAACTCGTGCACG-1" "AAAGGATCATGTTCGA-1" "AAAGGGCAGACTAAGT-1" "AAAGGGCAGCTCCACG-1" "AAAGGGCTCCACAAGT-1"
+##   [31] "AAAGGTACAACTTGGT-1" "AAAGGTACATAGGCGA-1" "AAAGGTAGTATCGCAT-1" "AAAGGTAGTGAGTCAG-1" "AAAGTCCCACCTCTAC-1"
+##   [36] "AAAGTCCCATGGCACC-1" "AAAGTCCTCCGTGGCA-1" "AAAGTCCTCTTCGATT-1" "AAAGTGAAGATGACAT-1" "AAAGTGACATGTTACG-1"
+##   [41] "AAATGGAAGTGTAGTA-1" "AAATGGACATGCTGCG-1" "AAATGGAGTGAGTTTC-1" "AACAAAGCACAATCTG-1" "AACAAAGCACCAGTTA-1"
+##   [46] "AACAAAGGTCCGGTGT-1" "AACAAAGTCGCAATTG-1" "AACAACCTCCATAAGC-1" "AACAACCTCTCATAGG-1" "AACAAGAGTGAGTGAC-1"
+##   [51] "AACAGGGCATGTCAGT-1" "AACCAACAGAATCGTA-1" "AACCAACAGATAGCTA-1" "AACCAACAGCCTGTGC-1" "AACCAACAGGTCATAA-1"
+##   [56] "AACCAACCAAGTGTCT-1" "AACCAACGTTGCGGAA-1" "AACCAACTCCTATGGA-1" "AACCACAAGACCGTTT-1" "AACCACAAGGTGGTTG-1"
+##   [61] "AACCACAAGTAACCTC-1" "AACCACACATCCAATG-1" "AACCACAGTCCAGGTC-1" "AACCACAGTCGACGCT-1" "AACCACAGTGTGAATA-1"
+##   [66] "AACCACATCACGACTA-1" "AACCATGTCACCCTTG-1" "AACCCAAAGATGAACT-1" "AACCCAATCCAGCAAT-1" "AACCTGACAAGTGGAC-1"
+##   [71] "AACCTGACACTCTCGT-1" "AACCTGAGTCGGTACC-1" "AACCTGAGTGCATGAG-1" "AACCTGAGTTGAGGAC-1" "AACCTTTCATGGCTGC-1"
+##   [76] "AACGAAAAGGGACTGT-1" "AACGAAACAAGAAATC-1" "AACGGGAAGGCTTCCG-1" "AACGGGACAAGTATCC-1" "AACGGGACACTCACTC-1"
+##   [81] "AACGGGACAGATTCGT-1" "AACGGGATCTCGCTCA-1" "AACGTCAAGACTAGAT-1" "AACGTCAAGCGATGGT-1" "AACGTCAAGTATTCCG-1"
+##   [86] "AACGTCAGTGTCCACG-1" "AACGTCATCGGTCGGT-1" "AACGTCATCTGGTCAA-1" "AACTTCTTCATCACTT-1" "AAGAACAAGGATTTCC-1"
+##   [91] "AAGAACAAGGGCAGAG-1" "AAGAACAGTCAGTCCG-1" "AAGACAAGTATACCTG-1" "AAGACTCAGAAATTGC-1" "AAGACTCAGCAGCGAT-1"
+##   [96] "AAGACTCCAACCGTGC-1" "AAGACTCCAAGTGCAG-1" "AAGACTCCATGTGGCC-1" "AAGACTCTCCCGTAAA-1" "AAGACTCTCTAAGGAA-1"
+##  [101] "AAGATAGAGGGCAATC-1" "AAGCATCAGGCGTTAG-1" "AAGCATCCACATGTTG-1" "AAGCATCGTAAGATAC-1" "AAGCATCTCAGATTGC-1"
+##  [106] "AAGCATCTCGAGATAA-1" "AAGCATCTCTCGCAGG-1" "AAGCCATGTTGGAGGT-1" "AAGCGAGGTATTTCCT-1" "AAGCGAGTCGATACAC-1"
+##  [111] "AAGCGTTAGGCCGCTT-1" "AAGCGTTAGGGCAGTT-1" "AAGCGTTCATTCTTCA-1" "AAGCGTTGTCTTTATC-1" "AAGCGTTTCATTCACT-1"
+##  [116] "AAGGAATAGCCTAGGA-1" "AAGGAATCACCAGTTA-1" "AAGGTAAGTAATCAAG-1" "AAGTCGTAGGTTCAGG-1" "AAGTCGTCAAACACCT-1"
+##  [121] "AAGTCGTCAAAGGGCT-1" "AAGTCGTCAAGCCATT-1" "AAGTCGTCACAGAGAC-1" "AAGTCGTTCACTTTGT-1" "AAGTCGTTCATCCCGT-1"
+##  [126] "AAGTCGTTCTGTTGGA-1" "AAGTGAAAGCCGGATA-1" "AAGTGAACAATTTCGG-1" "AAGTGAACACCCTGAG-1" "AAGTGAAGTTTGGCTA-1"
+##  [131] "AAGTTCGTCGAGGCAA-1" "AATAGAGAGCTATCTG-1" "AATAGAGAGGTAATCA-1" "AATAGAGCAGGTACGA-1" "AATCACGAGAGCGACT-1"
+##  [136] "AATCACGCAAGCGCTC-1" "AATCACGCAATGAGCG-1" "AATCACGCAGACAAGC-1" "AATCGACCATTCATCT-1" "AATCGACGTGCGGATA-1"
+##  [141] "AATCGACTCATCGTAG-1" "AATCGACTCTAAGGAA-1" "AATCGTGAGAACGTGC-1" "AATCGTGCAATCCAGT-1" "AATGAAGAGGGCAAGG-1"
+##  [146] "AATGAAGTCTATCGGA-1" "AATGACCAGAGCAGCT-1" "AATGACCAGATCCCAT-1" "AATGACCAGGGTGAAA-1" "AATGACCCAGAGTAAT-1"
+##  [151] "AATGACCCAGGATTCT-1" "AATGACCGTCTGTAGT-1" "AATGACCGTGGTCCCA-1" "AATGCCAAGATGATTG-1" "AATGCCACATAACTCG-1"
+##  [156] "AATGCCACATAGATCC-1" "AATGCCATCCGGCTTT-1" "AATGGAAAGCGTATGG-1" "AATGGAAAGGAACGCT-1" "AATGGAACACGTCATA-1"
+##  [161] "AATGGAAGTCAGTTTG-1" "AATTCCTAGAATCGTA-1" "AATTCCTGTACTAACC-1" "AATTCCTTCTCCCATG-1" "AATTTCCAGCTCCATA-1"
+##  [166] "AATTTCCGTCATATGC-1" "ACAAAGAAGCTACTGT-1" "ACAAAGACAACTCATG-1" "ACAAAGACAGATAAAC-1" "ACAAAGAGTACTGCGC-1"
+##  [171] "ACAAAGATCGAGAGCA-1" "ACAACCACAACACTAC-1" "ACAACCACAATTCGTG-1" "ACAACCACACCCAACG-1" "ACAACCAGTGCCGTTG-1"
+##  [176] "ACAACCAGTTTAGACC-1" "ACAACCATCAAGCCAT-1" "ACAACCATCCTACAAG-1" "ACAAGCTAGATCCCAT-1" "ACAAGCTAGCCAAGCA-1"
+##  [181] "ACAAGCTCACAGAGAC-1" "ACAAGCTCACCTGATA-1" "ACAAGCTCAGCGTACC-1" "ACAAGCTGTTATTCCT-1" "ACAAGCTTCGGTTAGT-1"
+##  [186] "ACACAGTAGCACGTCC-1" "ACACCAACAAGAGGTC-1" "ACACCAATCATCCTGC-1" "ACACCAATCCACCTGT-1" "ACACGCGCAATAGGGC-1"
+##  [191] "ACACGCGCACTATCCC-1" "ACACTGAGTATCAGCT-1" "ACACTGAGTGCCAAGA-1" "ACAGAAAAGTGGTGAC-1" "ACAGAAACACCGAATT-1"
+##  [196] "ACAGAAACAGAGGACT-1" "ACAGAAACATAAGCGG-1" "ACAGAAAGTGCGGATA-1" "ACAGCCGAGGCCGCTT-1" "ACAGCCGAGGTGCTGA-1"
+##  [201] "ACAGCCGAGTACCATC-1" "ACAGGGAAGAAACTGT-1" "ACAGGGAGTTGAATCC-1" "ACAGGGATCAAGTCGT-1" "ACATCCCAGCAAGCCA-1"
+##  [206] "ACATCCCAGGCTAGCA-1" "ACATCCCAGTGCGACA-1" "ACATCCCCATCAGTGT-1" "ACATCCCGTGCCTTTC-1" "ACATCGACATTGGGAG-1"
+##  [211] "ACATCGAGTGTATCCA-1" "ACATCGATCACAACCA-1" "ACATGCACATCTTTCA-1" "ACATGCAGTACTGCGC-1" "ACATGCAGTCCTGGGT-1"
+##  [216] "ACATGCAGTCGAACGA-1" "ACATGCAGTGCATACT-1" "ACATTTCAGTCACTGT-1" "ACATTTCCAGTTCCAA-1" "ACATTTCGTATTTCTC-1"
+##  [221] "ACATTTCTCCGCACTT-1" "ACATTTCTCGTGTGGC-1" "ACCAAACAGACCTCAT-1" "ACCAAACGTGCTAGCC-1" "ACCAACAAGCCGCTTG-1"
+##  [226] "ACCAACAGTCGGCTAC-1" "ACCACAAGTCGAAGCA-1" "ACCACAAGTTTGGAAA-1" "ACCACAATCACAAGGG-1" "ACCATTTAGACGACTG-1"
+##  [231] "ACCATTTAGAGGTGCT-1" "ACCATTTAGGTACAGC-1" "ACCATTTAGTCGTCTA-1" "ACCATTTAGTGAGTTA-1" "ACCATTTCAGAGGACT-1"
+##  [236] "ACCATTTGTAGTCCTA-1" "ACCATTTGTATGTCCA-1" "ACCATTTGTGACTGTT-1" "ACCCAAACAGCATTGT-1" "ACCCTCATCCTCGCAT-1"
+##  [241] "ACCCTTGCAACGGCCT-1" "ACCGTTCAGCGACATG-1" "ACCGTTCCACACAGCC-1" "ACCTACCCAGCGTTGC-1" "ACCTACCTCAAGCTTG-1"
+##  [246] "ACCTACCTCGACGACC-1" "ACCTACCTCGTTTACT-1" "ACCTGAAAGCAACAGC-1" "ACCTGAAAGCGTCTGC-1" "ACCTGAACAATTGCGT-1"
+##  [251] "ACCTGAAGTCTGGTTA-1" "ACCTGAAGTGGAAGTC-1" "ACGATCAGTCCGTTTC-1" "ACGATGTAGATGTAGT-1" "ACGATGTCAAGTTCGT-1"
+##  [256] "ACGATGTCATGTGCTA-1" "ACGATGTTCCTATTGT-1" "ACGATGTTCGAAATCC-1" "ACGATGTTCGACCAAT-1" "ACGATGTTCTATCGCC-1"
+##  [261] "ACGCACGAGCTGTACT-1" "ACGCACGCACGATTCA-1" "ACGCACGCAGGTTACT-1" "ACGCACGGTGGGCTTC-1" "ACGCACGTCCAACTAG-1"
+##  [266] "ACGGAAGAGTCGAAAT-1" "ACGGAAGCAAGGCCTC-1" "ACGGAAGCAGGTATGG-1" "ACGGAAGGTAATCAGA-1" "ACGGAAGGTTGTCTAG-1"
+##  [271] "ACGGAAGTCTGTAACG-1" "ACGGGTCAGGCTGGAT-1" "ACGGGTCAGTAGCTCT-1" "ACGGGTCCATCGGCCA-1" "ACGGGTCGTCACTCAA-1"
+##  [276] "ACGGTCGAGCGCTGAA-1" "ACGGTCGGTATCGATC-1" "ACGGTCGGTGTGATGG-1" "ACGGTTAAGCGTGCCT-1" "ACGGTTAAGCTCGAAG-1"
+##  [281] "ACGGTTACAGCTTCCT-1" "ACGGTTAGTCGTAATC-1" "ACGTAACCACAACATC-1" "ACGTAACGTAAGTTAG-1" "ACGTACAAGCAGGTCA-1"
+##  [286] "ACGTACATCGTTGTGA-1" "ACGTAGTAGGACTATA-1" "ACGTAGTAGGGCGAGA-1" "ACGTAGTCACCCAAGC-1" "ACGTAGTCATCACAGT-1"
+##  [291] "ACGTAGTGTCCTATAG-1" "ACGTCCTAGCATCAGG-1" "ACGTCCTAGTTGGACG-1" "ACGTCCTGTGGCTACC-1" "ACGTCCTGTTAAGGGC-1"
+##  [296] "ACGTCCTTCAACTGAC-1" "ACGTTCCCACTATGTG-1" "ACTACGACAATTGTGC-1" "ACTACGAGTTGCAAGG-1" "ACTATCTAGATCGCCC-1"
+##  [301] "ACTATCTAGCATCAAA-1" "ACTATCTCACGTCATA-1" "ACTATCTGTGGAGAAA-1" "ACTATCTTCCCGAAAT-1" "ACTATGGAGGCATGCA-1"
+##  [306] "ACTATGGCAATCTCGA-1" "ACTATGGGTTCTCGCT-1" "ACTATGGTCCTTCTAA-1" "ACTATTCGTAGTACGG-1" "ACTATTCTCAAACCCA-1"
+##  [311] "ACTCCCACAGACCCGT-1" "ACTCCCATCTAGCATG-1" "ACTCTCGAGACTTAAG-1" "ACTCTCGAGTGCAAAT-1" "ACTCTCGGTAAGATAC-1"
+##  [316] "ACTCTCGGTCGTGGTC-1" "ACTCTCGGTGGAGAAA-1" "ACTGATGCAAATGGAT-1" "ACTGATGTCACATTGG-1" "ACTGATGTCGTGCATA-1"
+##  [321] "ACTGCAAAGGACTGGT-1" "ACTGCAAAGGTATCTC-1" "ACTGCAACACTATGTG-1" "ACTGCAAGTGCAACAG-1" "ACTGTCCAGTTTCGAC-1"
+##  [326] "ACTGTCCCACAACCGC-1" "ACTGTCCCATCTGGGC-1" "ACTGTCCGTCGCACGT-1" "ACTGTCCTCAAACGAA-1" "ACTGTCCTCTGTAACG-1"
+##  [331] "ACTGTGACACCCTAAA-1" "ACTGTGACAGTGTACT-1" "ACTGTGAGTATGCGGA-1" "ACTGTGATCTAACACG-1" "ACTTAGGAGCAGCGAT-1"
+##  [336] "ACTTAGGAGTGAGTTA-1" "ACTTAGGCAAGTGGTG-1" "ACTTAGGGTCCAGCCA-1" "ACTTATCGTATCCCTC-1" "ACTTATCGTATCGCTA-1"
+##  [341] "ACTTATCGTTAGAAGT-1" "ACTTATCTCCTGTAGA-1" "ACTTCCGGTAAGATCA-1" "ACTTCCGGTACTGCGC-1" "ACTTCCGGTCAGGTAG-1"
+##  [346] "ACTTCCGGTTAGGCTT-1" "ACTTCCGTCTCCCATG-1" "ACTTCGCCAGGTTCAT-1" "ACTTCGCGTAGAGACC-1" "ACTTCGCTCTAGTACG-1"
+##  [351] "ACTTTGTAGACGCTCC-1" "ACTTTGTAGGGATGTC-1" "ACTTTGTAGTAAATGC-1" "ACTTTGTGTAGAATGT-1" "AGAAATGCAACATACC-1"
+##  [356] "AGAAATGCAATGACCT-1" "AGAAATGGTCATCGGC-1" "AGAAATGGTTCAGGTT-1" "AGAAATGTCCACTTCG-1" "AGAAATGTCTAGAACC-1"
+##  [361] "AGAACAAAGAGTGTGC-1" "AGAACAAAGGGCAATC-1" "AGAACCTGTAGACGGT-1" "AGAACCTGTGCCTTTC-1" "AGAACCTTCAGTCTTT-1"
+##  [366] "AGAAGCGTCAAACGTC-1" "AGAAGTAAGAAGCGCT-1" "AGAAGTACATCATCCC-1" "AGAAGTACATGGGCAA-1" "AGACAAACATCGCCTT-1"
+##  [371] "AGACAAATCATGACAC-1" "AGACAAATCCCGAATA-1" "AGACACTCACTGGATT-1" "AGACACTCATGAATCC-1" "AGACACTGTAACCCTA-1"
+##  [376] "AGACACTTCCTACCAC-1" "AGACAGGCATCGTGCG-1" "AGACAGGGTACCCGCA-1" "AGACAGGGTTTCACTT-1" "AGACCATAGCGACCCT-1"
+##  [381] "AGACCATAGCTCCATA-1" "AGACCATGTTTACTTC-1" "AGACCCGCAAATGAAC-1" "AGACCCGGTGTGAATA-1" "AGACCCGTCGAACACT-1"
+##  [386] "AGACCCGTCGTTGTTT-1" "AGACTCAAGATGTTCC-1" "AGACTCAGTCGTTGCG-1" "AGAGAATCAACTGGTT-1" "AGAGAATGTAGGACCA-1"
+##  [391] "AGAGAATTCAACCGAT-1" "AGAGAATTCCCGTGTT-1" "AGAGAGCGTTCGTGCG-1" "AGAGAGCTCAGATGCT-1" "AGAGAGCTCAGCAATC-1"
+##  [396] "AGAGCAGAGGTGGCTA-1" "AGAGCAGAGGTTCTTG-1" "AGAGCAGAGTTTGGCT-1" "AGAGCAGCAAGGACAC-1" "AGAGCAGCAGCACCCA-1"
+##  [401] "AGAGCAGGTACAAAGT-1" "AGAGCAGGTGATGTAA-1" "AGAGCCCAGCCACAAG-1" "AGAGCCCCATCAGTCA-1" "AGATAGAAGGATGTTA-1"
+##  [406] "AGATCCAAGCCTCGTG-1" "AGATCCACAAACCACT-1" "AGATCCACACCCTATC-1" "AGATCCATCAGCTTCC-1" "AGATCCATCTCCAATT-1"
+##  [411] "AGATCGTAGTTAGAAC-1" "AGATCGTCAGCTCATA-1" "AGATCGTCATTGAGCT-1" "AGATCGTGTAGCGAGT-1" "AGATGAAAGTGTAGTA-1"
+##  [416] "AGATGAATCAAACGAA-1" "AGATGAATCAAGAATG-1" "AGATGCTAGCATCAAA-1" "AGATGCTAGGTGCAGT-1" "AGATGCTAGTAGAGTT-1"
+##  [421] "AGATGCTCATGTCAGT-1" "AGATGCTGTACTCGCG-1" "AGATGCTTCACCTGTC-1" "AGCATCAGTCCTGTTC-1" "AGCATCATCCGTTGAA-1"
+##  [426] "AGCCAATAGGGTATAT-1" "AGCCAATCATAAGCGG-1" "AGCCAATGTCATTCCC-1" "AGCCACGGTCGAAGCA-1" "AGCCACGGTGCCTGAC-1"
+##  [431] "AGCCACGGTGTCCAAT-1" "AGCCAGCGTCATTGCA-1" "AGCCAGCGTGGGTTGA-1" "AGCCAGCGTTAGGCTT-1" "AGCGATTGTTTCGTAG-1"
+##  [436] "AGCGCCAAGAGGGCGA-1" "AGCGCCACATAATCGC-1" "AGCGCCAGTATAGCTC-1" "AGCGCTGTCACATACG-1" "AGCGTATAGACTTCAC-1"
+##  [441] "AGCGTATCAAATTGGA-1" "AGCGTATGTTGCCATA-1" "AGCGTATTCTGGCCGA-1" "AGCGTCGCATATCGGT-1" "AGCTACAGTCGGATTT-1"
+##  [446] "AGCTACAGTCTCGACG-1" "AGCTACAGTGCGTTTA-1" "AGCTACATCGTCAAAC-1" "AGCTCAAAGCAGATAT-1" "AGCTCAAAGTCTGTAC-1"
+##  [451] "AGCTCAACACCTTCGT-1" "AGCTCAATCCCAGTGG-1" "AGCTCAATCCTTGAAG-1" "AGCTCAATCGTTCGCT-1" "AGCTTCCAGAAGCTCG-1"
+##  [456] "AGCTTCCAGGCGCTTC-1" "AGCTTCCAGGTGCCTC-1" "AGCTTCCTCAAGATAG-1" "AGCTTCCTCCGAGGCT-1" "AGCTTCCTCGTGTTCC-1"
+##  [461] "AGGAAATAGAAGCTGC-1" "AGGAAATAGTCGCTAT-1" "AGGAAATGTTAGGGTG-1" "AGGAAATTCACTGAAC-1" "AGGAAATTCATTCCTA-1"
+##  [466] "AGGAATACAACGTTAC-1" "AGGAATATCTGTAACG-1" "AGGACGAAGTTTCGAC-1" "AGGACGACATGGGAAC-1" "AGGACGATCGCATAGT-1"
+##  [471] "AGGACTTAGCGGACAT-1" "AGGACTTAGTCCTACA-1" "AGGACTTCAGAGGACT-1" "AGGACTTCATGGCTGC-1" "AGGACTTGTACGTACT-1"
+##  [476] "AGGAGGTAGGAGCAAA-1" "AGGAGGTCACTCGATA-1" "AGGAGGTCATTCGATG-1" "AGGAGGTGTTATGGTC-1" "AGGAGGTTCTCGCTTG-1"
+##  [481] "AGGATAAAGAGCAGCT-1" "AGGATAAGTCCGATCG-1" "AGGATAAGTGTAGCAG-1" "AGGATAATCAATCTTC-1" "AGGATCTAGACGTCCC-1"
+##  [486] "AGGATCTAGTGGGAAA-1" "AGGATCTCAACGATCT-1" "AGGATCTGTAGTCTGT-1" "AGGATCTGTGCAATAA-1" "AGGCATTTCACTGGGC-1"
+##  [491] "AGGCATTTCTCACTCG-1" "AGGCCACAGTTCATCG-1" "AGGCCACCATCAGTCA-1" "AGGCCACCATGGGTCC-1" "AGGCCACTCAGTGTGT-1"
+##  [496] "AGGCCACTCCACACAA-1" "AGGCTGCAGAGAGGGC-1" "AGGCTGCCAAGAAATC-1" "AGGGAGTAGCTCGTGC-1" "AGGGCCTAGTACAACA-1"
+##  [501] "AGGGCCTAGTTGCATC-1" "AGGGCCTCACTTGACA-1" "AGGGCCTCAGATTAAG-1" "AGGGCCTGTCTGCATA-1" "AGGGCCTTCCGTTGAA-1"
+##  [506] "AGGGCCTTCGTAGGGA-1" "AGGGCTCAGGACCCAA-1" "AGGGCTCCAGCTCCTT-1" "AGGGCTCGTAGCGCCT-1" "AGGGCTCGTAGTCCTA-1"
+##  [511] "AGGGCTCTCTCGACGG-1" "AGGGTCCCACAATCTG-1" "AGGGTCCTCGTTACCC-1" "AGGGTGAAGCATACTC-1" "AGGTAGGCACGTAACT-1"
+##  [516] "AGGTAGGGTACGTACT-1" "AGGTAGGGTGAGCCAA-1" "AGGTCATAGGGTTAGC-1" "AGGTCATGTCTGTAGT-1" "AGGTCATGTTCCATTT-1"
+##  [521] "AGGTCTACACTAGGCC-1" "AGGTCTAGTCACCGCA-1" "AGGTCTAGTCATGGCC-1" "AGGTCTATCGATTTCT-1" "AGGTCTATCTGGTTGA-1"
+##  [526] "AGGTGTTGTGTTGACT-1" "AGGTGTTTCTCCAATT-1" "AGGTGTTTCTGTGTGA-1" "AGGTTACCAGATACCT-1" "AGGTTACGTACAGGTG-1"
+##  [531] "AGGTTACGTCCTTTGC-1" "AGGTTGTCAGCTACTA-1" "AGGTTGTTCCGGACGT-1" "AGTAACCAGTACAGCG-1" "AGTAACCCAGACTGCC-1"
+##  [536] "AGTAACCGTGGCCACT-1" "AGTAACCGTGTTGATC-1" "AGTACCAAGACAGCTG-1" "AGTACCAAGCACGATG-1" "AGTACCACAGCCATTA-1"
+##  [541] "AGTACCAGTCGCGTTG-1" "AGTACTGAGGGTTTCT-1" "AGTACTGCACTTGACA-1" "AGTACTGGTACGTGTT-1" "AGTACTGGTATGGTAA-1"
+##  [546] "AGTACTGGTTTCGTAG-1" "AGTACTGTCGTGTGAT-1" "AGTAGCTCATTCCTCG-1" "AGTAGCTGTCTTAGTG-1" "AGTAGTCGTGAGTGAC-1"
+##  [551] "AGTAGTCGTTGTGTTG-1" "AGTCAACAGAGTGTGC-1" "AGTCAACAGGCCATAG-1" "AGTCAACCACTAACCA-1" "AGTCAACGTTCGAGCC-1"
+##  [556] "AGTCAACTCAACTACG-1" "AGTCAACTCTTTGGAG-1" "AGTCACAAGCGATGAC-1" "AGTCACAAGCGTCTGC-1" "AGTCACAAGCTCCACG-1"
+##  [561] "AGTCACAAGTGAACAT-1" "AGTCACACAAACGAGC-1" "AGTCACAGTTAACCTG-1" "AGTCATGCAGCACAAG-1" "AGTCATGTCTCCCAAC-1"
+##  [566] "AGTCTCCAGTAACGTA-1" "AGTCTCCCATGCCGAC-1" "AGTCTCCCATGGACAG-1" "AGTGACTAGTGATTCC-1" "AGTGACTCACAGTCCG-1"
+##  [571] "AGTGACTGTTGACTAC-1" "AGTGATCAGCCGTAAG-1" "AGTGATCAGGACGCTA-1" "AGTGATCAGGCTAGCA-1" "AGTGATCGTGTCCGGT-1"
+##  [576] "AGTGATCGTGTTACAC-1" "AGTGATCTCAACTGGT-1" "AGTGATCTCACTGTTT-1" "AGTGCCGTCCCTGTTG-1" "AGTGTTGCACGGGCTT-1"
+##  [581] "AGTGTTGGTCCAATCA-1" "AGTTAGCCACGGTCTG-1" "AGTTAGCGTTAGGACG-1" "AGTTCCCGTTACCGTA-1" "ATACCGAGTCATGGCC-1"
+##  [586] "ATACCGATCCGTAGTA-1" "ATACCTTCAAAGGATT-1" "ATACCTTGTCGATTCA-1" "ATACCTTGTGTCCATA-1" "ATACCTTTCTAGAGCT-1"
+##  [591] "ATACCTTTCTCCCATG-1" "ATACTTCAGGGTGAAA-1" "ATAGACCCACTCGATA-1" "ATAGACCCACTGCACG-1" "ATAGACCGTACCGTCG-1"
+##  [596] "ATAGACCGTCATCGCG-1" "ATAGACCTCATGCCAA-1" "ATAGAGACAAGAATGT-1" "ATAGGCTGTAACGCGA-1" "ATAGGCTTCCTAGCGG-1"
+##  [601] "ATAGGCTTCTAGCCAA-1" "ATATCCTCAGGCGATA-1" "ATATCCTTCTTGGATG-1" "ATCACAGCACCGTGCA-1" "ATCACAGCACGATAGG-1"
+##  [606] "ATCACAGTCCGTAGTA-1" "ATCACGAAGGTACAAT-1" "ATCACGACAAAGGCGT-1" "ATCACGATCGCTAGCG-1" "ATCACTTAGGGTTTCT-1"
+##  [611] "ATCACTTCATGGTGGA-1" "ATCACTTTCCTAAGTG-1" "ATCAGGTAGCGTGTTT-1" "ATCAGGTAGGGTGGGA-1" "ATCATTCAGACTCATC-1"
+##  [616] "ATCATTCAGCAGGTCA-1" "ATCATTCCAGAGGTTG-1" "ATCATTCCATAGACTC-1" "ATCATTCGTGACTAAA-1" "ATCATTCGTTCGTTCC-1"
+##  [621] "ATCATTCTCGCCTAGG-1" "ATCCACCAGAGTTCGG-1" "ATCCACCCAGGTACGA-1" "ATCCACCCAGTGGCTC-1" "ATCCACCGTCATCCCT-1"
+##  [626] "ATCCACCGTGCCGGTT-1" "ATCCACCGTGTGACCC-1" "ATCCATTCAAGCGATG-1" "ATCCATTGTGCCCGTA-1" "ATCCATTGTGGGCTCT-1"
+##  [631] "ATCCATTTCGGCATAT-1" "ATCCCTGAGGTAAGGA-1" "ATCCCTGCAGCACCCA-1" "ATCCCTGCATGTGACT-1" "ATCCCTGTCCGTAGGC-1"
+##  [636] "ATCCCTGTCCTCTAGC-1" "ATCCCTGTCTGAGATC-1" "ATCCGTCCAAGCTGTT-1" "ATCCGTCCACGCCAGT-1" "ATCCGTCGTCTGTAGT-1"
+##  [641] "ATCCGTCGTCTTGGTA-1" "ATCCGTCTCTGAATGC-1" "ATCCGTCTCTTCGACC-1" "ATCCTATAGTCGGGAT-1" "ATCCTATCAAGTGATA-1"
+##  [646] "ATCCTATGTCAGGTAG-1" "ATCCTATTCCTTGGAA-1" "ATCCTATTCGTGCATA-1" "ATCCTATTCTGTTGGA-1" "ATCGATGAGGGTCAAC-1"
+##  [651] "ATCGATGAGTGAACAT-1" "ATCGATGAGTTAACAG-1" "ATCGATGCACCAGACC-1" "ATCGATGGTGGGAGAG-1" "ATCGATGGTTGGGATG-1"
+##  [656] "ATCGATGTCTCATTAC-1" "ATCGCCTCAATGTCAC-1" "ATCGGATAGCAATAGT-1" "ATCGGATGTAGTATAG-1" "ATCGGATTCTATACTC-1"
+##  [661] "ATCGTAGAGAATTCAG-1" "ATCGTAGGTACCTGTA-1" "ATCGTCCAGGCTGGAT-1" "ATCGTCCAGTATAGGT-1" "ATCGTCCCAAGACCTT-1"
+##  [666] "ATCGTCCCAAGTCGTT-1" "ATCGTCCCACCGTACG-1" "ATCGTCCGTACCTGTA-1" "ATCTCTAGTTTCGTAG-1" "ATCTTCACAAATCCCA-1"
+##  [671] "ATCTTCACACAATCTG-1" "ATCTTCACACGCCACA-1" "ATCTTCACAGACCCGT-1" "ATCTTCAGTATTGACC-1" "ATCTTCATCCAAGCAT-1"
+##  [676] "ATGAAAGCATTGCTTT-1" "ATGAAAGGTCAACACT-1" "ATGAAAGTCAAAGAAC-1" "ATGAAAGTCAGGGTAG-1" "ATGAAAGTCATCTACT-1"
+##  [681] "ATGAAAGTCTCTTAAC-1" "ATGACCAAGAGCCCAA-1" "ATGACCAAGCGCGTTC-1" "ATGACCAAGGAACTCG-1" "ATGACCACAAATGCGG-1"
+##  [686] "ATGACCACAAGTGCAG-1" "ATGACCACATTCACAG-1" "ATGACCACATTGAGCT-1" "ATGACCAGTCGTTGCG-1" "ATGACCATCCCGAACG-1"
+##  [691] "ATGAGGGGTACCTAAC-1" "ATGAGTCAGCATGAAT-1" "ATGAGTCCAAAGACGC-1" "ATGAGTCCAAGAAATC-1" "ATGAGTCCAGAAATTG-1"
+##  [696] "ATGAGTCTCTGTACAG-1" "ATGATCGCAATGAGCG-1" "ATGATCGTCAAATGAG-1" "ATGCATGTCCTCCACA-1" "ATGCATGTCGACACCG-1"
+##  [701] "ATGCCTCAGCGAACTG-1" "ATGCCTCAGGTGCTGA-1" "ATGCCTCTCACGGGAA-1" "ATGCGATCACTAACGT-1" "ATGCGATTCCATACAG-1"
+##  [706] "ATGCGATTCGTTCTCG-1" "ATGGAGGAGGACATCG-1" "ATGGAGGAGTAGGAAG-1" "ATGGAGGCATTGACCA-1" "ATGGATCAGGTTGTTC-1"
+##  [711] "ATGGATCCAGGAATCG-1" "ATGGATCGTGTAGGAC-1" "ATGGATCGTTGGTGTT-1" "ATGGATCTCCATCCGT-1" "ATGGGAGAGATCCAAA-1"
+##  [716] "ATGGGAGGTCGAATTC-1" "ATGGGAGGTGGTGATG-1" "ATGGGAGGTTCTCCTG-1" "ATGGGTTAGCAACCAG-1" "ATGGTTGCAAAGACTA-1"
+##  [721] "ATGGTTGGTCAACACT-1" "ATGGTTGGTTATCTGG-1" "ATGGTTGTCAAGCTGT-1" "ATGGTTGTCCCGATCT-1" "ATGGTTGTCCGCTAGG-1"
+##  [726] "ATGGTTGTCGCGATCG-1" "ATGTCCCGTGACAACG-1" "ATGTCTTAGCCGCACT-1" "ATGTCTTCAACACAAA-1" "ATGTCTTCACGGTCTG-1"
+##  [731] "ATGTCTTCACTGATTG-1" "ATGTCTTCATCGCTAA-1" "ATGTCTTGTCATTCCC-1" "ATGTCTTTCGTACACA-1" "ATTACCTTCGCCATAA-1"
+##  [736] "ATTACTCGTTGTAAAG-1" "ATTACTCTCCGGCTTT-1" "ATTATCCAGACATAGT-1" "ATTATCCCAGAAGTTA-1" "ATTATCCGTATCGATC-1"
+##  [741] "ATTATCCTCCCAAGTA-1" "ATTATCCTCGTTGTAG-1" "ATTCACTAGGATAATC-1" "ATTCAGGCACCTGATA-1" "ATTCATCAGGGTAGCT-1"
+##  [746] "ATTCCATTCCGTCCTA-1" "ATTCCCGTCGCGGTAC-1" "ATTCCTAGTTCGAAGG-1" "ATTCCTATCTAGGCCG-1" "ATTCGTTAGGGTAATT-1"
+##  [751] "ATTCGTTCAGAGTAAT-1" "ATTCGTTTCATAGGCT-1" "ATTCGTTTCCGCTTAC-1" "ATTCGTTTCGAGAATA-1" "ATTCTACAGCTCGAAG-1"
+##  [756] "ATTCTACTCACCGGGT-1" "ATTCTTGAGGCAGGGA-1" "ATTCTTGTCAACCTCC-1" "ATTGGGTAGACCCGCT-1" "ATTGGGTCAATGCAGG-1"
+##  [761] "ATTGGGTCACACACTA-1" "ATTGGGTGTGAACGGT-1" "ATTGGGTTCGTAGGGA-1" "ATTGTTCAGACTACCT-1" "ATTGTTCAGCTTTCTT-1"
+##  [766] "ATTGTTCAGGTAAAGG-1" "ATTGTTCCACCTGATA-1" "ATTGTTCCATCGAAGG-1" "ATTGTTCGTCCACGCA-1" "ATTGTTCTCACCGACG-1"
+##  [771] "ATTGTTCTCTCCATAT-1" "ATTTACCAGCCTTCTC-1" "ATTTACCAGGGCGAGA-1" "ATTTACCAGTACTGTC-1" "ATTTACCGTATCGATC-1"
+##  [776] "ATTTACCGTTGCATTG-1" "ATTTCACAGCACTTTG-1" "ATTTCACAGTCCCAGC-1" "ATTTCACGTCTTTCAT-1" "ATTTCACGTTGGTAGG-1"
+##  [781] "ATTTCTGAGAGCACTG-1" "CAAAGAAGTGATACAA-1" "CAAAGAAGTGCCTACG-1" "CAAAGAATCGTAGTGT-1" "CAACAACAGGATACCG-1"
+##  [786] "CAACAACAGTAGAGTT-1" "CAACAACTCTGACAGT-1" "CAACAACTCTTACCAT-1" "CAACAGTCAAGGACAC-1" "CAACAGTGTCTTACAG-1"
+##  [791] "CAACAGTGTGATAGAT-1" "CAACAGTTCTCCCATG-1" "CAACCAAAGATCCAAA-1" "CAACCAAAGCATGAAT-1" "CAACCAAAGTGCACTT-1"
+##  [796] "CAACCAACATCGAGCC-1" "CAACCAACATTGACTG-1" "CAACCTCAGTGCAACG-1" "CAACCTCGTATCGATC-1" "CAACCTCGTATTTCGG-1"
+##  [801] "CAACCTCGTTGTCAGT-1" "CAACCTCTCTGAGAGG-1" "CAACGATAGATTGTGA-1" "CAACGATCAACGTATC-1" "CAACGATGTATGAGCG-1"
+##  [806] "CAACGATGTGCCGTTG-1" "CAACGATGTTATGACC-1" "CAACGATGTTTCACTT-1" "CAACGATTCCACTGGG-1" "CAACGATTCCCGTGAG-1"
+##  [811] "CAACGATTCCGAAGGA-1" "CAACGGCAGATCGGTG-1" "CAACGGCGTAACACCT-1" "CAACGGCTCCGAGTGC-1" "CAAGACTCACTGAGTT-1"
+##  [816] "CAAGAGGAGCTACAAA-1" "CAAGAGGCAACACGAG-1" "CAAGAGGCAAGCGCTC-1" "CAAGAGGGTGGGACAT-1" "CAAGCTAAGACGGAAA-1"
+##  [821] "CAAGCTAAGGCTTAAA-1" "CAAGCTAGTCACGCTG-1" "CAAGCTAGTCTCCTGT-1" "CAAGCTAGTGCATGTT-1" "CAAGCTATCCTTCGAC-1"
+##  [826] "CAAGGGAAGAGTTGCG-1" "CAAGGGAAGCATTTCG-1" "CAAGGGACACCGGAAA-1" "CAAGGGACACGTGAGA-1" "CAAGGGAGTAAGAACT-1"
+##  [831] "CAAGGGAGTTCCGGTG-1" "CAAGGGATCTTCGTAT-1" "CAATACGCACGCGTGT-1" "CAATACGGTTACAGCT-1" "CAATACGTCACACCCT-1"
+##  [836] "CAATCGACAATTGAAG-1" "CAATGACAGGTTGCCC-1" "CAATGACCAAATAAGC-1" "CAATGACCATATTCGG-1" "CAATTTCCAGGTCCGT-1"
+##  [841] "CAATTTCCAGTCAGAG-1" "CAATTTCGTCTTAGTG-1" "CAATTTCTCCATAGGT-1" "CAATTTCTCCTTCAGC-1" "CACAACACATGACTCA-1"
+##  [846] "CACACAACACCCTATC-1" "CACACAACACTGTGTA-1" "CACACAACAGGCTATT-1" "CACACAAGTATTCTCT-1" "CACAGATAGATAGCAT-1"
+##  [851] "CACAGATGTGCGACAA-1" "CACAGATTCCTAACAG-1" "CACAGATTCGTCGGGT-1" "CACAGGCTCTGTCCGT-1" "CACATGAAGAGGATGA-1"
+##  [856] "CACATGAGTGCGTTTA-1" "CACCAAACATATGGCT-1" "CACCAAAGTAATCAGA-1" "CACCAAAGTTTGTTCT-1" "CACCGTTCATTAGGCT-1"
+##  [861] "CACCGTTGTCCAGGTC-1" "CACCGTTTCACTCACC-1" "CACCGTTTCTAGACCA-1" "CACCGTTTCTAGTGTG-1" "CACGAATGTCTTGAAC-1"
+##  [866] "CACGAATGTGACAGCA-1" "CACGAATTCCCATTTA-1" "CACGGGTTCTCCGAAA-1" "CACGTGGGTCTGATCA-1" "CACGTGGGTGAGTAGC-1"
+##  [871] "CACGTTCGTGGCTCTG-1" "CACTAAGCACGACAGA-1" "CACTGAACATATCTGG-1" "CACTGAATCCGCGGAT-1" "CACTGAATCGATGCAT-1"
+##  [876] "CACTGGGAGCTAAGTA-1" "CACTGGGAGCTACTGT-1" "CACTGGGGTAATGTGA-1" "CACTGGGTCGCTCCTA-1" "CACTGTCAGGCACTCC-1"
+##  [881] "CACTGTCCATTAGGAA-1" "CACTGTCTCACTGTTT-1" "CACTTCGGTAAGTTGA-1" "CACTTCGGTACGATGG-1" "CACTTCGTCAGCATTG-1"
+##  [886] "CAGAGCCTCATTCGGA-1" "CAGATACAGGAACGAA-1" "CAGATACGTAGGAGTC-1" "CAGATACGTGCACATT-1" "CAGATCAAGTTCACTG-1"
+##  [891] "CAGATCACAAGGTACG-1" "CAGATCACACCGAATT-1" "CAGATCACATACGCAT-1" "CAGATCATCTCTAGGA-1" "CAGATTGAGCGCCATC-1"
+##  [896] "CAGCAATGTCGTAATC-1" "CAGCAATGTGAGCAGT-1" "CAGCAGCCAGAGTAAT-1" "CAGCAGCGTATCACGT-1" "CAGCCAGAGCTGGAGT-1"
+##  [901] "CAGCCAGCACATCCCT-1" "CAGCCAGCATCGGAGA-1" "CAGCCAGGTTCAAGGG-1" "CAGCCAGTCAGTGGGA-1" "CAGCGTGAGCTTGTGT-1"
+##  [906] "CAGCGTGCAAGTTCCA-1" "CAGCGTGCACCCATAA-1" "CAGCGTGGTTGCATGT-1" "CAGCGTGGTTGCTCGG-1" "CAGGCCACACGAAGAC-1"
+##  [911] "CAGGCCACAGGTCAAG-1" "CAGGGCTAGAGAGCAA-1" "CAGGGCTTCATTCACT-1" "CAGGTATCACCTGATA-1" "CAGGTATCATGGCCCA-1"
+##  [916] "CAGTGCGCAAGAATGT-1" "CAGTGCGCACATACGT-1" "CAGTGCGCAGTGGCTC-1" "CAGTGCGGTCATTCCC-1" "CAGTGCGTCCCTGGTT-1"
+##  [921] "CAGTTAGAGCAACTTC-1" "CAGTTAGGTAATCAGA-1" "CAGTTAGTCACGTAGT-1" "CAGTTAGTCCGCGATG-1" "CAGTTCCCACCTGAAT-1"
+##  [926] "CAGTTCCGTGCATGTT-1" "CAGTTCCGTGTTTACG-1" "CAGTTCCTCCCTTCCC-1" "CAGTTCCTCGGTAACT-1" "CATAAGCCAGTAGTGG-1"
+##  [931] "CATAAGCGTATGGAAT-1" "CATACAGAGAGGTGCT-1" "CATACAGCAATCAAGA-1" "CATACAGCACAATGTC-1" "CATACAGGTTGGAGAC-1"
+##  [936] "CATACTTCAAGAGATT-1" "CATACTTCACTGAGGA-1" "CATACTTGTCACCGCA-1" "CATACTTGTCCCTGTT-1" "CATACTTTCGCGTGAC-1"
+##  [941] "CATAGACAGGGTGGGA-1" "CATAGACGTAGATCGG-1" "CATAGACGTCAATGGG-1" "CATCAAGCATAGATGA-1" "CATCAAGTCGCTATTT-1"
+##  [946] "CATCCACAGAAGCGCT-1" "CATCCACAGCGTGCTC-1" "CATCCACAGGTAACTA-1" "CATCCCACATGAAGGC-1" "CATCCGTGTAGGAGGG-1"
+##  [951] "CATCGCTCAGGGATAC-1" "CATCGGGAGAGCAAGA-1" "CATCGGGAGGCAGCTA-1" "CATCGGGAGTCACTGT-1" "CATCGGGTCTCGCGTT-1"
+##  [956] "CATCGTCAGAAGCGCT-1" "CATCGTCTCCCTTGTG-1" "CATCGTCTCCGGCAGT-1" "CATGAGTAGTTCGGTT-1" "CATGAGTTCTTCCGTG-1"
+##  [961] "CATGCAATCTCGCCTA-1" "CATGCCTCACTTGAGT-1" "CATGCCTCAGTGGTGA-1" "CATGCCTTCATCACTT-1" "CATGCGGAGCCATATC-1"
+##  [966] "CATGCGGTCCCATTTA-1" "CATGCGGTCTAGCAAC-1" "CATGCTCGTTGTACGT-1" "CATGCTCTCTGAGCAT-1" "CATGGATAGAGTAACT-1"
+##  [971] "CATGGATAGAGTCTGG-1" "CATGGATAGGTAGACC-1" "CATGGATCATCTTCGC-1" "CATGGATGTAGATTGA-1" "CATGGATTCCAGTTCC-1"
+##  [976] "CATGGTACAAATCAAG-1" "CATGGTACACATAACC-1" "CATGGTACACCAGTTA-1" "CATGGTACAGCACAAG-1" "CATGGTATCATCCTGC-1"
+##  [981] "CATTCATAGAGCAACC-1" "CATTCCGGTGCTCCGA-1" "CATTCCGGTTAAGCAA-1" "CATTCCGTCTCGCCTA-1" "CATTCTAAGCTCGAAG-1"
+##  [986] "CATTCTAGTACCAATC-1" "CATTCTAGTAGAATAC-1" "CATTGAGGTCCTCCAT-1" "CATTGAGGTGTCGATT-1" "CATTGAGTCCCGAGTG-1"
+##  [991] "CATTGCCAGACTCTTG-1" "CATTGCCCAGATGCGA-1" "CATTGCCTCATGGAGG-1" "CATTGTTAGATGGTAT-1" "CATTGTTAGCTTTGTG-1"
+##  [996] "CATTGTTCAGCTGGTC-1" "CATTGTTGTCTTGTCC-1" "CATTGTTGTTGCTAGT-1" "CATTTCACATCGCCTT-1" "CATTTCAGTAATGATG-1"
+##  [ reached getOption("max.print") -- omitted 2265 entries ]
+```
+    
+---   
+## The Seurat object
+
+From this point we will use the Droplets filtered using Cellranger
+
+
+``` r
+Nd1T.obj@meta.data[1:2, ]
+```
+
+```
+##                    orig.ident nCount_RNA nFeature_RNA
+## AAACCCACACAATGTC-1        Nd1      28295         5892
+## AAACCCACACCACTGG-1        Nd1       1498          245
+```
+    
+---   
+## The Seurat object
+
+From this point we will use the Droplets filtered using Cellranger
+
+
+``` r
+Nd1T.obj@active.assay
+```
+
+```
+## [1] "RNA"
+```
+
+``` r
+Nd1T.obj@active.ident[1:2]
+```
+
+```
+## AAACCCACACAATGTC-1 AAACCCACACCACTGG-1 
+##                Nd1                Nd1 
+## Levels: Nd1
+```
+ 
+---   
+## The Seurat object
+
+From this point we will use the Droplets filtered using Cellranger
+
+
+``` r
+Nd1T.obj@assays$RNA$counts
+```
+
+```
+## 55417 x 3265 sparse Matrix of class "dgCMatrix"
+```
+
+```
+##   [[ suppressing 48 column names 'AAACCCACACAATGTC-1', 'AAACCCACACCACTGG-1', 'AAACCCACACGAGAAC-1' ... ]]
+##   [[ suppressing 48 column names 'AAACCCACACAATGTC-1', 'AAACCCACACCACTGG-1', 'AAACCCACACGAGAAC-1' ... ]]
+```
+
+```
+##                                                                                                               
+## Gm37671 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ......
+## Gm19087 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ......
+## Gm8941  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ......
+## Gm38212 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ......
+## Gm7449  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ......
+## Gm15178 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ......
+## Gm28283 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ......
+## Gm37108 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ......
+## Gm37275 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ......
+## Gm6679  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ......
+## 
+##  ..............................
+##  ........suppressing 3217 columns and 55397 rows in show(); maybe adjust options(max.print=, width=)
+##  ..............................
+```
+
+```
+##   [[ suppressing 48 column names 'AAACCCACACAATGTC-1', 'AAACCCACACCACTGG-1', 'AAACCCACACGAGAAC-1' ... ]]
+```
+
+```
+##                                                                                                                      
+## ENSMUSG00000094915  . .  .  . .  . .  . . .  . . . .  . . . .  .  . .  . .  . . . . . . .  .  . . . .  . .  .  . .  .
+## ENSMUSG00000079808  . .  .  . .  . .  . . .  . . . .  . . . .  .  . .  . .  . . . . . . .  .  . . . .  . .  .  . .  .
+## ENSMUSG00000095041  6 . 26  8 1  4 . 19 . . 11 . . 4 13 . . 9  9 14 .  3 . 32 7 5 9 . . 4 10  7 . . 2 11 .  4 15 3  2
+## ENSMUSG00002075400  . .  .  . .  . .  . . .  . . . .  . . . .  .  . .  . .  . . . . . . .  .  . . . .  . .  .  . .  .
+## ENSMUSG00002074970  . .  .  . .  . .  . . .  . . . .  . . . .  .  . .  . .  . . . . . . .  .  . . . .  . .  .  . .  .
+## ENSMUSG00002075729  . .  .  . .  . .  . . .  . . . .  . . . .  .  . .  . .  . . . . . . .  .  . . . .  . .  .  . .  .
+## ENSMUSG00002074899  . .  .  . .  . .  . . .  . . . .  . . . .  .  . .  . .  . . . . . . .  .  . . . .  . .  .  . .  .
+## ENSMUSG00002076890  . .  .  . .  . .  . . .  . . . .  . . . .  .  . .  . .  . . . . . . .  .  . . . .  . .  .  . .  .
+## ENSMUSG00000095742  . .  .  . .  . .  1 . .  . . . .  . . . 1  .  . .  . .  . . . . . . .  .  . . . .  . .  .  . .  .
+## TMT                52 . 15 35 2 29 2 13 . 2 26 . . 1  9 . . 8 11  5 . 16 . 16 2 5 8 . . 1 10 28 . . . 28 5 51  6 3 23
+##                                         
+## ENSMUSG00000094915 . . . . .  . . ......
+## ENSMUSG00000079808 . . . . .  . . ......
+## ENSMUSG00000095041 5 2 . 4 1 10 . ......
+## ENSMUSG00002075400 . . . . .  . . ......
+## ENSMUSG00002074970 . . . . .  . . ......
+## ENSMUSG00002075729 . . . . .  . . ......
+## ENSMUSG00002074899 . . . . .  . . ......
+## ENSMUSG00002076890 . . . . .  . . ......
+## ENSMUSG00000095742 . . . . .  1 . ......
+## TMT                2 1 . 1 . 42 1 ......
+```
+    
+ 
+---   
+## The Seurat object
+
+From this point we will use the Droplets filtered using Cellranger
+
+
+``` r
+mito.genes &lt;- grep("^mt", rownames(Nd1T.obj), value = T)
+mito.genes[1:10]
+```
+
+```
+##  [1] "mt-Tf"   "mt-Rnr1" "mt-Tv"   "mt-Rnr2" "mt-Tl1"  "mt-Nd1"  "mt-Ti"   "mt-Tq"   "mt-Tm"   "mt-Nd2"
+```
+
+---   
+## The Seurat object
+
+From this point we will use the Droplets filtered using Cellranger
+
+
+``` r
+percent.mt &lt;- PercentageFeatureSet(Nd1T.obj, features = mito.genes)
+Nd1T.obj &lt;- AddMetaData(Nd1T.obj, metadata = percent.mt, col.name = "percent.mt")
+head(Nd1T.obj@meta.data)
+```
+
+```
+##                    orig.ident nCount_RNA nFeature_RNA percent.mt
+## AAACCCACACAATGTC-1        Nd1      28295         5892   6.580668
+## AAACCCACACCACTGG-1        Nd1       1498          245  67.489987
+## AAACCCACACGAGAAC-1        Nd1      85155         8687   3.783689
+## AAACCCAGTGTCCGGT-1        Nd1      23045         5725  11.863745
+## AAACGAAAGCCTCGTG-1        Nd1       8930         2502  14.636058
+## AAACGAAAGCCTTGAT-1        Nd1      15882         4633   4.445284
+```
+
+---   
+## The Seurat object
+
+From this point we will use the Droplets filtered using Cellranger
+
+
+``` r
+VlnPlot(Nd1T.obj, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+```
+
+```
+## Warning: Default search for "data" layer in "RNA" assay yielded no results; utilizing "counts" layer instead.
+```
+
+![](Session2_files/figure-html/unnamed-chunk-54-1.png)&lt;!-- --&gt;
+
+---   
+## The Seurat object
+
+From this point we will use the Droplets filtered using Cellranger
+
+
+``` r
+plot1 &lt;- FeatureScatter(Nd1T.obj, feature1 = "nCount_RNA", feature2 = "percent.mt")
+plot2 &lt;- FeatureScatter(Nd1T.obj, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+plot3 &lt;- FeatureScatter(Nd1T.obj, feature1 = "nFeature_RNA", feature2 = "percent.mt")
+plot1 + plot2 + plot3
+```
+
+![](Session2_files/figure-html/unnamed-chunk-55-1.png)&lt;!-- --&gt;
+---
+
+
+``` r
+Nd1T.obj.filt &lt;- subset(Nd1T.obj, subset = nCount_RNA &lt; 125000 &amp; percent.mt &lt; 25 &amp; nFeature_RNA &gt; 200)
+Nd1T.obj.filt
+```
+
+```
+## An object of class Seurat 
+## 55417 features across 2161 samples within 1 assay 
+## Active assay: RNA (55417 features, 0 variable features)
+##  1 layer present: counts
+```
+---
+
+
+``` r
+Nd1T.obj.filt &lt;- NormalizeData(Nd1T.obj.filt)
+```
+
+```
+## Normalizing layer: counts
+```
+---
+
+
+``` r
+Nd1T.obj.filt &lt;- FindVariableFeatures(Nd1T.obj.filt, selection.method = "vst", nfeatures = 3000)
+```
+
+```
+## Finding variable features for layer counts
+```
+
+``` r
+top10 &lt;- head(VariableFeatures(Nd1T.obj.filt), 10)
+top10
+```
+
+```
+##  [1] "Iapp"   "Olfm4"  "Lingo2" "Dmbt1"  "Asic5"  "Reg3b"  "Hmgb2"  "H2ac24" "Gcg"    "Gsta1"
+```
+---
+
+
+``` r
+plot1 &lt;- VariableFeaturePlot(Nd1T.obj.filt)
+plot2 &lt;- LabelPoints(plot = plot1, points = top10, repel = TRUE)
+```
+
+```
+## When using repel, set xnudge and ynudge to 0 for optimal results
+```
+
+``` r
+plot2
+```
+
+```
+## Warning in scale_x_log10(): log-10 transformation introduced infinite values.
+```
+
+![](Session2_files/figure-html/unnamed-chunk-59-1.png)&lt;!-- --&gt;
+---
+
+
+``` r
+all.genes &lt;- rownames(Nd1T.obj.filt)
+Nd1T.obj.filt &lt;- ScaleData(Nd1T.obj.filt, features = all.genes)
+```
+
+```
+## Centering and scaling data matrix
+```
+
+``` r
+Nd1T.obj.filt@assays
+```
+
+```
+## $RNA
+## Assay (v5) data with 55417 features for 2161 cells
+## Top 10 variable features:
+##  Iapp, Olfm4, Lingo2, Dmbt1, Asic5, Reg3b, Hmgb2, H2ac24, Gcg, Gsta1 
+## Layers:
+##  counts, data, scale.data
+```
+---
+
+
+``` r
+Nd1T.obj.filt &lt;- RunPCA(Nd1T.obj.filt, features = VariableFeatures(object = Nd1T.obj))
+```
+
+```
+## PC_ 1 
+## Positive:  Rps19, Rps2, Rps5, Rpl35, Eef1b2, Rplp0, Rps8, Rps16, Rps20, Rps12 
+## 	   Rpl39, Rpl18a, Rpl28, Rpl14, Rpl32, Rps28, Rpsa, Rpl27a, Rpl3, Rps21 
+## 	   Rpl36, Rpl35a, Rpl23, Rpl30, Npm1, Rpl34, Rpl29, Rpl37, Rpl6, Rps13 
+## Negative:  Trpm2, Dlg2, Apob, Iqsec1, Ada, Slc35f3, Bnip5, Abcc2, Adcy8, Man1c1 
+## 	   Cdk14, Ptprr, Ahnak, Slc38a11, Gda, Trpc4, Ddhd1, 4930556N09Rik, Rasal2, Pip4k2a 
+## 	   Gm44678, Slc27a4, Espn, Stk32a, Cobl, Grik4, Lama3, Pmp22, Nrp1, Lpar3 
+## PC_ 2 
+## Positive:  Clec2h, Ace2, Gda, Mep1b, Ggt1, Mme, Dgat1, Ces2e, Guca2b, Maf 
+## 	   Xdh, Spink1, Lct, Mgam, Trim30d, Slc5a1, Pcsk5, Exoc3l4, Slc2a2, Sult1b1 
+## 	   Aspa, Ace, Prap1, Ifi27l2b, Maoa, Cyp2b10, H2-T3, Cgref1, Cs, Apol10a 
+## Negative:  Ptma, Myl7, Mid1, Krt18, Rfx6, Scg2, Bbx, Kcnj3, Nrp1, Parm1 
+## 	   Smyd3, Agr3, Slc12a8, Hmgn1, Kctd12, Gm11992, Rps3a1, Parp1, Pde1c, Rgs17 
+## 	   Acadsb, Unc80, Isl1, Rpl37a, Bambi, Ror2, Etv1, Rab3c, Txndc5, Rflna 
+## PC_ 3 
+## Positive:  Krt19, Cdk14, Rasal2, Slc38a11, Dlg2, Adcy8, Iqsec1, Ccnd2, Grik4, Sox5 
+## 	   Trpm2, 2810025M15Rik, Trpc4, Afp, Gm37060, Serpinf2, Trpa1, Ssbp2, Slc5a4b, 4930556N09Rik 
+## 	   Pla2g7, Rab3c, Aqp9, Otop3, Fmo2, B3galt5, S100a6, Ddhd1, Lonrf1, Hcn1 
+## Negative:  Scg2, Isl1, Abcc8, Gm11992, Plcxd3, Unc80, Sphkap, Kcnj3, Ffar1, Parm1 
+## 	   Kcnj6, Slc16a10, Bambi, Etv1, Gnai1, Rflna, Tec, Gm48530, Mid1, Gm16505 
+## 	   4732419C18Rik, Rasgrf2, Galnt13, Ptger3, Nr4a2, Pacrg, BB557941, Cyp2j6, Tmem108, Pkia 
+## PC_ 4 
+## Positive:  Top2a, Knl1, Rad51b, Nusap1, Kif20b, Ttk, Hmmr, Gvin-ps1.1, Ckap2l, Kif11 
+## 	   Myb, Mis18bp1, Sgo1, Prc1, Racgap1, Esco2, Lmnb1, Clca3a2, Ckap2, Ticrr 
+## 	   Nhs, Anln, Bub1, Cdk1, Lockd, Kif2c, Bub1b, H2ac24, Aurkb, Plk1 
+## Negative:  Myl7, Cox7a2, Gapdh, Casp6, Agr3, Uqcrb, Fau, Atp5g1, Uqcr11, Atp5h 
+## 	   Rpl19, Cyp2j6, Rpl37a, Atp5j2, Hint1, Ppia, Ndufb10, Ms4a10, Tuba1a, Rpl41 
+## 	   Cox5b, Rpl11, Cox4i1, Rpl9, Atp5mpl, Atp5k, Mdh2, Cyb5a, Tomm7, Sem1 
+## PC_ 5 
+## Positive:  Rfx6, Sphkap, Pkib, Pdzrn3, Phlda1, Asic2, Ass1, Moxd1, Rbp2, Hjurp 
+## 	   Rtl4, Plxnc1, Me2, Smoc1, Plcl1, Gm16505, 2010204K13Rik, Gm48530, Plcxd3, Acvrl1 
+## 	   Nqo1, Car8, Pls3, Far2os1, Gm7205, Fmo1, Arhgap24, Dcdc5, Bbx, Otulinl 
+## Negative:  Agr3, Mgll, Slc39a8, Onecut3, Galnt13, Habp2, Cit, Casr, Crp, Me3 
+## 	   Ret, Slc41a2, Man1c1, Kcnk16, Adamts5, Zfp618, Basp1, Cap2, Gm30524, Axin2 
+## 	   Rasgrf2, Epha3, Tmem108, Slc12a8, Serpina1b, Tril, Thrb, Cyp2j6, S100a11, Etv1
+```
+
+``` r
+ElbowPlot(Nd1T.obj.filt, ndims = 50)
+```
+
+![](Session2_files/figure-html/unnamed-chunk-61-1.png)&lt;!-- --&gt;
+---
+
+
+``` r
+Nd1T.obj.filt &lt;- RunPCA(Nd1T.obj.filt, features = VariableFeatures(object = Nd1T.obj))
+```
+
+```
+## PC_ 1 
+## Positive:  Rps19, Rps2, Rps5, Rpl35, Eef1b2, Rplp0, Rps8, Rps16, Rps20, Rps12 
+## 	   Rpl39, Rpl18a, Rpl28, Rpl14, Rpl32, Rps28, Rpsa, Rpl27a, Rpl3, Rps21 
+## 	   Rpl36, Rpl35a, Rpl23, Rpl30, Npm1, Rpl34, Rpl29, Rpl37, Rpl6, Rps13 
+## Negative:  Trpm2, Dlg2, Apob, Iqsec1, Ada, Slc35f3, Bnip5, Abcc2, Adcy8, Man1c1 
+## 	   Cdk14, Ptprr, Ahnak, Slc38a11, Gda, Trpc4, Ddhd1, 4930556N09Rik, Rasal2, Pip4k2a 
+## 	   Gm44678, Slc27a4, Espn, Stk32a, Cobl, Grik4, Lama3, Pmp22, Nrp1, Lpar3 
+## PC_ 2 
+## Positive:  Clec2h, Ace2, Gda, Mep1b, Ggt1, Mme, Dgat1, Ces2e, Guca2b, Maf 
+## 	   Xdh, Spink1, Lct, Mgam, Trim30d, Slc5a1, Pcsk5, Exoc3l4, Slc2a2, Sult1b1 
+## 	   Aspa, Ace, Prap1, Ifi27l2b, Maoa, Cyp2b10, H2-T3, Cgref1, Cs, Apol10a 
+## Negative:  Ptma, Myl7, Mid1, Krt18, Rfx6, Scg2, Bbx, Kcnj3, Nrp1, Parm1 
+## 	   Smyd3, Agr3, Slc12a8, Hmgn1, Kctd12, Gm11992, Rps3a1, Parp1, Pde1c, Rgs17 
+## 	   Acadsb, Unc80, Isl1, Rpl37a, Bambi, Ror2, Etv1, Rab3c, Txndc5, Rflna 
+## PC_ 3 
+## Positive:  Krt19, Cdk14, Rasal2, Slc38a11, Dlg2, Adcy8, Iqsec1, Ccnd2, Grik4, Sox5 
+## 	   Trpm2, 2810025M15Rik, Trpc4, Afp, Gm37060, Serpinf2, Trpa1, Ssbp2, Slc5a4b, 4930556N09Rik 
+## 	   Pla2g7, Rab3c, Aqp9, Otop3, Fmo2, B3galt5, S100a6, Ddhd1, Lonrf1, Hcn1 
+## Negative:  Scg2, Isl1, Abcc8, Gm11992, Plcxd3, Unc80, Sphkap, Kcnj3, Ffar1, Parm1 
+## 	   Kcnj6, Slc16a10, Bambi, Etv1, Gnai1, Rflna, Tec, Gm48530, Mid1, Gm16505 
+## 	   4732419C18Rik, Rasgrf2, Galnt13, Ptger3, Nr4a2, Pacrg, BB557941, Cyp2j6, Tmem108, Pkia 
+## PC_ 4 
+## Positive:  Top2a, Knl1, Rad51b, Nusap1, Kif20b, Ttk, Hmmr, Gvin-ps1.1, Ckap2l, Kif11 
+## 	   Myb, Mis18bp1, Sgo1, Prc1, Racgap1, Esco2, Lmnb1, Clca3a2, Ckap2, Ticrr 
+## 	   Nhs, Anln, Bub1, Cdk1, Lockd, Kif2c, Bub1b, H2ac24, Aurkb, Plk1 
+## Negative:  Myl7, Cox7a2, Gapdh, Casp6, Agr3, Uqcrb, Fau, Atp5g1, Uqcr11, Atp5h 
+## 	   Rpl19, Cyp2j6, Rpl37a, Atp5j2, Hint1, Ppia, Ndufb10, Ms4a10, Tuba1a, Rpl41 
+## 	   Cox5b, Rpl11, Cox4i1, Rpl9, Atp5mpl, Atp5k, Mdh2, Cyb5a, Tomm7, Sem1 
+## PC_ 5 
+## Positive:  Rfx6, Sphkap, Pkib, Pdzrn3, Phlda1, Asic2, Ass1, Moxd1, Rbp2, Hjurp 
+## 	   Rtl4, Plxnc1, Me2, Smoc1, Plcl1, Gm16505, 2010204K13Rik, Gm48530, Plcxd3, Acvrl1 
+## 	   Nqo1, Car8, Pls3, Far2os1, Gm7205, Fmo1, Arhgap24, Dcdc5, Bbx, Otulinl 
+## Negative:  Agr3, Mgll, Slc39a8, Onecut3, Galnt13, Habp2, Cit, Casr, Crp, Me3 
+## 	   Ret, Slc41a2, Man1c1, Kcnk16, Adamts5, Zfp618, Basp1, Cap2, Gm30524, Axin2 
+## 	   Rasgrf2, Epha3, Tmem108, Slc12a8, Serpina1b, Tril, Thrb, Cyp2j6, S100a11, Etv1
+```
+
+``` r
+ElbowPlot(Nd1T.obj.filt, ndims = 50)
+```
+
+![](Session2_files/figure-html/unnamed-chunk-62-1.png)&lt;!-- --&gt;
+---
+
+
+``` r
+Nd1T.obj.filt &lt;- RunUMAP(Nd1T.obj.filt, dims = 1:30)
+```
+
+```
+## 11:42:05 UMAP embedding parameters a = 0.9922 b = 1.112
+```
+
+```
+## 11:42:05 Read 2161 rows and found 30 numeric columns
+```
+
+```
+## 11:42:05 Using Annoy for neighbor search, n_neighbors = 30
+```
+
+```
+## 11:42:05 Building Annoy index with metric = cosine, n_trees = 50
+```
+
+```
+## 0%   10   20   30   40   50   60   70   80   90   100%
+```
+
+```
+## [----|----|----|----|----|----|----|----|----|----|
+```
+
+```
+## **************************************************|
+## 11:42:05 Writing NN index file to temp file /var/folders/0_/8lnwn5sn7hn9nr8qv2jg48nw0000gn/T//Rtmpu0f83k/file6cb776d976df
+## 11:42:05 Searching Annoy index using 1 thread, search_k = 3000
+## 11:42:06 Annoy recall = 100%
+## 11:42:08 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
+## 11:42:10 Initializing from normalized Laplacian + noise (using RSpectra)
+## 11:42:10 Commencing optimization for 500 epochs, with 84208 positive edges
+## 11:42:14 Optimization finished
+```
+---
+
+
+``` r
+FeaturePlot(Nd1T.obj.filt, reduction = "umap", features = "percent.mt")
+```
+
+![](Session2_files/figure-html/unnamed-chunk-64-1.png)&lt;!-- --&gt;
+---
+
+
+``` r
+Nd1T.obj.filt &lt;- FindNeighbors(Nd1T.obj.filt, dims = 1:30)
+```
+
+```
+## Computing nearest neighbor graph
+```
+
+```
+## Computing SNN
+```
+
+``` r
+Nd1T.obj.filt &lt;- FindClusters(Nd1T.obj.filt, resolution = 0.8)
+```
+
+```
+## Modularity Optimizer version 1.3.0 by Ludo Waltman and Nees Jan van Eck
+## 
+## Number of nodes: 2161
+## Number of edges: 67130
+## 
+## Running Louvain algorithm...
+## Maximum modularity in 10 random starts: 0.8714
+## Number of communities: 15
+## Elapsed time: 0 seconds
+```
+
+``` r
+Nd1T.obj.filt@active.ident
+```
+
+```
+## AAACCCACACAATGTC-1 AAACCCACACGAGAAC-1 AAACCCAGTGTCCGGT-1 AAACGAAAGCCTCGTG-1 AAACGAAAGCCTTGAT-1 
+##                  9                 13                  9                  4                  0 
+## AAACGAACATGTCAGT-1 AAACGAAGTAGACGTG-1 AAACGAAGTAGCTGTT-1 AAACGAAGTGTATACC-1 AAACGAAGTTTGACAC-1 
+##                  0                 14                 14                  5                 10 
+## AAACGAATCTCCGCAT-1 AAACGCTAGAGTTGAT-1 AAACGCTCATCGCTCT-1 AAACGCTGTTCAATCG-1 AAAGAACCAATAGTAG-1 
+##                  4                  2                  0                  7                  4 
+## AAAGAACCAGACTCTA-1 AAAGAACCATATCGGT-1 AAAGAACCATCCTCAC-1 AAAGAACGTACCTAAC-1 AAAGAACGTTGGACCC-1 
+##                  7                  0                  4                  5                  2 
+## AAAGAACTCGTGCACG-1 AAAGGATCATGTTCGA-1 AAAGGTACAACTTGGT-1 AAAGGTACATAGGCGA-1 AAAGTCCCATGGCACC-1 
+##                  7                  2                  2                  6                  7 
+## AAAGTCCTCTTCGATT-1 AAAGTGAAGATGACAT-1 AAAGTGACATGTTACG-1 AAATGGAAGTGTAGTA-1 AAATGGACATGCTGCG-1 
+##                  1                  2                  4                  9                  5 
+## AAATGGAGTGAGTTTC-1 AACAAAGGTCCGGTGT-1 AACAAAGTCGCAATTG-1 AACAACCTCTCATAGG-1 AACAAGAGTGAGTGAC-1 
+##                  4                 14                  6                 10                  2 
+## AACAGGGCATGTCAGT-1 AACCAACAGCCTGTGC-1 AACCAACAGGTCATAA-1 AACCAACGTTGCGGAA-1 AACCAACTCCTATGGA-1 
+##                  2                  2                  6                  0                  7 
+## AACCACAAGACCGTTT-1 AACCACAAGGTGGTTG-1 AACCACAAGTAACCTC-1 AACCACACATCCAATG-1 AACCACAGTCCAGGTC-1 
+##                  0                  3                 14                  7                  1 
+## AACCACAGTCGACGCT-1 AACCCAAAGATGAACT-1 AACCCAATCCAGCAAT-1 AACCTGACACTCTCGT-1 AACCTGAGTCGGTACC-1 
+##                  0                  8                  3                  1                  4 
+## AACCTGAGTGCATGAG-1 AACGAAAAGGGACTGT-1 AACGAAACAAGAAATC-1 AACGGGACACTCACTC-1 AACGGGATCTCGCTCA-1 
+##                  2                  1                  9                  1                  9 
+## AACGTCAAGCGATGGT-1 AACGTCAGTGTCCACG-1 AACGTCATCTGGTCAA-1 AACTTCTTCATCACTT-1 AAGAACAAGGGCAGAG-1 
+##                  7                  4                  8                  1                  3 
+## AAGAACAGTCAGTCCG-1 AAGACTCAGAAATTGC-1 AAGACTCAGCAGCGAT-1 AAGACTCCAACCGTGC-1 AAGACTCCAAGTGCAG-1 
+##                  4                  0                  5                 12                  0 
+## AAGACTCTCCCGTAAA-1 AAGACTCTCTAAGGAA-1 AAGATAGAGGGCAATC-1 AAGCATCAGGCGTTAG-1 AAGCATCCACATGTTG-1 
+##                  1                  5                  1                  2                  2 
+## AAGCATCGTAAGATAC-1 AAGCATCTCAGATTGC-1 AAGCATCTCTCGCAGG-1 AAGCGAGTCGATACAC-1 AAGCGTTAGGCCGCTT-1 
+##                  4                  1                  2                  4                  3 
+## AAGCGTTAGGGCAGTT-1 AAGCGTTCATTCTTCA-1 AAGGAATAGCCTAGGA-1 AAGGAATCACCAGTTA-1 AAGGTAAGTAATCAAG-1 
+##                  2                  9                  6                  4                  0 
+## AAGTCGTAGGTTCAGG-1 AAGTCGTTCATCCCGT-1 AAGTCGTTCTGTTGGA-1 AAGTGAAAGCCGGATA-1 AAGTGAACAATTTCGG-1 
+##                 11                  1                  7                  3                 10 
+## AAGTGAACACCCTGAG-1 AAGTGAAGTTTGGCTA-1 AATCACGAGAGCGACT-1 AATCACGCAAGCGCTC-1 AATCACGCAATGAGCG-1 
+##                  5                  8                  5                 12                  6 
+## AATCACGCAGACAAGC-1 AATCGACCATTCATCT-1 AATCGACGTGCGGATA-1 AATCGACTCATCGTAG-1 AATCGACTCTAAGGAA-1 
+##                  5                  9                  6                  3                  5 
+## AATCGTGAGAACGTGC-1 AATCGTGCAATCCAGT-1 AATGAAGAGGGCAAGG-1 AATGACCAGATCCCAT-1 AATGACCAGGGTGAAA-1 
+##                  4                  3                  3                  9                  0 
+## AATGACCCAGAGTAAT-1 AATGACCGTCTGTAGT-1 AATGACCGTGGTCCCA-1 AATGCCACATAACTCG-1 AATGCCATCCGGCTTT-1 
+##                  2                  8                  1                  0                  3 
+## AATGGAAAGCGTATGG-1 AATGGAAAGGAACGCT-1 AATGGAACACGTCATA-1 AATGGAAGTCAGTTTG-1 AATTCCTAGAATCGTA-1 
+##                  0                  4                 11                  6                  4 
+## AATTCCTGTACTAACC-1 AATTCCTTCTCCCATG-1 AATTTCCGTCATATGC-1 ACAAAGAAGCTACTGT-1 ACAAAGACAACTCATG-1 
+##                  4                 10                  3                  2                  5 
+## ACAAAGACAGATAAAC-1 ACAAAGAGTACTGCGC-1 ACAACCACAACACTAC-1 ACAACCACAATTCGTG-1 ACAACCACACCCAACG-1 
+##                  7                  4                  4                  5                 11 
+## ACAACCAGTGCCGTTG-1 ACAACCAGTTTAGACC-1 ACAACCATCAAGCCAT-1 ACAACCATCCTACAAG-1 ACAAGCTAGCCAAGCA-1 
+##                  3                 10                  5                  5                  1 
+## ACAAGCTCACAGAGAC-1 ACAAGCTCACCTGATA-1 ACAAGCTCAGCGTACC-1 ACAAGCTGTTATTCCT-1 ACAAGCTTCGGTTAGT-1 
+##                  3                  1                  6                  2                 14 
+## ACACAGTAGCACGTCC-1 ACACCAATCATCCTGC-1 ACACCAATCCACCTGT-1 ACACGCGCAATAGGGC-1 ACACTGAGTATCAGCT-1 
+##                  8                  0                 13                  6                 13 
+## ACACTGAGTGCCAAGA-1 ACAGAAACACCGAATT-1 ACAGAAACAGAGGACT-1 ACAGAAAGTGCGGATA-1 ACAGCCGAGGCCGCTT-1 
+##                  6                  7                  0                  4                  5 
+## ACAGGGAAGAAACTGT-1 ACAGGGAGTTGAATCC-1 ACATCCCAGCAAGCCA-1 ACATCCCAGGCTAGCA-1 ACATCCCCATCAGTGT-1 
+##                 12                  1                  1                  0                  4 
+## ACATCCCGTGCCTTTC-1 ACATGCACATCTTTCA-1 ACATGCAGTACTGCGC-1 ACATGCAGTCCTGGGT-1 ACATGCAGTGCATACT-1 
+##                 12                  5                  7                  5                  0 
+## ACATTTCAGTCACTGT-1 ACATTTCGTATTTCTC-1 ACATTTCTCCGCACTT-1 ACATTTCTCGTGTGGC-1 ACCAAACAGACCTCAT-1 
+##                 13                  7                  2                  2                  0 
+## ACCAACAAGCCGCTTG-1 ACCAACAGTCGGCTAC-1 ACCACAAGTCGAAGCA-1 ACCACAAGTTTGGAAA-1 ACCACAATCACAAGGG-1 
+##                  9                  3                  8                  2                 11 
+## ACCATTTAGACGACTG-1 ACCATTTAGGTACAGC-1 ACCATTTAGTCGTCTA-1 ACCATTTGTAGTCCTA-1 ACCATTTGTATGTCCA-1 
+##                  0                 12                  2                 11                  0 
+## ACCATTTGTGACTGTT-1 ACCCTCATCCTCGCAT-1 ACCGTTCCACACAGCC-1 ACCTACCCAGCGTTGC-1 ACCTACCTCAAGCTTG-1 
+##                  1                  2                 14                 12                  9 
+## ACCTACCTCGACGACC-1 ACCTACCTCGTTTACT-1 ACCTGAAAGCAACAGC-1 ACCTGAACAATTGCGT-1 ACCTGAAGTCTGGTTA-1 
+##                  3                  4                 13                  2                  2 
+## ACGATCAGTCCGTTTC-1 ACGATGTCAAGTTCGT-1 ACGATGTCATGTGCTA-1 ACGATGTTCGAAATCC-1 ACGATGTTCTATCGCC-1 
+##                 12                  6                  2                  6                  7 
+## ACGCACGAGCTGTACT-1 ACGCACGCACGATTCA-1 ACGCACGCAGGTTACT-1 ACGCACGGTGGGCTTC-1 ACGGAAGAGTCGAAAT-1 
+##                  8                  7                 14                  4                  4 
+## ACGGAAGCAAGGCCTC-1 ACGGAAGCAGGTATGG-1 ACGGAAGTCTGTAACG-1 ACGGGTCAGGCTGGAT-1 ACGGGTCAGTAGCTCT-1 
+##                  0                  1                 14                 10                  1 
+## ACGGGTCCATCGGCCA-1 ACGGGTCGTCACTCAA-1 ACGGTCGAGCGCTGAA-1 ACGGTCGGTATCGATC-1 ACGGTCGGTGTGATGG-1 
+##                  4                  6                  8                  1                 13 
+## ACGGTTAAGCGTGCCT-1 ACGGTTAAGCTCGAAG-1 ACGGTTAGTCGTAATC-1 ACGTAACCACAACATC-1 ACGTACAAGCAGGTCA-1 
+##                 12                  5                  5                  4                  6 
+## ACGTACATCGTTGTGA-1 ACGTAGTAGGGCGAGA-1 ACGTAGTCATCACAGT-1 ACGTAGTGTCCTATAG-1 ACGTCCTAGCATCAGG-1 
+##                  2                  5                  1                  6                  0 
+## ACGTCCTGTGGCTACC-1 ACGTCCTGTTAAGGGC-1 ACGTCCTTCAACTGAC-1 ACGTTCCCACTATGTG-1 ACTATCTCACGTCATA-1 
+##                  5                  0                  2                  7                  3 
+## ACTATCTGTGGAGAAA-1 ACTATGGGTTCTCGCT-1 ACTATGGTCCTTCTAA-1 ACTATTCTCAAACCCA-1 ACTCCCATCTAGCATG-1 
+##                  5                  1                  2                  0                  2 
+## ACTCTCGGTCGTGGTC-1 ACTCTCGGTGGAGAAA-1 ACTGATGCAAATGGAT-1 ACTGATGTCACATTGG-1 ACTGCAAAGGACTGGT-1 
+##                 11                  2                  7                  7                  3 
+## ACTGCAAAGGTATCTC-1 ACTGTCCAGTTTCGAC-1 ACTGTCCCATCTGGGC-1 ACTGTCCGTCGCACGT-1 ACTGTGACACCCTAAA-1 
+##                 10                  5                  8                  6                  0 
+## ACTGTGATCTAACACG-1 ACTTAGGAGCAGCGAT-1 ACTTAGGAGTGAGTTA-1 ACTTAGGCAAGTGGTG-1 ACTTAGGGTCCAGCCA-1 
+##                  2                  9                  2                  0                 10 
+## ACTTATCGTATCCCTC-1 ACTTATCGTATCGCTA-1 ACTTATCGTTAGAAGT-1 ACTTATCTCCTGTAGA-1 ACTTCCGGTAAGATCA-1 
+##                  7                 13                  6                  0                  7 
+## ACTTCCGGTACTGCGC-1 ACTTCCGTCTCCCATG-1 ACTTCGCCAGGTTCAT-1 ACTTCGCGTAGAGACC-1 ACTTTGTAGACGCTCC-1 
+##                 10                 10                  1                  5                  7 
+## ACTTTGTAGTAAATGC-1 ACTTTGTGTAGAATGT-1 AGAAATGCAACATACC-1 AGAAATGGTCATCGGC-1 AGAAATGGTTCAGGTT-1 
+##                  0                  0                  5                 10                  1 
+## AGAACAAAGAGTGTGC-1 AGAACAAAGGGCAATC-1 AGAACCTGTAGACGGT-1 AGAACCTGTGCCTTTC-1 AGAACCTTCAGTCTTT-1 
+##                 11                  0                  5                  9                 10 
+## AGAAGTAAGAAGCGCT-1 AGAAGTACATCATCCC-1 AGAAGTACATGGGCAA-1 AGACAAACATCGCCTT-1 AGACAAATCCCGAATA-1 
+##                  8                  5                  9                 13                  2 
+## AGACACTGTAACCCTA-1 AGACACTTCCTACCAC-1 AGACAGGCATCGTGCG-1 AGACAGGGTACCCGCA-1 AGACCATAGCGACCCT-1 
+##                  0                  7                  5                 14                  7 
+## AGACCATGTTTACTTC-1 AGACCCGCAAATGAAC-1 AGACCCGTCGAACACT-1 AGACCCGTCGTTGTTT-1 AGACTCAAGATGTTCC-1 
+##                  9                  4                  0                  1                  4 
+## AGACTCAGTCGTTGCG-1 AGAGAATCAACTGGTT-1 AGAGAATGTAGGACCA-1 AGAGAATTCCCGTGTT-1 AGAGAGCGTTCGTGCG-1 
+##                  4                  0                 10                  2                  4 
+## AGAGAGCTCAGATGCT-1 AGAGCAGAGGTTCTTG-1 AGAGCAGAGTTTGGCT-1 AGAGCAGCAAGGACAC-1 AGAGCAGCAGCACCCA-1 
+##                  0                  6                  0                  5                  5 
+## AGAGCAGGTGATGTAA-1 AGAGCCCAGCCACAAG-1 AGATAGAAGGATGTTA-1 AGATCCAAGCCTCGTG-1 AGATCCACACCCTATC-1 
+##                  8                  1                  6                  1                  4 
+## AGATCCATCAGCTTCC-1 AGATCGTAGTTAGAAC-1 AGATCGTCATTGAGCT-1 AGATCGTGTAGCGAGT-1 AGATGAATCAAACGAA-1 
+##                  0                  3                  0                  0                  0 
+## AGATGCTAGCATCAAA-1 AGATGCTAGGTGCAGT-1 AGATGCTAGTAGAGTT-1 AGATGCTCATGTCAGT-1 AGATGCTGTACTCGCG-1 
+##                  0                  0                 14                  7                  2 
+## AGCATCAGTCCTGTTC-1 AGCCAATAGGGTATAT-1 AGCCAATGTCATTCCC-1 AGCCACGGTCGAAGCA-1 AGCCACGGTGTCCAAT-1 
+##                  2                  3                  9                  4                  4 
+## AGCCAGCGTTAGGCTT-1 AGCGCCAAGAGGGCGA-1 AGCGCCACATAATCGC-1 AGCGCCAGTATAGCTC-1 AGCGCTGTCACATACG-1 
+##                  5                  7                  0                  7                 12 
+## AGCGTATAGACTTCAC-1 AGCGTATCAAATTGGA-1 AGCGTATGTTGCCATA-1 AGCGTATTCTGGCCGA-1 AGCGTCGCATATCGGT-1 
+##                  4                  2                  2                 12                  6 
+## AGCTACAGTCGGATTT-1 AGCTACAGTCTCGACG-1 AGCTACATCGTCAAAC-1 AGCTCAAAGCAGATAT-1 AGCTCAAAGTCTGTAC-1 
+##                  1                 12                  1                  0                 11 
+## AGCTCAACACCTTCGT-1 AGCTCAATCCCAGTGG-1 AGCTCAATCGTTCGCT-1 AGCTTCCAGAAGCTCG-1 AGCTTCCAGGCGCTTC-1 
+##                 12                 10                  4                  5                  4 
+## AGCTTCCAGGTGCCTC-1 AGCTTCCTCAAGATAG-1 AGCTTCCTCGTGTTCC-1 AGGAAATAGAAGCTGC-1 AGGAAATTCATTCCTA-1 
+##                  0                  2                 12                  8                 14 
+## AGGAATATCTGTAACG-1 AGGACGACATGGGAAC-1 AGGACTTAGCGGACAT-1 AGGACTTAGTCCTACA-1 AGGACTTCAGAGGACT-1 
+##                  6                 10                  2                  6                  5 
+## AGGAGGTAGGAGCAAA-1 AGGAGGTGTTATGGTC-1 AGGAGGTTCTCGCTTG-1 AGGATAAGTGTAGCAG-1 AGGATAATCAATCTTC-1 
+##                  1                  1                  2                  5                 10 
+## AGGATCTAGACGTCCC-1 AGGATCTAGTGGGAAA-1 AGGATCTCAACGATCT-1 AGGCCACAGTTCATCG-1 AGGCCACCATCAGTCA-1 
+##                  0                  3                  0                  8                 14 
+## AGGCCACCATGGGTCC-1 AGGCTGCAGAGAGGGC-1 AGGGAGTAGCTCGTGC-1 AGGGCCTAGTACAACA-1 AGGGCCTAGTTGCATC-1 
+##                  1                  4                  9                 14                  3 
+## AGGGCCTCAGATTAAG-1 AGGGCCTTCCGTTGAA-1 AGGGCCTTCGTAGGGA-1 AGGGCTCAGGACCCAA-1 AGGGCTCCAGCTCCTT-1 
+##                  8                  2                  1                  0                  1 
+## AGGGCTCGTAGCGCCT-1 AGGGCTCTCTCGACGG-1 AGGGTCCCACAATCTG-1 AGGGTCCTCGTTACCC-1 AGGGTGAAGCATACTC-1 
+##                  4                  1                  7                 12                  1 
+## AGGTAGGCACGTAACT-1 AGGTAGGGTACGTACT-1 AGGTAGGGTGAGCCAA-1 AGGTCATGTCTGTAGT-1 AGGTCATGTTCCATTT-1 
+##                  0                  0                 11                  4                  8 
+## AGGTCTACACTAGGCC-1 AGGTCTATCGATTTCT-1 AGGTCTATCTGGTTGA-1 AGGTGTTTCTCCAATT-1 AGGTTACCAGATACCT-1 
+##                 13                  7                  5                 10                  4 
+## AGGTTACGTACAGGTG-1 AGGTTACGTCCTTTGC-1 AGTAACCCAGACTGCC-1 AGTAACCGTGGCCACT-1 AGTACCAAGACAGCTG-1 
+##                  6                  4                  2                 10                  4 
+## AGTACCACAGCCATTA-1 AGTACCAGTCGCGTTG-1 AGTACTGAGGGTTTCT-1 AGTACTGCACTTGACA-1 AGTACTGGTATGGTAA-1 
+##                  4                  0                  1                  8                  1 
+## AGTAGTCGTGAGTGAC-1 AGTAGTCGTTGTGTTG-1 AGTCAACAGAGTGTGC-1 AGTCAACAGGCCATAG-1 AGTCAACCACTAACCA-1 
+##                  9                  3                  7                  4                  2 
+## AGTCAACGTTCGAGCC-1 AGTCAACTCTTTGGAG-1 AGTCACAAGCGATGAC-1 AGTCATGCAGCACAAG-1 AGTCATGTCTCCCAAC-1 
+##                  4                  4                 12                 12                 10 
+## AGTCTCCCATGCCGAC-1 AGTCTCCCATGGACAG-1 AGTGATCAGGACGCTA-1 AGTGATCGTGTTACAC-1 AGTGATCTCACTGTTT-1 
+##                  7                  9                  3                  3                  3 
+## AGTGCCGTCCCTGTTG-1 AGTTAGCGTTAGGACG-1 AGTTCCCGTTACCGTA-1 ATACCGATCCGTAGTA-1 ATACCTTCAAAGGATT-1 
+##                 10                  5                  0                  7                  4 
+## ATACCTTGTCGATTCA-1 ATACCTTTCTAGAGCT-1 ATACCTTTCTCCCATG-1 ATACTTCAGGGTGAAA-1 ATAGACCCACTCGATA-1 
+##                  6                  6                 10                  4                  5 
+## ATAGACCGTCATCGCG-1 ATAGACCTCATGCCAA-1 ATAGAGACAAGAATGT-1 ATAGGCTGTAACGCGA-1 ATAGGCTTCTAGCCAA-1 
+##                  6                  1                  6                  5                  0 
+## ATATCCTCAGGCGATA-1 ATCACAGCACCGTGCA-1 ATCACAGCACGATAGG-1 ATCACGAAGGTACAAT-1 ATCACGACAAAGGCGT-1 
+##                  1                 10                 12                  7                  3 
+## ATCACGATCGCTAGCG-1 ATCACTTAGGGTTTCT-1 ATCACTTTCCTAAGTG-1 ATCAGGTAGGGTGGGA-1 ATCATTCAGCAGGTCA-1 
+##                  1                  6                  0                 12                  2 
+## ATCATTCCATAGACTC-1 ATCATTCGTGACTAAA-1 ATCATTCGTTCGTTCC-1 ATCCACCAGAGTTCGG-1 ATCCACCCAGGTACGA-1 
+##                  3                  1                  1                  5                 13 
+## ATCCACCCAGTGGCTC-1 ATCCACCGTCATCCCT-1 ATCCACCGTGTGACCC-1 ATCCATTCAAGCGATG-1 ATCCATTGTGCCCGTA-1 
+##                 13                  6                  3                  5                  5 
+## ATCCATTTCGGCATAT-1 ATCCCTGAGGTAAGGA-1 ATCCCTGCAGCACCCA-1 ATCCCTGCATGTGACT-1 ATCCCTGTCCGTAGGC-1 
+##                  2                  9                  4                  0                  4 
+## ATCCCTGTCCTCTAGC-1 ATCCCTGTCTGAGATC-1 ATCCGTCCAAGCTGTT-1 ATCCGTCGTCTGTAGT-1 ATCCGTCGTCTTGGTA-1 
+##                 10                  7                 11                  1                  3 
+## ATCCGTCTCTGAATGC-1 ATCCTATAGTCGGGAT-1 ATCCTATCAAGTGATA-1 ATCCTATTCGTGCATA-1 ATCGATGAGTTAACAG-1 
+##                 10                  6                  2                  0                  1 
+## ATCGATGCACCAGACC-1 ATCGATGGTGGGAGAG-1 ATCGATGGTTGGGATG-1 ATCGATGTCTCATTAC-1 ATCGCCTCAATGTCAC-1 
+##                  1                  0                  7                  3                  1 
+## ATCGGATAGCAATAGT-1 ATCGGATGTAGTATAG-1 ATCGTCCAGTATAGGT-1 ATCGTCCCAAGACCTT-1 ATCGTCCCACCGTACG-1 
+##                  9                  1                  8                  2                  2 
+## ATCTCTAGTTTCGTAG-1 ATCTTCACACAATCTG-1 ATCTTCACACGCCACA-1 ATCTTCACAGACCCGT-1 ATCTTCAGTATTGACC-1 
+##                  3                 10                  5                  1                  3 
+## ATGAAAGCATTGCTTT-1 ATGAAAGGTCAACACT-1 ATGAAAGTCAAAGAAC-1 ATGAAAGTCAGGGTAG-1 ATGAAAGTCATCTACT-1 
+##                  6                  3                  3                  2                  6 
+## ATGAAAGTCTCTTAAC-1 ATGACCAAGCGCGTTC-1 ATGACCAAGGAACTCG-1 ATGACCACAAGTGCAG-1 ATGACCACATTCACAG-1 
+##                  1                  2                 13                  1                 11 
+## ATGACCAGTCGTTGCG-1 ATGACCATCCCGAACG-1 ATGAGGGGTACCTAAC-1 ATGAGTCCAAAGACGC-1 ATGAGTCTCTGTACAG-1 
+##                  5                 14                  4                 10                  1 
+## ATGATCGTCAAATGAG-1 ATGCATGTCCTCCACA-1 ATGCCTCAGGTGCTGA-1 ATGCCTCTCACGGGAA-1 ATGCGATTCGTTCTCG-1 
+##                  0                  4                  8                  1                 12 
+## ATGGAGGAGGACATCG-1 ATGGAGGAGTAGGAAG-1 ATGGATCCAGGAATCG-1 ATGGATCGTGTAGGAC-1 ATGGATCTCCATCCGT-1 
+##                  3                  4                  3                  3                  0 
+## ATGGGAGGTCGAATTC-1 ATGGGAGGTGGTGATG-1 ATGGGTTAGCAACCAG-1 ATGGTTGGTCAACACT-1 ATGGTTGGTTATCTGG-1 
+##                  4                 10                  1                  0                 13 
+## ATGGTTGTCAAGCTGT-1 ATGGTTGTCCCGATCT-1 ATGGTTGTCCGCTAGG-1 ATGTCTTCAACACAAA-1 ATGTCTTCACGGTCTG-1 
+##                  7                  2                  2                  3                  5 
+## ATGTCTTCACTGATTG-1 ATGTCTTCATCGCTAA-1 ATGTCTTGTCATTCCC-1 ATGTCTTTCGTACACA-1 ATTACCTTCGCCATAA-1 
+##                  9                  1                 11                  3                 14 
+## ATTACTCTCCGGCTTT-1 ATTATCCAGACATAGT-1 ATTATCCGTATCGATC-1 ATTATCCTCCCAAGTA-1 ATTCATCAGGGTAGCT-1 
+##                  6                  1                  1                  1                  3 
+## ATTCCATTCCGTCCTA-1 ATTCCTAGTTCGAAGG-1 ATTCCTATCTAGGCCG-1 ATTCGTTCAGAGTAAT-1 ATTCGTTTCGAGAATA-1 
+##                  2                  3                  6                  0                  1 
+## ATTCTACAGCTCGAAG-1 ATTCTACTCACCGGGT-1 ATTCTTGAGGCAGGGA-1 ATTCTTGTCAACCTCC-1 ATTGGGTAGACCCGCT-1 
+##                  7                  0                  8                  9                  4 
+## ATTGGGTCACACACTA-1 ATTGGGTGTGAACGGT-1 ATTGGGTTCGTAGGGA-1 ATTGTTCCACCTGATA-1 ATTGTTCCATCGAAGG-1 
+##                 10                  4                  0                  4                  1 
+## ATTGTTCGTCCACGCA-1 ATTGTTCTCACCGACG-1 ATTGTTCTCTCCATAT-1 ATTTACCAGGGCGAGA-1 ATTTACCAGTACTGTC-1 
+##                  7                  8                  3                  8                  2 
+## ATTTACCGTTGCATTG-1 ATTTCACAGTCCCAGC-1 ATTTCACGTTGGTAGG-1 ATTTCTGAGAGCACTG-1 CAAAGAAGTGCCTACG-1 
+##                  6                  0                 13                  8                  8 
+## CAAAGAATCGTAGTGT-1 CAACAACAGTAGAGTT-1 CAACAACTCTGACAGT-1 CAACAACTCTTACCAT-1 CAACAGTCAAGGACAC-1 
+##                 13                 13                  4                  8                  4 
+## CAACAGTTCTCCCATG-1 CAACCAAAGATCCAAA-1 CAACCAAAGTGCACTT-1 CAACCAACATCGAGCC-1 CAACCTCAGTGCAACG-1 
+##                 10                  4                 11                 10                 11 
+## CAACCTCGTATTTCGG-1 CAACCTCGTTGTCAGT-1 CAACGATAGATTGTGA-1 CAACGATCAACGTATC-1 CAACGATGTGCCGTTG-1 
+##                 12                  5                  0                  8                  2 
+## CAACGATGTTATGACC-1 CAACGATGTTTCACTT-1 CAACGATTCCACTGGG-1 CAACGATTCCCGTGAG-1 CAACGATTCCGAAGGA-1 
+##                  5                  4                 13                  0                  2 
+## CAACGGCAGATCGGTG-1 CAACGGCGTAACACCT-1 CAACGGCTCCGAGTGC-1 CAAGACTCACTGAGTT-1 CAAGAGGAGCTACAAA-1 
+##                  2                 10                  4                  6                 13 
+## CAAGAGGCAACACGAG-1 CAAGAGGCAAGCGCTC-1 CAAGAGGGTGGGACAT-1 CAAGCTAAGACGGAAA-1 CAAGCTAGTCTCCTGT-1 
+##                  6                 10                  5                  0                  8 
+## CAAGCTAGTGCATGTT-1 CAAGCTATCCTTCGAC-1 CAAGGGAAGAGTTGCG-1 CAAGGGACACCGGAAA-1 CAAGGGACACGTGAGA-1 
+##                  2                  1                 11                  1                  7 
+## CAAGGGAGTAAGAACT-1 CAAGGGATCTTCGTAT-1 CAATACGCACGCGTGT-1 CAATACGGTTACAGCT-1 CAATACGTCACACCCT-1 
+##                  0                 12                  4                  4                  0 
+## CAATCGACAATTGAAG-1 CAATGACAGGTTGCCC-1 CAATGACCAAATAAGC-1 CAATGACCATATTCGG-1 CAATTTCCAGTCAGAG-1 
+##                  3                  8                  3                  5                  3 
+## CAATTTCTCCTTCAGC-1 CACAACACATGACTCA-1 CACACAACACCCTATC-1 CACACAACAGGCTATT-1 CACAGATAGATAGCAT-1 
+##                  4                  0                  2                  4                  4 
+## CACAGATTCCTAACAG-1 CACAGGCTCTGTCCGT-1 CACATGAAGAGGATGA-1 CACATGAGTGCGTTTA-1 CACCAAACATATGGCT-1 
+##                  5                  2                  5                  0                  4 
+## CACCAAAGTAATCAGA-1 CACCGTTCATTAGGCT-1 CACCGTTGTCCAGGTC-1 CACCGTTTCACTCACC-1 CACCGTTTCTAGACCA-1 
+##                 14                  3                  0                  3                 11 
+## CACGTGGGTCTGATCA-1 CACTGAACATATCTGG-1 CACTGAATCGATGCAT-1 CACTGGGAGCTACTGT-1 CACTGGGGTAATGTGA-1 
+##                  3                  9                 12                  3                  5 
+## CACTGGGTCGCTCCTA-1 CACTGTCAGGCACTCC-1 CACTGTCCATTAGGAA-1 CACTTCGGTAAGTTGA-1 CACTTCGTCAGCATTG-1 
+##                  4                 13                  8                  2                  3 
+## CAGATACAGGAACGAA-1 CAGATACGTAGGAGTC-1 CAGATACGTGCACATT-1 CAGATCAAGTTCACTG-1 CAGATCACAAGGTACG-1 
+##                  2                  2                  6                  0                  2 
+## CAGATTGAGCGCCATC-1 CAGCAATGTGAGCAGT-1 CAGCAGCCAGAGTAAT-1 CAGCAGCGTATCACGT-1 CAGCCAGAGCTGGAGT-1 
+##                  6                  9                  4                  4                  2 
+## CAGCCAGCACATCCCT-1 CAGCCAGCATCGGAGA-1 CAGCCAGGTTCAAGGG-1 CAGCCAGTCAGTGGGA-1 CAGCGTGAGCTTGTGT-1 
+##                  5                 13                  7                 11                 12 
+## CAGCGTGCACCCATAA-1 CAGCGTGGTTGCATGT-1 CAGCGTGGTTGCTCGG-1 CAGGCCACACGAAGAC-1 CAGGCCACAGGTCAAG-1 
+##                  5                  1                 12                  0                  2 
+## CAGGGCTAGAGAGCAA-1 CAGGGCTTCATTCACT-1 CAGGTATCATGGCCCA-1 CAGTGCGCAAGAATGT-1 CAGTGCGCACATACGT-1 
+##                  5                  3                  5                 10                  6 
+## CAGTGCGGTCATTCCC-1 CAGTTAGGTAATCAGA-1 CAGTTAGTCACGTAGT-1 CAGTTCCCACCTGAAT-1 CAGTTCCGTGCATGTT-1 
+##                  9                  2                  8                  6                  3 
+## CAGTTCCGTGTTTACG-1 CATAAGCGTATGGAAT-1 CATACAGCACAATGTC-1 CATACAGGTTGGAGAC-1 CATACTTCAAGAGATT-1 
+##                  3                  1                  9                  5                  1 
+## CATACTTCACTGAGGA-1 CATACTTGTCACCGCA-1 CATACTTGTCCCTGTT-1 CATAGACAGGGTGGGA-1 CATAGACGTAGATCGG-1 
+##                  3                 12                 10                  0                  9 
+## CATAGACGTCAATGGG-1 CATCAAGCATAGATGA-1 CATCAAGTCGCTATTT-1 CATCCACAGAAGCGCT-1 CATCCACAGCGTGCTC-1 
+##                  1                  8                  6                  6                  0 
+## CATCCCACATGAAGGC-1 CATCCGTGTAGGAGGG-1 CATCGCTCAGGGATAC-1 CATCGGGAGAGCAAGA-1 CATCGGGAGGCAGCTA-1 
+##                  5                  7                  5                  1                  4 
+## CATCGGGTCTCGCGTT-1 CATCGTCAGAAGCGCT-1 CATCGTCTCCGGCAGT-1 CATGAGTAGTTCGGTT-1 CATGAGTTCTTCCGTG-1 
+##                  6                  3                  0                 11                  5 
+## CATGCAATCTCGCCTA-1 CATGCCTCACTTGAGT-1 CATGCCTCAGTGGTGA-1 CATGCGGTCTAGCAAC-1 CATGCTCGTTGTACGT-1 
+##                  5                  0                  3                  5                 11 
+## CATGCTCTCTGAGCAT-1 CATGGATAGAGTAACT-1 CATGGATAGAGTCTGG-1 CATGGATAGGTAGACC-1 CATGGATCATCTTCGC-1 
+##                  1                  8                  6                  1                  6 
+## CATGGATGTAGATTGA-1 CATGGATTCCAGTTCC-1 CATGGTACAAATCAAG-1 CATGGTACACCAGTTA-1 CATGGTATCATCCTGC-1 
+##                  0                  2                  3                  7                  3 
+## CATTCTAGTAGAATAC-1 CATTGAGTCCCGAGTG-1 CATTGCCCAGATGCGA-1 CATTGTTAGATGGTAT-1 CATTGTTAGCTTTGTG-1 
+##                  0                  4                  1                  5                  2 
+## CATTGTTCAGCTGGTC-1 CATTGTTGTTGCTAGT-1 CATTTCAGTAATGATG-1 CATTTCAGTAGCTTGT-1 CATTTCAGTCGAAGCA-1 
+##                 10                  7                  5                  3                  5 
+## CATTTCATCACTTATC-1 CCAAGCGGTAGCCCTG-1 CCAATGAAGATGCGAC-1 CCAATGAAGGAACTAT-1 CCAATGAGTGAGTAGC-1 
+##                  8                 10                 13                 12                  9 
+## CCAATGATCTGCTGAA-1 CCAATTTCAGAAGTTA-1 CCAATTTGTGTCGCTG-1 CCACAAACATGCGGTC-1 CCACACTGTATCGAGG-1 
+##                  0                  3                 11                 11                  0 
+## CCACACTGTGTGAATA-1 CCACCATAGAATTTGG-1 CCACCATAGTATAACG-1 CCACGAGGTCGGTGAA-1 CCACGAGTCGAGAAGC-1 
+##                 13                  9                  1                  7                 12 
+## CCACGAGTCGCCTATC-1 CCACGAGTCTTAGCCC-1 CCACGTTTCCATCAGA-1 CCACGTTTCTATCCAT-1 CCACTTGAGGGTACAC-1 
+##                  2                  7                  6                  1                  0 
+## CCACTTGCAATTCTCT-1 CCACTTGTCACTAGCA-1 CCACTTGTCTGAGATC-1 CCATAAGCATCCGAGC-1 CCATCACCAACCGATT-1 
+##                  3                  0                  0                  4                  2 
+## CCCAACTAGTTTGTCG-1 CCCAACTTCCCGAAAT-1 CCCATTGCAAATCGTC-1 CCCGAAGAGACAACAT-1 CCCGAAGAGTGAGTGC-1 
+##                  3                  6                  4                  2                  5 
+## CCCGAAGTCAGTCATG-1 CCCGAAGTCCGATGCG-1 CCCGGAACAACTAGAA-1 CCCGGAACATGTGGTT-1 CCCTAACAGGATCACG-1 
+##                  8                 12                 11                  0                  2 
+## CCCTAACCACAGTCAT-1 CCCTAACCATTAAAGG-1 CCCTAACGTGTTCAGT-1 CCCTAACTCATCTACT-1 CCCTAACTCTGCGGAC-1 
+##                  0                  1                 11                 11                 13 
+## CCCTCAAAGCCTCTGG-1 CCCTCAACAACTTGCA-1 CCCTCAAGTGACACGA-1 CCCTCAATCCCATAAG-1 CCCTCAATCCCTTCCC-1 
+##                 12                 10                  8                  2                  7 
+## CCCTCAATCGCAGTGC-1 CCCTCTCGTGAGATAT-1 CCCTGATCAGCTGTAT-1 CCCTGATTCTCAAAGC-1 CCCTTAGGTCTCTCTG-1 
+##                  4                 12                  4                  4                  3 
+## CCCTTAGTCATGGCCG-1 CCCTTAGTCGCCATAA-1 CCCTTAGTCGTTCATT-1 CCGAACGGTAAGCTCT-1 CCGATCTCACGCGTCA-1 
+##                  6                  4                 11                  6                  3 
+## CCGATCTGTCAATCTG-1 CCGATCTTCAGAGTTC-1 CCGATGGGTTGGGCCT-1 CCGATGGTCCGGGACT-1 CCGCAAGCAGACCTGC-1 
+##                  8                  0                  7                  5                  3 
+## CCGCAAGGTGTTGATC-1 CCGGACAAGAGTGTTA-1 CCGGACAAGGTTTGAA-1 CCGGGTAAGTGTAGAT-1 CCGGTAGCAAACACCT-1 
+##                  1                  9                  9                  1                  8 
+## CCGGTGAAGGCCACCT-1 CCGGTGACACAACCGC-1 CCGGTGAGTCAAAGAT-1 CCGTGAGAGATTACCC-1 CCGTGAGCAAGCCTGC-1 
+##                  3                 11                  2                  1                  0 
+## CCGTGAGCAGAGGAAA-1 CCGTGAGCATCCGCGA-1 CCGTGAGGTCCGTACG-1 CCGTTCATCAGATTGC-1 CCTAACCTCACTACGA-1 
+##                 12                  2                  4                  2                  2 
+## CCTAAGAAGAGGTCGT-1 CCTAAGACAGTAGGAC-1 CCTAAGACAGTGTGGA-1 CCTAAGACAGTTGGTT-1 CCTAAGACATGGCCCA-1 
+##                  8                  0                  2                  3                  7 
+## CCTAAGAGTATTTCCT-1 CCTACGTAGCGAGGAG-1 CCTACGTAGTGGCCTC-1 CCTACGTCACCGTGGT-1 CCTACGTCACGCGTCA-1 
+##                  1                  1                  2                 10                  2 
+## CCTACGTTCAAACTGC-1 CCTATCGAGTATTGCC-1 CCTATCGCAGTTGAAA-1 CCTATCGGTGGTTCTA-1 CCTCAACAGATTGGGC-1 
+##                  6                  0                 11                 10                  1 
+## CCTCAACTCGCACGAC-1 CCTCAACTCTCTGCTG-1 CCTCACAAGACCAGAC-1 CCTCACAAGCTGGCCT-1 CCTCAGTCAACATACC-1 
+##                 13                  6                  4                  4                 10 
+## CCTCAGTCATCCTATT-1 CCTCAGTCATCGGATT-1 CCTCAGTCATGGGAAC-1 CCTCATGCACTTCATT-1 CCTCATGTCGTTCCCA-1 
+##                  2                  7                  5                  0                 13 
+## CCTCCAACAAGCTCTA-1 CCTCCAACACTGCACG-1 CCTCCAAGTGCCTGCA-1 CCTCCTCAGTCGAAGC-1 CCTCCTCTCACTTGTT-1 
+##                 12                  6                  6                  0                  6 
+## CCTCCTCTCATCCTAT-1 CCTCTAGAGAGCCATG-1 CCTCTAGCATGCAGGA-1 CCTCTCCCAGTGGGTA-1 CCTCTCCCATCAGCGC-1 
+##                 12                  1                  8                  4                  5 
+## CCTCTCCGTGACCGTC-1 CCTCTCCTCGTGGGAA-1 CCTGCATAGCTAAACA-1 CCTGCATCAGTCGTTA-1 CCTGCATGTCAGACGA-1 
+##                  0                  7                  0                  0                 12 
+## CCTGCATTCGATTCCC-1 CCTGCATTCTCCAATT-1 CCTTCAGCACGTCTCT-1 CCTTCAGCAGCTACTA-1 CCTTGTGAGCGTGCTC-1 
+##                  3                  2                  3                 14                  1 
+## CCTTGTGCAAGCAGGT-1 CCTTGTGCAGATCATC-1 CCTTGTGGTCGCATGC-1 CCTTGTGTCACCTGGG-1 CCTTGTGTCCACGTCT-1 
+##                  7                  1                  0                  3                  4 
+## CCTTGTGTCGTTCCTG-1 CCTTTGGAGAGCAGCT-1 CCTTTGGAGGGCTTCC-1 CCTTTGGGTCACAGTT-1 CCTTTGGTCAGCTTCC-1 
+##                  3                  1                 11                  2                  1 
+## CCTTTGGTCTCGGTAA-1 CGAAGGAAGGATATAC-1 CGAAGGATCTGGGCCA-1 CGAATTGAGTGCTCAT-1 CGAATTGCATTCTCTA-1 
+##                  4                  0                  0                 11                 14 
+## CGAATTGGTTGTGTTG-1 CGACAGCAGTCAGCGA-1 CGAGAAGGTGACAGCA-1 CGAGGAAAGGCAGGTT-1 CGAGGAAGTAGTGCGA-1 
+##                  4                  3                  1                  1                  1 
+## CGAGGCTGTCCGTACG-1 CGAGGCTTCTTCTTCC-1 CGAGTGCAGAAACTGT-1 CGAGTGCAGCGCTTCG-1 CGAGTGCCAACTAGAA-1 
+##                  2                 10                 13                  3                  2 
+## CGAGTGCGTGGCTTGC-1 CGAGTGCGTTCGGTTA-1 CGAGTTAAGCGACCCT-1 CGAGTTAAGCGCACAA-1 CGAGTTAGTGTGTCCG-1 
+##                  6                  2                  9                  2                  0 
+## CGAGTTAGTTATCTGG-1 CGAGTTATCATGCCCT-1 CGAGTTATCTGTCGTC-1 CGATCGGAGATGCGAC-1 CGATCGGAGTCCCGAC-1 
+##                  4                  0                  4                  8                  4 
+## CGATCGGTCCCTCAAC-1 CGATCGGTCGGACTTA-1 CGATGCGTCTTAGCAG-1 CGATGGCAGGTCTACT-1 CGATGGCAGTACCGGA-1 
+##                  3                  6                  2                  3                 13 
+## CGATGGCCACTGGCGT-1 CGCAGGTCACTGGCGT-1 CGCATAAGTTCTCCCA-1 CGCATAATCTCCCATG-1 CGCATGGAGATGTTAG-1 
+##                  3                  0                  4                 10                 13 
+## CGCATGGAGCCTAGGA-1 CGCCAGATCGGTGAAG-1 CGCCATTGTTGGATCT-1 CGGAACCCAGGCTTGC-1 CGGAACCGTGAGTAAT-1 
+##                  8                  6                  5                 13                  9 
+## CGGAACCTCTTAATCC-1 CGGAATTTCTCCTACG-1 CGGAGAAAGCGCCTTG-1 CGGAGAACAGGACATG-1 CGGAGAACAGTTGGTT-1 
+##                  2                  3                  2                  6                  4 
+## CGGGACTTCAAATAGG-1 CGGGCATCACCACATA-1 CGGGTCAGTCAGTCGC-1 CGGGTCATCGTTCTCG-1 CGGGTGTAGTTGAATG-1 
+##                  6                  6                  4                  5                  6 
+## CGGTCAGAGTCGGCAA-1 CGGTCAGCAGAGCGTA-1 CGGTCAGTCATGGCCG-1 CGTAAGTGTACTGGGA-1 CGTAAGTTCAATCTTC-1 
+##                  5                 12                 12                  9                  4 
+## CGTAATGGTTAGGCCC-1 CGTAATGTCGGCATCG-1 CGTAGTACAGTTAGGG-1 CGTCAAACAGTCAACT-1 CGTCAAAGTCATAGTC-1 
+##                  5                 12                  1                 10                  0 
+## CGTCCATAGAACCGCA-1 CGTCCATAGGCATGCA-1 CGTCCATAGTCAGCCC-1 CGTCCATTCACTACGA-1 CGTGAATGTCCATACA-1 
+##                 12                  3                  2                  0                 13 
+## CGTGATAAGACATCCT-1 CGTGCTTCACTGGAAG-1 CGTGCTTGTGTCCACG-1 CGTGCTTGTTGGCTAT-1 CGTGTCTCAAAGCTAA-1 
+##                  4                  1                  5                  8                  6 
+## CGTGTCTCAGGTGGAT-1 CGTGTCTCATCTCAAG-1 CGTGTCTGTCACAATC-1 CGTGTCTTCGGCTTGG-1 CGTTAGATCGAGTCTA-1 
+##                  1                  9                  1                 11                 13 
+## CGTTCTGCACAGAAGC-1 CGTTCTGCAGAGTTGG-1 CGTTCTGGTCAGTCCG-1 CGTTCTGGTGGCTCTG-1 CGTTGGGAGCCGATCC-1 
+##                  7                  8                  7                  0                  2 
+## CGTTGGGGTGACCTGC-1 CGTTGGGTCAGATTGC-1 CTAACCCAGTCATTGC-1 CTAACCCCACGTTGGC-1 CTAACTTAGGGAACAA-1 
+##                  1                 10                  4                  0                  3 
+## CTAACTTAGGTATAGT-1 CTAACTTCACATTGTG-1 CTAAGTGAGGTAGCAC-1 CTAAGTGCAGCGCTTG-1 CTAAGTGGTCATGCAT-1 
+##                  5                  3                  0                  7                  9 
+## CTAAGTGGTCCTGTTC-1 CTAAGTGGTGGCAACA-1 CTAAGTGTCGCCAACG-1 CTAAGTGTCGTTGTTT-1 CTACAGAAGTAAGACT-1 
+##                 10                  1                  8                  1                 11 
+## CTACAGAGTCTACACA-1 CTACAGAGTGTGTCGC-1 CTACAGATCAGCACCG-1 CTACATTAGGTGCTAG-1 CTACATTTCTCTAAGG-1 
+##                  3                 12                  6                 10                  2 
+## CTACCTGAGTTGGGAC-1 CTACGGGCAACCGTGC-1 CTACGGGCATGGACAG-1 CTACGGGGTACATTGC-1 CTACGGGTCTCTTAAC-1 
+##                  0                  5                  0                  3                  8 
+## CTACTATAGCTAGCCC-1 CTAGACACATCCTTCG-1 CTAGGTAAGTGAGTTA-1 CTAGGTAGTGATTAGA-1 CTAGGTATCGAGAACG-1 
+##                  4                  2                  2                  0                  4 
+## CTATAGGAGAGCAGAA-1 CTATAGGCAGCACAGA-1 CTATAGGGTCAGCGTC-1 CTATAGGGTCCCACGA-1 CTATAGGGTTTCGACA-1 
+##                  3                  1                  0                  6                  3 
+## CTATAGGTCAAGCTTG-1 CTATCCGGTGACGTCC-1 CTATCCGTCGTCTAAG-1 CTATCCGTCTCGTCGT-1 CTATCTAGTTCTCCAC-1 
+##                  4                  4                  5                 14                  4 
+## CTCAACCCATCCGTGG-1 CTCAAGATCAAGCTGT-1 CTCAATTAGATAGCAT-1 CTCAATTGTAGACTGG-1 CTCAATTGTCATTCCC-1 
+##                  2                  1                  7                  1                  4 
+## CTCAATTTCGTTCTGC-1 CTCACTGCAGTCTTCC-1 CTCACTGTCATCGCTC-1 CTCACTGTCTGACGCG-1 CTCAGAAAGCCACCGT-1 
+##                  6                  1                  6                  3                  3 
+## CTCAGAAGTAATGCTC-1 CTCAGAATCCGTTGGG-1 CTCAGGGAGATAGCAT-1 CTCAGGGGTACCCAGC-1 CTCAGGGTCATGGTAC-1 
+##                 11                 10                  3                  7                  4 
+## CTCAGTCCAACCGCTG-1 CTCATCGCAACATACC-1 CTCATCGCAGCAGTGA-1 CTCATCGGTCGTGCCA-1 CTCATCGGTTGAATCC-1 
+##                  0                  7                  6                  1                  1 
+## CTCATGCAGCCTAACT-1 CTCATGCGTTAATCGC-1 CTCATTAAGAATTGCA-1 CTCATTAAGTTTGTCG-1 CTCATTACAACCACGC-1 
+##                  4                  1                 14                  6                 11 
+## CTCATTAGTTCATCTT-1 CTCATTATCAGTAGGG-1 CTCATTATCGGCATTA-1 CTCCAACCACACCTAA-1 CTCCACATCTCCCATG-1 
+##                  0                  3                  1                  0                 10 
+## CTCCATGAGCGTGAAC-1 CTCCCAACAGACTCTA-1 CTCCCAAGTACTAACC-1 CTCCCAATCTTCGGTC-1 CTCCCTCAGATCCGAG-1 
+##                  3                  3                  1                  3                  1 
+## CTCCCTCCAACTTCTT-1 CTCCCTCCATCTCAAG-1 CTCCGATAGTACCATC-1 CTCCGATGTAGGGAGG-1 CTCCTCCAGGTTAAAC-1 
+##                  0                  2                  1                  0                  1 
+## CTCCTCCCATGACGAG-1 CTCCTTTAGCACCGTC-1 CTCCTTTAGGAACTAT-1 CTCCTTTCACGGCGTT-1 CTCCTTTGTTTACCTT-1 
+##                  0                  6                  2                  7                  2 
+## CTCCTTTTCCTACGGG-1 CTCGAGGCACGTGTGC-1 CTCGAGGCAGTCGGAA-1 CTCGAGGGTCGCAGTC-1 CTCTCAGAGTTTGCTG-1 
+##                 11                  6                  4                  0                  6 
+## CTCTCAGTCACCGGGT-1 CTCTCGACAGAACTTC-1 CTCTCGAGTCGTGATT-1 CTCTCGAGTGACTAAA-1 CTCTGGTAGCCAGAGT-1 
+##                  3                  5                  1                  2                  0 
+## CTCTGGTCAGAAACCG-1 CTCTGGTGTGCGTTTA-1 CTCTGGTTCGATGCAT-1 CTGAATGAGTTCATCG-1 CTGAATGCACGACCTG-1 
+##                 10                  8                  1                  4                  6 
+## CTGAATGCACGCAAAG-1 CTGAGCGTCTTCTCAA-1 CTGAGGCGTGTTCGTA-1 CTGCAGGAGTCTGCAT-1 CTGCAGGGTATGTCAC-1 
+##                  1                  3                  6                  3                  2 
+## CTGCATCAGACATAGT-1 CTGCATCCACAGCTGC-1 CTGCATCCAGGTGTGA-1 CTGCATCTCCCTCTTT-1 CTGCCATAGACCAAGC-1 
+##                  5                  9                  9                  2                 11 
+## CTGCCATCACGTCATA-1 CTGCCATCATGTGTCA-1 CTGCCTAAGCTCATAC-1 CTGCCTAAGTTGAAAC-1 CTGCCTACAGGTCAAG-1 
+##                  3                 13                 11                  2                  0 
+## CTGCCTATCTCATAGG-1 CTGCGAGAGGGCCTCT-1 CTGCGAGAGGTCACTT-1 CTGCGAGAGTGGAAAG-1 CTGCTCAAGGTTAAAC-1 
+##                  5                 12                  1                  0                  3 
+##  [ reached getOption("max.print") -- omitted 1161 entries ]
+## Levels: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14
+```
+---
+
+
+``` r
+DimPlot(Nd1T.obj.filt, reduction = "umap")
+```
+
+![](Session2_files/figure-html/unnamed-chunk-66-1.png)&lt;!-- --&gt;
+---
+
+
+``` r
+bioc.clusters &lt;- data.frame(Bioc = sce.NeuroD1_filtered_QCed$label, row.names = sce.NeuroD1_filtered_QCed$Barcode)
+seurat.clusters &lt;- as.data.frame(Nd1T.obj.filt@active.ident)
+colnames(seurat.clusters) &lt;- "Seurat"
+clustersAll &lt;- merge(bioc.clusters, seurat.clusters, by = 0, all = FALSE)
+```
+---
+
+
+``` r
+tab &lt;- table(Bioc = clustersAll$Bioc, Seurat = clustersAll$Seurat)
+rownames(tab) &lt;- paste("Bioc", rownames(tab))
+colnames(tab) &lt;- paste("Seurat", colnames(tab))
+library(pheatmap)
+pheatmap(log10(tab + 10), color = viridis::viridis(100), cluster_cols = FALSE, cluster_rows = FALSE)
+```
+---
+
+
+``` r
+Nd1T.markers &lt;- FindAllMarkers(Nd1T.obj.filt, only.pos = TRUE)
+```
+
+```
+## Calculating cluster 0
+```
+
+```
+## Calculating cluster 1
+```
+
+```
+## Calculating cluster 2
+```
+
+```
+## Calculating cluster 3
+```
+
+```
+## Calculating cluster 4
+```
+
+```
+## Calculating cluster 5
+```
+
+```
+## Calculating cluster 6
+```
+
+```
+## Calculating cluster 7
+```
+
+```
+## Calculating cluster 8
+```
+
+```
+## Calculating cluster 9
+```
+
+```
+## Calculating cluster 10
+```
+
+```
+## Calculating cluster 11
+```
+
+```
+## Calculating cluster 12
+```
+
+```
+## Calculating cluster 13
+```
+
+```
+## Calculating cluster 14
+```
+
+``` r
+Nd1T.markers[Nd1T.markers$cluster == 0, ]
+```
+
+```
+##                       p_val avg_log2FC pct.1 pct.2     p_val_adj cluster          gene
+## Pzp           4.661700e-307  5.7250791 0.965 0.067 2.583374e-302       0           Pzp
+## Adamts5       1.826972e-279  5.0477501 0.816 0.034 1.012453e-274       0       Adamts5
+## Habp2         3.669321e-271  4.4181076 0.953 0.083 2.033428e-266       0         Habp2
+## Crp           1.410231e-250  4.1396923 0.938 0.091 7.815079e-246       0           Crp
+## Basp1         1.113311e-244  5.1968475 0.699 0.024 6.169638e-240       0         Basp1
+## Cyp2j5        3.903578e-241  4.8824852 0.848 0.066 2.163246e-236       0        Cyp2j5
+## Ugt8a         1.329429e-235  4.2493126 0.711 0.030 7.367299e-231       0         Ugt8a
+## Mc4r          3.896202e-230  4.5536275 0.645 0.019 2.159158e-225       0          Mc4r
+## Col17a1       1.806586e-228  4.7348858 0.664 0.023 1.001156e-223       0       Col17a1
+## Kcnk16        2.349611e-213  3.5150281 0.926 0.112 1.302084e-208       0        Kcnk16
+## Rbm24         1.150970e-210  4.4919707 0.656 0.029 6.378329e-206       0         Rbm24
+## Crtac1        1.833795e-208  5.2672191 0.570 0.014 1.016234e-203       0        Crtac1
+## Tlr5          1.070989e-206  3.7098607 0.625 0.023 5.935100e-202       0          Tlr5
+## Cux2          8.507485e-199  3.7121921 0.766 0.065 4.714593e-194       0          Cux2
+## Tlr2          6.880123e-197  4.0741987 0.684 0.045 3.812758e-192       0          Tlr2
+## Smbd1         4.340494e-188  3.8536270 0.781 0.083 2.405371e-183       0         Smbd1
+## Cltrn         8.966122e-182  3.4130662 0.926 0.161 4.968756e-177       0         Cltrn
+## Trpm3         7.005738e-178  4.1748410 0.777 0.098 3.882370e-173       0         Trpm3
+## E030025P04Rik 2.709899e-174  4.3718368 0.500 0.014 1.501745e-169       0 E030025P04Rik
+## Casr          5.683832e-174  2.7597524 0.922 0.153 3.149809e-169       0          Casr
+## Galnt13       8.500504e-162  3.0108395 0.977 0.239 4.710724e-157       0       Galnt13
+## Scn9a         2.050798e-159  4.7565894 0.457 0.013 1.136491e-154       0         Scn9a
+## Onecut3       2.280637e-156  2.8150587 0.973 0.244 1.263860e-151       0       Onecut3
+## Pgc           1.327769e-155  3.7270307 0.820 0.130 7.358095e-151       0           Pgc
+## Me3           1.427211e-155  2.9008550 0.770 0.098 7.909174e-151       0           Me3
+## Tril          1.380288e-152  3.4716050 0.691 0.075 7.649143e-148       0          Tril
+## Zfp618        4.218699e-147  2.6791259 0.938 0.237 2.337876e-142       0        Zfp618
+## Gm27153       2.021697e-145  5.3729410 0.379 0.006 1.120364e-140       0       Gm27153
+## U90926        5.642746e-142  4.5455589 0.488 0.027 3.127041e-137       0        U90926
+## Slc39a8       1.766366e-140  2.9262793 0.934 0.234 9.788670e-136       0       Slc39a8
+## Cap2          6.361330e-140  2.3763199 0.758 0.109 3.525258e-135       0          Cap2
+## Agr2          2.832192e-139  3.5471734 1.000 0.563 1.569516e-134       0          Agr2
+## Rflna         4.001495e-139  2.7211176 0.906 0.205 2.217509e-134       0         Rflna
+## Cyp2j6        8.571843e-139  3.1913599 0.984 0.443 4.750258e-134       0        Cyp2j6
+## Scn3b         1.234966e-138  2.9131627 0.699 0.088 6.843810e-134       0         Scn3b
+## Egfl6         4.473288e-138  5.1162825 0.414 0.014 2.478962e-133       0         Egfl6
+## Gm12511       8.547357e-136  2.6464793 0.934 0.268 4.736689e-131       0       Gm12511
+## Agr3          1.715111e-134  2.4825202 1.000 0.508 9.504633e-130       0          Agr3
+## Scg2          2.470609e-134  2.9040988 1.000 0.582 1.369138e-129       0          Scg2
+## Cck           6.010511e-132  3.7310962 1.000 0.988 3.330845e-127       0           Cck
+## Upp1          3.593920e-127  2.3649473 1.000 0.660 1.991643e-122       0          Upp1
+## D930028M14Rik 3.927817e-127  2.5790275 0.918 0.253 2.176678e-122       0 D930028M14Rik
+## Vkorc1        1.616596e-123  2.6795807 0.863 0.216 8.958693e-119       0        Vkorc1
+## Abca8b        2.149533e-123  3.8676127 0.414 0.020 1.191207e-118       0        Abca8b
+## Proc          1.005240e-122  4.3120553 0.438 0.026 5.570737e-118       0          Proc
+## Arx           1.288170e-122  2.2582504 0.938 0.233 7.138650e-118       0           Arx
+## 3110004A20Rik 4.461035e-121  4.6624617 0.391 0.017 2.472172e-116       0 3110004A20Rik
+## Etv1          1.123379e-119  2.1779563 0.969 0.307 6.225429e-115       0          Etv1
+## Cav2          5.731719e-119  2.8227705 0.633 0.081 3.176347e-114       0          Cav2
+## Tmem176a      2.259073e-118  2.0783907 0.980 0.543 1.251911e-113       0      Tmem176a
+## Aldoc         5.451460e-118  2.8061705 0.789 0.171 3.021036e-113       0         Aldoc
+## Cst3          9.925085e-118  2.0207592 0.988 0.672 5.500184e-113       0          Cst3
+## Gm11992       1.481684e-117  2.1056436 0.934 0.233 8.211051e-113       0       Gm11992
+## Tff3          5.330087e-117  2.2691952 0.996 0.830 2.953774e-112       0          Tff3
+## Lyzl4         4.490624e-116  2.7321979 0.637 0.086 2.488569e-111       0         Lyzl4
+## Cpn1          2.779242e-114  2.3667965 0.922 0.298 1.540173e-109       0          Cpn1
+## Grpr          1.072137e-112  1.8072713 0.691 0.104 5.941464e-108       0          Grpr
+## Cit           2.107437e-109  2.1306097 0.914 0.275 1.167878e-104       0           Cit
+## Spg20         2.495226e-109  2.5606643 0.871 0.262 1.382779e-104       0         Spg20
+## Parm1         1.627872e-108  2.0552274 0.980 0.471 9.021180e-104       0         Parm1
+## Rfxap         1.625954e-107  2.7465495 0.855 0.277 9.010550e-103       0         Rfxap
+## Pla2g12a      1.676541e-106  2.1276217 0.957 0.418 9.290890e-102       0      Pla2g12a
+## Rbp4          1.755801e-106  1.9791874 0.996 0.458 9.730123e-102       0          Rbp4
+## Dclk3         1.044555e-105  2.1751421 0.770 0.159 5.788609e-101       0         Dclk3
+## Fgl2          4.497522e-103  2.4032546 0.906 0.346  2.492392e-98       0          Fgl2
+## Mill2         5.882368e-103  2.4552248 0.770 0.169  3.259832e-98       0         Mill2
+## Tm4sf4        2.459607e-102  1.4065660 1.000 0.887  1.363040e-97       0        Tm4sf4
+## Cped1         5.540916e-102  1.9005474 0.898 0.252  3.070609e-97       0         Cped1
+## Marveld1      1.718791e-100  3.8137499 0.383 0.026  9.525025e-96       0      Marveld1
+## Rdh7          4.932680e-100  2.2318810 0.668 0.120  2.733543e-95       0          Rdh7
+## Camk4         7.327572e-100  5.0069184 0.320 0.014  4.060721e-95       0         Camk4
+## Ly6e           1.995592e-99  2.7908936 0.805 0.204  1.105897e-94       0          Ly6e
+## S100a11        4.000312e-99  2.0640792 0.957 0.383  2.216853e-94       0       S100a11
+## Sting1         1.024335e-98  4.1934901 0.340 0.018  5.676559e-94       0        Sting1
+## Igfbp7         3.234602e-98  2.8552949 0.480 0.053  1.792520e-93       0        Igfbp7
+## Gm49708        3.732224e-98  3.7620189 0.410 0.035  2.068287e-93       0       Gm49708
+## Lgals2         3.913059e-98  1.5536707 0.996 0.910  2.168500e-93       0        Lgals2
+## Nenf           7.800858e-98  1.7873704 0.969 0.571  4.323002e-93       0          Nenf
+## Cyp2j9         9.883243e-98  2.6209301 0.496 0.058  5.476997e-93       0        Cyp2j9
+## Ifitm2         4.293331e-97  1.8417459 0.871 0.253  2.379235e-92       0        Ifitm2
+## Tmem176b       1.952543e-96  1.6794595 0.984 0.609  1.082041e-91       0      Tmem176b
+## Tec            1.095043e-95  2.1578324 0.941 0.434  6.068401e-91       0           Tec
+## Prox1          5.372512e-95  1.8246674 0.969 0.428  2.977285e-90       0         Prox1
+## Itm2b          8.067415e-95  1.4715065 0.996 0.851  4.470720e-90       0         Itm2b
+## Tle1           8.614797e-95  1.9261943 0.965 0.561  4.774062e-90       0          Tle1
+## Tshz2          1.009690e-94  1.8168895 0.797 0.191  5.595399e-90       0         Tshz2
+## Homer2         1.551509e-94  1.8275374 0.977 0.481  8.597998e-90       0        Homer2
+## Slc25a4        1.637431e-94  1.9364380 0.945 0.525  9.074152e-90       0       Slc25a4
+## Prss23         4.618863e-93  3.3301562 0.480 0.060  2.559635e-88       0        Prss23
+## Myl7           7.757916e-93  1.9629877 0.996 0.722  4.299204e-88       0          Myl7
+## Serpine2       1.412185e-92  4.8947783 0.309 0.015  7.825907e-88       0      Serpine2
+## Gm42993        4.590830e-92  2.8273267 0.438 0.044  2.544100e-87       0       Gm42993
+## Gfra1          7.107416e-92  1.8430065 0.781 0.180  3.938717e-87       0         Gfra1
+## Qpct           1.067465e-91  2.0164344 0.953 0.414  5.915569e-87       0          Qpct
+## Ms4a8a         1.513979e-91  1.5447024 0.996 0.782  8.390017e-87       0        Ms4a8a
+## Fmo5           7.351257e-90  1.8441182 0.969 0.535  4.073846e-85       0          Fmo5
+## Epha4          6.340525e-89  3.0376224 0.484 0.064  3.513729e-84       0         Epha4
+## Slc8a1         6.678093e-89  1.6162673 0.996 0.749  3.700799e-84       0        Slc8a1
+## Gm27162        8.021305e-89  1.8313233 0.852 0.243  4.445166e-84       0       Gm27162
+## Gm30524        9.893708e-89  1.7288109 0.750 0.173  5.482796e-84       0       Gm30524
+## Ms4a10         6.023193e-88  1.8399848 0.871 0.295  3.337873e-83       0        Ms4a10
+## Slc41a2        4.888602e-87  1.8509675 0.957 0.460  2.709117e-82       0       Slc41a2
+## Sct            1.016970e-86  1.7112524 1.000 0.994  5.635743e-82       0           Sct
+## Slc22a15       6.924663e-86  2.1617954 0.703 0.164  3.837440e-81       0      Slc22a15
+## Tspan12        1.985295e-85  1.8270722 0.965 0.413  1.100191e-80       0       Tspan12
+## Kcnj6          8.537375e-84  1.5226468 0.871 0.256  4.731157e-79       0         Kcnj6
+## Cfap69         1.452462e-83  2.2050438 0.531 0.081  8.049109e-79       0        Cfap69
+## Apom           1.662047e-83  2.5581168 0.586 0.111  9.210564e-79       0          Apom
+## Plac8          4.849736e-83  1.1565039 1.000 0.948  2.687578e-78       0         Plac8
+## Wars           3.989641e-82  1.7863315 0.863 0.291  2.210939e-77       0          Wars
+## Klkb1          4.184090e-82  2.8719559 0.512 0.080  2.318697e-77       0         Klkb1
+## Casp6          6.726518e-82  1.7958743 0.957 0.542  3.727634e-77       0         Casp6
+## Dapp1          7.562035e-82  1.6891924 0.957 0.491  4.190653e-77       0         Dapp1
+## Upk1b          7.609642e-82  3.2817688 0.441 0.058  4.217035e-77       0         Upk1b
+## Cryba4         1.484505e-81  3.4573447 0.324 0.023  8.226680e-77       0        Cryba4
+## Bsg            1.818071e-81  1.0565934 0.996 0.852  1.007520e-76       0           Bsg
+## Col6a5         1.957456e-81  1.8009414 0.477 0.062  1.084763e-76       0        Col6a5
+## Spry1          2.005641e-81  2.5666851 0.465 0.064  1.111466e-76       0         Spry1
+## Serpina1b      2.115847e-81  1.6981013 0.840 0.267  1.172539e-76       0     Serpina1b
+## Pid1           4.312287e-81  1.6837085 0.891 0.294  2.389740e-76       0          Pid1
+## Psap           8.326622e-81  1.4371654 0.977 0.677  4.614364e-76       0          Psap
+## Trf            8.543237e-81  2.1597798 0.871 0.305  4.734406e-76       0           Trf
+## Aga            2.327749e-80  2.1109154 0.898 0.408  1.289968e-75       0           Aga
+## Bace2          4.581254e-80  1.2755002 0.914 0.276  2.538794e-75       0         Bace2
+## Tmed6          5.492361e-80  2.5078269 0.695 0.189  3.043701e-75       0         Tmed6
+## F5             5.962350e-80  1.8594320 0.832 0.259  3.304156e-75       0            F5
+## Gclm           8.762058e-80  1.2780917 0.980 0.761  4.855670e-75       0          Gclm
+## Sstr2          1.061280e-79  2.5668314 0.480 0.070  5.881293e-75       0         Sstr2
+## Oxr1           1.196660e-79  1.5370740 0.980 0.717  6.631529e-75       0          Oxr1
+## 4930573H18Rik  1.996459e-79  2.7483440 0.414 0.049  1.106378e-74       0 4930573H18Rik
+## Smarca1        2.111718e-78  1.6918911 0.738 0.187  1.170251e-73       0       Smarca1
+## Shf            2.552784e-77  1.5738266 0.891 0.330  1.414676e-72       0           Shf
+## Tmed3          3.747114e-77  1.5949707 0.973 0.517  2.076538e-72       0         Tmed3
+## Gnas           3.953396e-77  0.8583505 0.996 0.899  2.190854e-72       0          Gnas
+## Fxyd3          4.029498e-77  1.3359399 0.996 0.738  2.233027e-72       0         Fxyd3
+## Atoh8          1.243672e-76  2.6104259 0.352 0.034  6.892054e-72       0         Atoh8
+## Susd4          1.834738e-76  4.4833026 0.230 0.007  1.016757e-71       0         Susd4
+## 4732490B19Rik  6.129084e-76  2.4093038 0.582 0.119  3.396555e-71       0 4732490B19Rik
+## Krt20          8.817131e-76  1.3456261 0.996 0.771  4.886189e-71       0         Krt20
+## Ssr4           1.133324e-75  1.4226706 0.980 0.668  6.280542e-71       0          Ssr4
+## Ndrg1          1.470237e-75  1.4180377 0.977 0.698  8.147614e-71       0         Ndrg1
+## Egfl7          2.834675e-75  2.4277927 0.473 0.075  1.570892e-70       0         Egfl7
+##  [ reached 'max' / getOption("max.print") -- omitted 5920 rows ]
+```
+
+---
+
+
+``` r
+VlnPlot(Nd1T.obj.filt, features = head(Nd1T.markers[Nd1T.markers$cluster == 0, "gene"], n = 1))
+```
+
+![](Session2_files/figure-html/unnamed-chunk-70-1.png)&lt;!-- --&gt;
+ 
+  
+  
+&lt;!-- --- --&gt;
+&lt;!-- ## Select PCs from PCA --&gt;
+
+&lt;!-- ```{r} --&gt;
+&lt;!-- # set.seed(1000) --&gt;
+&lt;!-- # # Evaluate PCs --&gt;
+&lt;!-- # sce.NeuroD1_filtered_QCed &lt;- denoisePCA(sce.NeuroD1_filtered_QCed, subset.row = top.NeuroD1_filtered_QCed, technical = dec.NeuroD1_filtered_QCed) --&gt;
+&lt;!-- # ncol(reducedDim(sce.NeuroD1_filtered_QCed)) --&gt;
+
+&lt;!-- ``` --&gt;
+
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
