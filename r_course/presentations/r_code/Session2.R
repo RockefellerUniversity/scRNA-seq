@@ -375,8 +375,8 @@ Nd1T.obj
 
 
 ## ----fig.width=7,fig.height=4-------------------------------------------------
-rownames(Nd1T.obj)
-colnames(Nd1T.obj)
+rownames(Nd1T.obj)[1:2]
+colnames(Nd1T.obj)[1:2]
 
 
 ## ----fig.width=7,fig.height=4-------------------------------------------------
@@ -389,7 +389,7 @@ Nd1T.obj@active.ident[1:2]
 
 
 ## ----fig.width=7,fig.height=4-------------------------------------------------
-Nd1T.obj@assays$RNA$counts
+Nd1T.obj@assays$RNA$counts[1:2,1:2]
 
 
 ## ----fig.width=7,fig.height=4-------------------------------------------------
