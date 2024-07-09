@@ -690,8 +690,8 @@ Nd1T.obj
 We can access rownames and column names in a similar manner as before.
 
 ```{r,fig.width=7,fig.height=4}
-rownames(Nd1T.obj)
-colnames(Nd1T.obj)
+rownames(Nd1T.obj)[1:2]
+colnames(Nd1T.obj)[1:2]
 ```
     
 ---   
@@ -719,7 +719,7 @@ Nd1T.obj@active.ident[1:2]
 The get access to the assays we can pull directly from the relevent slots.
 
 ```{r,fig.width=7,fig.height=4}
-Nd1T.obj@assays$RNA$counts
+Nd1T.obj@assays$RNA$counts[1:2,1:2]
 ```
     
  
