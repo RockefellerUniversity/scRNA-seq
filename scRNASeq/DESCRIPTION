@@ -9,7 +9,7 @@ License: What license is it under?
 LazyData: TRUE
 biocViews: Training
 Remotes: 
-Depends: DropletUtils, scDblFinder, SingleCellExperiment, scran, scater, Seurat, dplyr, scuttle, biomaRt, hdf5r
+Depends: DropletUtils, scDblFinder, SingleCellExperiment, scran, scater, Seurat, dplyr, scuttle, biomaRt, hdf5r, harmony, scCustomize, decontX, bluster, batchelor
 Suggests: knitr,
     rmarkdown,
     testthat,
