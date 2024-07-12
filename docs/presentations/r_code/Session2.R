@@ -36,7 +36,7 @@ library(DropletUtils)
 
 ## ----fig.width=7,fig.height=4-------------------------------------------------
 
-h5file <- "https://rubioinformatics.s3.amazonaws.com/scRNA_graduate/SRR_NeuroD1/outs/NeuroD1_filtered_feature_bc_matrix.h5"
+h5file <- "https://rubioinformatics.s3.amazonaws.com/scRNA_graduate/SRR_NeuroD1/outs/filtered_feature_bc_matrix.h5"
 local_h5file <- basename(h5file)
 download.file(h5file,local_h5file)
 
@@ -153,18 +153,18 @@ sce.NeuroD1_filtered
 
 
 ## ----fig.width=7,fig.height=4-------------------------------------------------
-is.mito <- grepl("^mt",rowData(sce.NeuroD1_filtered)$Symbol)
-is.ribo <- grepl("^Rps",rowData(sce.NeuroD1_filtered)$Symbol)
+is.mito <- grepl("^MT",rowData(sce.NeuroD1_filtered)$Symbol)
+# is.ribo <- grepl("^Rps",rowData(sce.NeuroD1_filtered)$Symbol)
 
 table(is.mito)
-table(is.ribo)
+# table(is.ribo)
 
 
 
 ## ----fig.width=7,fig.height=4-------------------------------------------------
 library(scuttle)
 sce.NeuroD1_filtered <- addPerCellQCMetrics(sce.NeuroD1_filtered, 
-                                            subsets=list(Mito=is.mito,Ribosomal=is.ribo))
+                                            subsets=list(Mito=is.mito))
 sce.NeuroD1_filtered
 
 
@@ -186,9 +186,7 @@ plotColData(sce.NeuroD1_filtered,x="Sample",y="detected")
 
 ## ----fig.width=7,fig.height=4-------------------------------------------------
 library(scater)
-p1 <- plotColData(sce.NeuroD1_filtered,x="Sample",y="subsets_Mito_percent")
-p2 <- plotColData(sce.NeuroD1_filtered,x="Sample",y="subsets_Ribosomal_percent")
-gridExtra::grid.arrange(p1,p2,ncol=2)
+plotColData(sce.NeuroD1_filtered,x="Sample",y="subsets_Mito_percent")
 
 
 ## ----fig.width=7,fig.height=4-------------------------------------------------
@@ -338,6 +336,10 @@ plotExpression(sce.NeuroD1_filtered_QCed, features=head(rownames(ordered),n=1),
     x="label", colour_by="label")
 
 
+## -----------------------------------------------------------------------------
+saveRDS(sce.NeuroD1_filtered_QCed,file="sce.NeuroD1_filtered_QCed.RDS")
+
+
 ## ----results='asis',include=TRUE,echo=FALSE-----------------------------------
 if(params$isSlides == "yes"){
   cat("class: inverse, center, middle
@@ -362,7 +364,7 @@ if(params$isSlides == "yes"){
 
 ## ----fig.width=7,fig.height=4-------------------------------------------------
 library(Seurat)
-h5file <- "https://rubioinformatics.s3.amazonaws.com/scRNA_graduate/SRR_NeuroD1/outs/NeuroD1_filtered_feature_bc_matrix.h5"
+h5file <- "https://rubioinformatics.s3.amazonaws.com/scRNA_graduate/SRR_NeuroD1/outs/filtered_feature_bc_matrix.h5"
 local_h5file <- basename(h5file)
 download.file(h5file,local_h5file)
 Nd1T.mat <- Read10X_h5(filename = local_h5file)
@@ -393,7 +395,7 @@ Nd1T.obj@assays$RNA$counts[1:2,1:2]
 
 
 ## ----fig.width=7,fig.height=4-------------------------------------------------
-mito.genes <- grep("^mt", rownames(Nd1T.obj), value = T)
+mito.genes <- grep("^MT", rownames(Nd1T.obj), value = T)
 mito.genes[1:10]
 
 
@@ -457,7 +459,7 @@ FeaturePlot(Nd1T.obj.filt, reduction = "umap",features = "percent.mt")
 
 ## ----fig.width=7,fig.height=4-------------------------------------------------
 Nd1T.obj.filt <- FindNeighbors(Nd1T.obj.filt, dims = 1:30)
-Nd1T.obj.filt <- FindClusters(Nd1T.obj.filt, resolution = 0.8)
+Nd1T.obj.filt <- FindClusters(Nd1T.obj.filt, resolution = 0.7)
 Nd1T.obj.filt@active.ident
 
 
@@ -484,10 +486,10 @@ pheatmap(log10(tab+10), color=viridis::viridis(100), cluster_cols=FALSE, cluster
 
 ## ----fig.width=7,fig.height=4-------------------------------------------------
 Nd1T.markers <- FindAllMarkers(Nd1T.obj.filt, only.pos = TRUE)
-Nd1T.markers[Nd1T.markers$cluster == 0,]
+Nd1T.markers[Nd1T.markers$cluster == 1,]
 
 
 ## ----fig.width=7,fig.height=4-------------------------------------------------
-VlnPlot(Nd1T.obj.filt, features = head(Nd1T.markers[Nd1T.markers$cluster == 0,"gene"],n=1))
+VlnPlot(Nd1T.obj.filt, features = "Pzp")
 
 
