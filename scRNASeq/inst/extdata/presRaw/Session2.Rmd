@@ -896,7 +896,7 @@ The *FindAllMarkers* function allows us to identify markers across all clusters.
 
 ```{r,fig.width=7,fig.height=4}
 Nd1T.markers <- FindAllMarkers(Nd1T.obj.filt, only.pos = TRUE)
-Nd1T.markers[Nd1T.markers$cluster == 1,]
+head(Nd1T.markers[Nd1T.markers$cluster == 1,])
 ```
 
 ---
