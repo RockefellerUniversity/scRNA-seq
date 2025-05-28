@@ -174,7 +174,7 @@ local_rdsfile <-"sce.NeuroD1_filtered_QCed.RDS"
 download.file(rdsfile,local_rdsfile)
 ```
 
-```{r,fig.width=7,fig.height=4,warning=FALSE}
+```{r overlayDecontX,fig.width=7,fig.height=4,warning=FALSE}
 sce.NeuroD1_filtered_QCed <- readRDS("sce.NeuroD1_filtered_QCed.RDS")
 sce.NeuroD1_filtered_QCed$decontX_contamination <- sce.NeuroD1_filtered$decontX_contamination[match(colnames(sce.NeuroD1_filtered_QCed),colnames(sce.NeuroD1_filtered),nomatch = 0)]
 ```
@@ -244,7 +244,7 @@ CellBender outputs a filtered matrix file in H5 format for data import and among
 
 We can import the CellBender filtered matrix as before with the CellRanger matrix.
 
-```{r,fig.width=7,fig.height=4}
+```{r loadHDF5,fig.width=7,fig.height=4}
 
 h5file <- "https://rubioinformatics.s3.amazonaws.com/scRNA_graduate/SRR_NeuroD1/outs/cellbender_v0.3.2_filtered.h5"
 local_h5file <- basename(h5file)
