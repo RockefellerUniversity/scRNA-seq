@@ -1,7 +1,7 @@
 params <-
 list(isSlides = "no")
 
-## ----include=FALSE------------------------------------------------------------
+## ----include=FALSE-------------------------------------------------------------
 suppressPackageStartupMessages(require(knitr))
 knitr::opts_chunk$set(echo = TRUE, tidy = T)
 
@@ -43,7 +43,7 @@ knitr::opts_chunk$set(echo = TRUE, tidy = T)
 ## --fasta=custom_reference.fa  \
 ## --genes=custom_reference_filtered.gtf
 
-## ----results='asis',include=TRUE,echo=FALSE-----------------------------------
+## ----results='asis',include=TRUE,echo=FALSE------------------------------------
 if(params$isSlides == "yes"){
   cat("class: inverse, center, middle
 
@@ -65,7 +65,7 @@ if(params$isSlides == "yes"){
 
 
 
-## ----results='asis',include=TRUE,echo=FALSE-----------------------------------
+## ----results='asis',include=TRUE,echo=FALSE------------------------------------
 if(params$isSlides == "yes"){
   cat("class: inverse, center, middle
 
@@ -87,7 +87,7 @@ if(params$isSlides == "yes"){
 
 
 
-## ----results='asis',include=TRUE,echo=FALSE-----------------------------------
+## ----results='asis',include=TRUE,echo=FALSE------------------------------------
 if(params$isSlides == "yes"){
   cat("class: inverse, center, middle
 
