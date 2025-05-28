@@ -167,8 +167,15 @@ plotDecontXContamination(sce.NeuroD1_filtered)
 
 We could also overlay our decontX scores onto the data we created in session2.
 
+
+```{r,echo=FALSE,eval=TRUE}
+rdsfile <- "https://rubioinformatics.s3.amazonaws.com/scRNA_graduate/SRR_NeuroD1/outs/sce.NeuroD1_filtered_QCed.RDS"
+local_rdsfile <-"sce.NeuroD1_filtered_QCed.RDS"
+download.file(rdsfile,local_rdsfile)
+```
+
 ```{r,fig.width=7,fig.height=4,warning=FALSE}
-sce.NeuroD1_filtered_QCed <- readRDS("/Users/thomascarroll/Github/scRNA-seq2/sce.NeuroD1_filtered_QCed.RDS")
+sce.NeuroD1_filtered_QCed <- readRDS("sce.NeuroD1_filtered_QCed.RDS")
 sce.NeuroD1_filtered_QCed$decontX_contamination <- sce.NeuroD1_filtered$decontX_contamination[match(colnames(sce.NeuroD1_filtered_QCed),colnames(sce.NeuroD1_filtered),nomatch = 0)]
 ```
 
