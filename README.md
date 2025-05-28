@@ -1,4 +1,6 @@
 # Teaching at RU
+
+
 A template repository from which to build workshops and other teaching materials in a standard manner to allow integration with other RU material. An example can be found [here](https://rockefelleruniversity.github.io/RU_RNAseq/)
 
 
