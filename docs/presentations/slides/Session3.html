@@ -125,22 +125,13 @@ library(decontX)
 The decontX package is best implemented by providing the filtered and unfiltered datasets, here in singlecellexperiment format.
 
 
+``` r
+sce.NeuroD1_filtered &lt;- decontX(sce.NeuroD1_filtered, background = sce.NeuroD1_unfiltered)
+saveRDS(sce.NeuroD1_filtered, file = "decontx.RDS")
+sce.NeuroD1_filtered
+```
 
 
-```
-## class: SingleCellExperiment 
-## dim: 39905 3468 
-## metadata(2): Samples decontX
-## assays(2): counts decontXcounts
-## rownames(39905): Gm26206 Xkr4 ... MT-TrnT MT-TrnP
-## rowData names(3): ID Symbol Type
-## colnames(3468): AAACCCACACAATGTC-1 AAACCCACACCACTGG-1 ...
-##   TTTGTTGTCTCTTAAC-1 TTTGTTGTCTGGACCG-1
-## colData names(4): Sample Barcode decontX_contamination decontX_clusters
-## reducedDimNames(1): decontX_UMAP
-## mainExpName: NULL
-## altExpNames(0):
-```
 
 ---
 ## DecontX
@@ -244,7 +235,7 @@ We can now review whether any of our clusters have a high degree of ambient RNAs
 plotColData(sce.NeuroD1_filtered_QCed, x = "label", y = "decontX_contamination")
 ```
 
-![](Session3_files/figure-html/unnamed-chunk-13-1.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/unnamed-chunk-12-1.png)&lt;!-- --&gt;
 
 ---
 ## Overlay DecontX
@@ -256,7 +247,7 @@ Now we can review the clusters and ambient RNA contamination within a UMAP.
 plotUMAP(sce.NeuroD1_filtered_QCed, colour_by = "label")
 ```
 
-![](Session3_files/figure-html/unnamed-chunk-14-1.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/unnamed-chunk-13-1.png)&lt;!-- --&gt;
 
 ---
 ## Overlay DecontX
@@ -266,7 +257,7 @@ plotUMAP(sce.NeuroD1_filtered_QCed, colour_by = "label")
 plotUMAP(sce.NeuroD1_filtered_QCed, colour_by = "decontX_contamination")
 ```
 
-![](Session3_files/figure-html/unnamed-chunk-15-1.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/unnamed-chunk-14-1.png)&lt;!-- --&gt;
 
 ---
 
@@ -367,7 +358,7 @@ p3 &lt;- plotColData(sce.NeuroD1_CellBender, x = "detected", y = "subsets_Mito_p
 gridExtra::grid.arrange(p1, p2, p3, ncol = 3)
 ```
 
-![](Session3_files/figure-html/unnamed-chunk-18-1.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/unnamed-chunk-16-1.png)&lt;!-- --&gt;
 
 ---
 ## Filter CellBender
@@ -421,7 +412,7 @@ colData(sce.NeuroD1_CellBender_QCed)$DefaultLabel &lt;- clust.default
 plotUMAP(sce.NeuroD1_CellBender_QCed, colour_by = "label")
 ```
 
-![](Session3_files/figure-html/unnamed-chunk-22-1.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/unnamed-chunk-20-1.png)&lt;!-- --&gt;
 
 ---
 ## Cell annotation to CellBender
@@ -449,7 +440,7 @@ And review this annotation in the UMAP
 plotUMAP(sce.NeuroD1_CellBender_QCed, colour_by = "All_Cell_Types")
 ```
 
-![](Session3_files/figure-html/unnamed-chunk-24-1.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/unnamed-chunk-22-1.png)&lt;!-- --&gt;
 
 ---
 ## Doublet detection and removal
@@ -514,7 +505,7 @@ We can then review to see which clusters contained Doublets.
 plotColData(sce.NeuroD1_CellBender_QCed, x = "label", y = "scDblFinder.score")
 ```
 
-![](Session3_files/figure-html/unnamed-chunk-26-1.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/unnamed-chunk-24-1.png)&lt;!-- --&gt;
 
 ---
 ## Doublet detections and removal
@@ -528,7 +519,7 @@ p2 &lt;- plotColData(sce.NeuroD1_CellBender_QCed, x = "sum", y = "scDblFinder.sc
 gridExtra::grid.arrange(p1, p2, ncol = 2)
 ```
 
-![](Session3_files/figure-html/unnamed-chunk-27-1.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/unnamed-chunk-25-1.png)&lt;!-- --&gt;
 
 ---
 ## Doublet detections and removal
@@ -542,7 +533,7 @@ p2 &lt;- plotUMAP(sce.NeuroD1_CellBender_QCed, colour_by = "scDblFinder.score")
 gridExtra::grid.arrange(p1, p2, ncol = 2)
 ```
 
-![](Session3_files/figure-html/unnamed-chunk-28-1.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/unnamed-chunk-26-1.png)&lt;!-- --&gt;
 
 ---
 ## Doublet detections and removal
@@ -586,7 +577,7 @@ I have already processed the Ngn3 dataset in the same way.
 plotUMAP(sce.Ngn3_CellBender_QCDbled, colour_by = "All_Cell_Types")
 ```
 
-![](Session3_files/figure-html/unnamed-chunk-31-1.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/unnamed-chunk-29-1.png)&lt;!-- --&gt;
 
 ---
 ## Merging 2 Datasets
@@ -665,7 +656,7 @@ plotTSNE(sce.all, colour_by = "Sample")
 plotTSNE(sce.all, colour_by = "Sample") + facet_wrap(~colour_by)
 ```
 
-![](Session3_files/figure-html/unnamed-chunk-37-1.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/unnamed-chunk-35-1.png)&lt;!-- --&gt;
 
 ---
 ## Review TSNE
@@ -675,7 +666,7 @@ plotTSNE(sce.all, colour_by = "Sample") + facet_wrap(~colour_by)
 plotTSNE(sce.all, colour_by = "All_Cell_Types", shape_by = "Sample") + facet_wrap(~shape_by)
 ```
 
-![](Session3_files/figure-html/unnamed-chunk-38-1.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/unnamed-chunk-36-1.png)&lt;!-- --&gt;
 
 ---
 ## Review TSNE
@@ -685,7 +676,7 @@ plotTSNE(sce.all, colour_by = "All_Cell_Types", shape_by = "Sample") + facet_wra
 plotTSNE(sce.all, colour_by = "Sample", shape_by = "All_Cell_Types") + facet_wrap(~shape_by)
 ```
 
-![](Session3_files/figure-html/unnamed-chunk-39-1.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/unnamed-chunk-37-1.png)&lt;!-- --&gt;
 
 ---
 ## MNN batch correction.
@@ -747,7 +738,7 @@ plotUMAP(sce.all.mnn, colour_by = "All_Cell_Types", shape_by = "batch", dimred =
     facet_wrap(~shape_by)
 ```
 
-![](Session3_files/figure-html/unnamed-chunk-44-1.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/unnamed-chunk-42-1.png)&lt;!-- --&gt;
 
 ---
 ## Review TSNE and UMAP
@@ -758,7 +749,7 @@ plotUMAP(sce.all.mnn, colour_by = "MNNLabel", shape_by = "batch", dimred = "MNN.
     facet_wrap(~shape_by)
 ```
 
-![](Session3_files/figure-html/unnamed-chunk-45-1.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/unnamed-chunk-43-1.png)&lt;!-- --&gt;
 
 ---
 ## Review TSNE and UMAP
@@ -769,7 +760,7 @@ plotUMAP(sce.all.mnn, colour_by = "batch", shape_by = "All_Cell_Types", dimred =
     facet_wrap(~shape_by)
 ```
 
-![](Session3_files/figure-html/unnamed-chunk-46-1.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/unnamed-chunk-44-1.png)&lt;!-- --&gt;
 
 ---
 ## Harmony correction
@@ -832,7 +823,7 @@ We can then use the corrected PCA from Harmony to make our corrected TSNE and UM
 plotReducedDim(sce.all.harmony, dimred = "HARMONY", colour_by = "subsets_Mito_percent")
 ```
 
-![](Session3_files/figure-html/unnamed-chunk-50-1.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/unnamed-chunk-48-1.png)&lt;!-- --&gt;
 
 ---
 ## TSNE and UMAP.
@@ -847,7 +838,7 @@ plotUMAP(sce.all.harmony, colour_by = "HARMONYLabel", dimred = "HARMONY.UMAP", s
     facet_wrap(~shape_by)
 ```
 
-![](Session3_files/figure-html/unnamed-chunk-51-1.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/unnamed-chunk-49-1.png)&lt;!-- --&gt;
 
 ---
 ## TSNE and UMAP.
@@ -858,7 +849,7 @@ plotUMAP(sce.all.harmony, colour_by = "All_Cell_Types", , dimred = "HARMONY.UMAP
     shape_by = "Sample") + facet_wrap(~shape_by)
 ```
 
-![](Session3_files/figure-html/unnamed-chunk-52-1.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/unnamed-chunk-50-1.png)&lt;!-- --&gt;
 
 ---
 ## Seurat
@@ -972,19 +963,19 @@ Neurod1.obj.filt &lt;- RunUMAP(Neurod1.obj.filt, dims = 1:30)
 ```
 
 ```
-## 13:39:09 UMAP embedding parameters a = 0.9922 b = 1.112
+## 11:24:08 UMAP embedding parameters a = 0.9922 b = 1.112
 ```
 
 ```
-## 13:39:09 Read 1653 rows and found 30 numeric columns
+## 11:24:08 Read 1653 rows and found 30 numeric columns
 ```
 
 ```
-## 13:39:09 Using Annoy for neighbor search, n_neighbors = 30
+## 11:24:08 Using Annoy for neighbor search, n_neighbors = 30
 ```
 
 ```
-## 13:39:09 Building Annoy index with metric = cosine, n_trees = 50
+## 11:24:08 Building Annoy index with metric = cosine, n_trees = 50
 ```
 
 ```
@@ -997,13 +988,13 @@ Neurod1.obj.filt &lt;- RunUMAP(Neurod1.obj.filt, dims = 1:30)
 
 ```
 ## **************************************************|
-## 13:39:09 Writing NN index file to temp file /var/folders/0_/8lnwn5sn7hn9nr8qv2jg48nw0000gn/T//RtmpUTDURW/file16eb38fc3d79
-## 13:39:09 Searching Annoy index using 1 thread, search_k = 3000
-## 13:39:09 Annoy recall = 100%
-## 13:39:10 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
-## 13:39:12 Initializing from normalized Laplacian + noise (using RSpectra)
-## 13:39:12 Commencing optimization for 500 epochs, with 65124 positive edges
-## 13:39:15 Optimization finished
+## 11:24:08 Writing NN index file to temp file /var/folders/0_/8lnwn5sn7hn9nr8qv2jg48nw0000gn/T//RtmpUTDURW/file16eb7ccd0749
+## 11:24:08 Searching Annoy index using 1 thread, search_k = 3000
+## 11:24:09 Annoy recall = 100%
+## 11:24:10 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
+## 11:24:12 Initializing from normalized Laplacian + noise (using RSpectra)
+## 11:24:12 Commencing optimization for 500 epochs, with 65124 positive edges
+## 11:24:15 Optimization finished
 ```
 
 ---
@@ -1050,7 +1041,7 @@ Now we can review our UMAP
 DimPlot(Neurod1.obj.filt, reduction = "umap")
 ```
 
-![](Session3_files/figure-html/unnamed-chunk-57-1.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/unnamed-chunk-55-1.png)&lt;!-- --&gt;
 
 ---
 ## Ngn3 Seurat
@@ -1063,7 +1054,7 @@ DimPlot(Neurod1.obj.filt, reduction = "umap")
 DimPlot(Ngn3.obj.filt, reduction = "umap")
 ```
 
-![](Session3_files/figure-html/unnamed-chunk-59-1.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/unnamed-chunk-57-1.png)&lt;!-- --&gt;
 
 ---
 ## Seurat- 2 datasets
@@ -1197,19 +1188,19 @@ All.obj &lt;- RunUMAP(All.obj, dims = 1:30, reduction = "pca", reduction.name = 
 ```
 
 ```
-## 13:41:26 UMAP embedding parameters a = 0.9922 b = 1.112
+## 11:26:12 UMAP embedding parameters a = 0.9922 b = 1.112
 ```
 
 ```
-## 13:41:26 Read 8832 rows and found 30 numeric columns
+## 11:26:12 Read 8832 rows and found 30 numeric columns
 ```
 
 ```
-## 13:41:26 Using Annoy for neighbor search, n_neighbors = 30
+## 11:26:12 Using Annoy for neighbor search, n_neighbors = 30
 ```
 
 ```
-## 13:41:26 Building Annoy index with metric = cosine, n_trees = 50
+## 11:26:12 Building Annoy index with metric = cosine, n_trees = 50
 ```
 
 ```
@@ -1222,13 +1213,13 @@ All.obj &lt;- RunUMAP(All.obj, dims = 1:30, reduction = "pca", reduction.name = 
 
 ```
 ## **************************************************|
-## 13:41:27 Writing NN index file to temp file /var/folders/0_/8lnwn5sn7hn9nr8qv2jg48nw0000gn/T//RtmpUTDURW/file16ebaf8486c
-## 13:41:27 Searching Annoy index using 1 thread, search_k = 3000
-## 13:41:28 Annoy recall = 100%
-## 13:41:30 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
-## 13:41:32 Initializing from normalized Laplacian + noise (using RSpectra)
-## 13:41:32 Commencing optimization for 500 epochs, with 363508 positive edges
-## 13:41:43 Optimization finished
+## 11:26:13 Writing NN index file to temp file /var/folders/0_/8lnwn5sn7hn9nr8qv2jg48nw0000gn/T//RtmpUTDURW/file16eb6754ab37
+## 11:26:13 Searching Annoy index using 1 thread, search_k = 3000
+## 11:26:16 Annoy recall = 100%
+## 11:26:17 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
+## 11:26:19 Initializing from normalized Laplacian + noise (using RSpectra)
+## 11:26:19 Commencing optimization for 500 epochs, with 363508 positive edges
+## 11:26:31 Optimization finished
 ```
 
 ---
@@ -1240,7 +1231,7 @@ We can review any batch effects using our umap.
 DimPlot(All.obj, reduction = "umap.unintegrated", group.by = "orig.ident")
 ```
 
-![](Session3_files/figure-html/unnamed-chunk-62-1.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/unnamed-chunk-60-1.png)&lt;!-- --&gt;
 
 ---
 ## Seurat- Integration
@@ -1330,19 +1321,19 @@ All.obj &lt;- RunUMAP(All.obj, reduction = "integrated.harmony", dims = 1:30, re
 ```
 
 ```
-## 13:42:04 UMAP embedding parameters a = 0.9922 b = 1.112
+## 11:26:56 UMAP embedding parameters a = 0.9922 b = 1.112
 ```
 
 ```
-## 13:42:04 Read 8832 rows and found 30 numeric columns
+## 11:26:56 Read 8832 rows and found 30 numeric columns
 ```
 
 ```
-## 13:42:04 Using Annoy for neighbor search, n_neighbors = 30
+## 11:26:56 Using Annoy for neighbor search, n_neighbors = 30
 ```
 
 ```
-## 13:42:04 Building Annoy index with metric = cosine, n_trees = 50
+## 11:26:56 Building Annoy index with metric = cosine, n_trees = 50
 ```
 
 ```
@@ -1355,13 +1346,13 @@ All.obj &lt;- RunUMAP(All.obj, reduction = "integrated.harmony", dims = 1:30, re
 
 ```
 ## **************************************************|
-## 13:42:05 Writing NN index file to temp file /var/folders/0_/8lnwn5sn7hn9nr8qv2jg48nw0000gn/T//RtmpUTDURW/file16eb205e2417
-## 13:42:05 Searching Annoy index using 1 thread, search_k = 3000
-## 13:42:06 Annoy recall = 100%
-## 13:42:08 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
-## 13:42:10 Initializing from normalized Laplacian + noise (using RSpectra)
-## 13:42:10 Commencing optimization for 500 epochs, with 364320 positive edges
-## 13:42:21 Optimization finished
+## 11:26:57 Writing NN index file to temp file /var/folders/0_/8lnwn5sn7hn9nr8qv2jg48nw0000gn/T//RtmpUTDURW/file16eb17f76071
+## 11:26:57 Searching Annoy index using 1 thread, search_k = 3000
+## 11:27:00 Annoy recall = 100%
+## 11:27:01 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
+## 11:27:03 Initializing from normalized Laplacian + noise (using RSpectra)
+## 11:27:03 Commencing optimization for 500 epochs, with 364320 positive edges
+## 11:27:15 Optimization finished
 ```
 
 ---
@@ -1378,7 +1369,7 @@ DimPlot(All.obj, reduction = "umap.harmony", group.by = "harmony_clusters", comb
 ## [[1]]
 ```
 
-![](Session3_files/figure-html/unnamed-chunk-66-1.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/unnamed-chunk-64-1.png)&lt;!-- --&gt;
 
 ---
 ## Seurat- Review integration
@@ -1393,7 +1384,7 @@ DimPlot(All.obj, reduction = "umap.harmony", group.by = "orig.ident", combine = 
 ## [[1]]
 ```
 
-![](Session3_files/figure-html/unnamed-chunk-67-1.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/unnamed-chunk-65-1.png)&lt;!-- --&gt;
 
 ---
 ## Markers within/between batches
@@ -1405,7 +1396,7 @@ Batch correction is often performed on the PCs (MNN and Harmony) and so is used 
 plotUMAP(sce.all.mnn, colour_by = "MNNLabel", dimred = "MNN.UMAP")
 ```
 
-![](Session3_files/figure-html/unnamed-chunk-68-1.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/unnamed-chunk-66-1.png)&lt;!-- --&gt;
 
 ---
 ## Markers within/between batches
@@ -1471,7 +1462,7 @@ plotExpression(sce.all, features = c("Chgb", "Reg4"), x = "MNNLabel", colour_by 
     facet_wrap(Feature ~ colour_by)
 ```
 
-![](Session3_files/figure-html/unnamed-chunk-72-1.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/unnamed-chunk-70-1.png)&lt;!-- --&gt;
 
 
 ---
@@ -1485,7 +1476,7 @@ plotExpression(sce.all.mnn, features = c("Chgb", "Reg4"), x = "MNNLabel", exprs_
     colour_by = "batch") + facet_wrap(Feature ~ colour_by)
 ```
 
-![](Session3_files/figure-html/unnamed-chunk-73-1.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/unnamed-chunk-71-1.png)&lt;!-- --&gt;
 
 
 
@@ -1518,7 +1509,7 @@ plotExpression(sce.all, features = c("Xist"), x = "MNNLabel", colour_by = "batch
     facet_wrap(Feature ~ colour_by)
 ```
 
-![](Session3_files/figure-html/unnamed-chunk-75-1.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/unnamed-chunk-73-1.png)&lt;!-- --&gt;
 
 
 ---
@@ -1534,16 +1525,7 @@ harmony.markers &lt;- FindConservedMarkers(All.obj, ident.1 = 1, grouping.var = 
 VlnPlot(All.obj, features = "Slc38a11", split.by = "orig.ident")
 ```
 
-```
-## The default behaviour of split.by has changed.
-## Separate violin plots are now plotted side-by-side.
-## To restore the old behaviour of a single split violin,
-## set split.plot = TRUE.
-##       
-## This message will be shown once per session.
-```
-
-![](Session3_files/figure-html/unnamed-chunk-76-1.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/unnamed-chunk-74-1.png)&lt;!-- --&gt;
 
 ---
 ## Seurat
@@ -1617,7 +1599,7 @@ Neurod1.obj.scTransform &lt;- SCTransform(Neurod1.obj.scTransform, vars.to.regre
 ```
 
 ```
-## Wall clock passed: Time difference of 11.19809 secs
+## Wall clock passed: Time difference of 11.93546 secs
 ```
 
 ```
@@ -1708,19 +1690,19 @@ Neurod1.obj.scTransform &lt;- RunUMAP(Neurod1.obj.scTransform, dims = 1:30)
 ```
 
 ```
-## 13:44:53 UMAP embedding parameters a = 0.9922 b = 1.112
+## 11:30:38 UMAP embedding parameters a = 0.9922 b = 1.112
 ```
 
 ```
-## 13:44:53 Read 1653 rows and found 30 numeric columns
+## 11:30:38 Read 1653 rows and found 30 numeric columns
 ```
 
 ```
-## 13:44:53 Using Annoy for neighbor search, n_neighbors = 30
+## 11:30:38 Using Annoy for neighbor search, n_neighbors = 30
 ```
 
 ```
-## 13:44:53 Building Annoy index with metric = cosine, n_trees = 50
+## 11:30:38 Building Annoy index with metric = cosine, n_trees = 50
 ```
 
 ```
@@ -1733,13 +1715,13 @@ Neurod1.obj.scTransform &lt;- RunUMAP(Neurod1.obj.scTransform, dims = 1:30)
 
 ```
 ## **************************************************|
-## 13:44:53 Writing NN index file to temp file /var/folders/0_/8lnwn5sn7hn9nr8qv2jg48nw0000gn/T//RtmpUTDURW/file16eb306d1f05
-## 13:44:53 Searching Annoy index using 1 thread, search_k = 3000
-## 13:44:53 Annoy recall = 100%
-## 13:44:54 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
-## 13:44:56 Initializing from normalized Laplacian + noise (using RSpectra)
-## 13:44:56 Commencing optimization for 500 epochs, with 64510 positive edges
-## 13:44:59 Optimization finished
+## 11:30:38 Writing NN index file to temp file /var/folders/0_/8lnwn5sn7hn9nr8qv2jg48nw0000gn/T//RtmpUTDURW/file16eb2582ef5c
+## 11:30:38 Searching Annoy index using 1 thread, search_k = 3000
+## 11:30:38 Annoy recall = 100%
+## 11:30:39 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
+## 11:30:42 Initializing from normalized Laplacian + noise (using RSpectra)
+## 11:30:42 Commencing optimization for 500 epochs, with 64510 positive edges
+## 11:30:45 Optimization finished
 ```
 
 ``` r
@@ -1834,7 +1816,7 @@ All.obj.sct &lt;- SCTransform(All.obj.sct, vars.to.regress = "percent.mt")
 ```
 
 ```
-## Wall clock passed: Time difference of 10.79489 secs
+## Wall clock passed: Time difference of 13.19651 secs
 ```
 
 ```
@@ -1890,7 +1872,7 @@ All.obj.sct &lt;- SCTransform(All.obj.sct, vars.to.regress = "percent.mt")
 ```
 
 ```
-## Wall clock passed: Time difference of 41.0231 secs
+## Wall clock passed: Time difference of 42.66531 secs
 ```
 
 ```
@@ -1999,19 +1981,19 @@ All.obj.sct &lt;- RunUMAP(All.obj.sct, dims = 1:30)
 ```
 
 ```
-## 13:49:20 UMAP embedding parameters a = 0.9922 b = 1.112
+## 11:35:04 UMAP embedding parameters a = 0.9922 b = 1.112
 ```
 
 ```
-## 13:49:20 Read 8832 rows and found 30 numeric columns
+## 11:35:04 Read 8832 rows and found 30 numeric columns
 ```
 
 ```
-## 13:49:20 Using Annoy for neighbor search, n_neighbors = 30
+## 11:35:04 Using Annoy for neighbor search, n_neighbors = 30
 ```
 
 ```
-## 13:49:20 Building Annoy index with metric = cosine, n_trees = 50
+## 11:35:04 Building Annoy index with metric = cosine, n_trees = 50
 ```
 
 ```
@@ -2024,13 +2006,13 @@ All.obj.sct &lt;- RunUMAP(All.obj.sct, dims = 1:30)
 
 ```
 ## **************************************************|
-## 13:49:21 Writing NN index file to temp file /var/folders/0_/8lnwn5sn7hn9nr8qv2jg48nw0000gn/T//RtmpUTDURW/file16eb361a43c8
-## 13:49:21 Searching Annoy index using 1 thread, search_k = 3000
-## 13:49:23 Annoy recall = 100%
-## 13:49:24 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
-## 13:49:26 Initializing from normalized Laplacian + noise (using RSpectra)
-## 13:49:26 Commencing optimization for 500 epochs, with 358442 positive edges
-## 13:49:37 Optimization finished
+## 11:35:05 Writing NN index file to temp file /var/folders/0_/8lnwn5sn7hn9nr8qv2jg48nw0000gn/T//RtmpUTDURW/file16eb6ff3f844
+## 11:35:05 Searching Annoy index using 1 thread, search_k = 3000
+## 11:35:07 Annoy recall = 100%
+## 11:35:08 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
+## 11:35:11 Initializing from normalized Laplacian + noise (using RSpectra)
+## 11:35:11 Commencing optimization for 500 epochs, with 358442 positive edges
+## 11:35:22 Optimization finished
 ```
 
 ``` r
@@ -2077,19 +2059,19 @@ All.obj.sct &lt;- RunUMAP(All.obj.sct, dims = 1:30, reduction = "harmony")
 ```
 
 ```
-## 13:49:50 UMAP embedding parameters a = 0.9922 b = 1.112
+## 11:35:34 UMAP embedding parameters a = 0.9922 b = 1.112
 ```
 
 ```
-## 13:49:50 Read 8832 rows and found 30 numeric columns
+## 11:35:34 Read 8832 rows and found 30 numeric columns
 ```
 
 ```
-## 13:49:50 Using Annoy for neighbor search, n_neighbors = 30
+## 11:35:34 Using Annoy for neighbor search, n_neighbors = 30
 ```
 
 ```
-## 13:49:50 Building Annoy index with metric = cosine, n_trees = 50
+## 11:35:34 Building Annoy index with metric = cosine, n_trees = 50
 ```
 
 ```
@@ -2102,20 +2084,20 @@ All.obj.sct &lt;- RunUMAP(All.obj.sct, dims = 1:30, reduction = "harmony")
 
 ```
 ## **************************************************|
-## 13:49:51 Writing NN index file to temp file /var/folders/0_/8lnwn5sn7hn9nr8qv2jg48nw0000gn/T//RtmpUTDURW/file16eb1262f494
-## 13:49:51 Searching Annoy index using 1 thread, search_k = 3000
-## 13:49:53 Annoy recall = 100%
-## 13:49:54 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
-## 13:49:56 Initializing from normalized Laplacian + noise (using RSpectra)
-## 13:49:56 Commencing optimization for 500 epochs, with 364314 positive edges
-## 13:50:07 Optimization finished
+## 11:35:36 Writing NN index file to temp file /var/folders/0_/8lnwn5sn7hn9nr8qv2jg48nw0000gn/T//RtmpUTDURW/file16eb27dfe7d
+## 11:35:36 Searching Annoy index using 1 thread, search_k = 3000
+## 11:35:38 Annoy recall = 100%
+## 11:35:39 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
+## 11:35:41 Initializing from normalized Laplacian + noise (using RSpectra)
+## 11:35:41 Commencing optimization for 500 epochs, with 364314 positive edges
+## 11:35:54 Optimization finished
 ```
 
 ``` r
 DimPlot(All.obj.sct, reduction = "umap", group.by = c("orig.ident", "SCT_snn_res.0.3"))
 ```
 
-![](Session3_files/figure-html/unnamed-chunk-84-1.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/unnamed-chunk-82-1.png)&lt;!-- --&gt;
 
 ---
 ## scTransform.
@@ -2142,7 +2124,7 @@ harmonySCT.markers &lt;- FindMarkers(All.obj.sct, ident.1 = 3, verbose = FALSE)
 VlnPlot(All.obj.sct, features = "Tph1", split.by = "orig.ident")
 ```
 
-![](Session3_files/figure-html/unnamed-chunk-86-1.png)&lt;!-- --&gt;
+![](Session3_files/figure-html/unnamed-chunk-84-1.png)&lt;!-- --&gt;
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
